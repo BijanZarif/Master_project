@@ -27,8 +27,8 @@ x = SpatialCoordinate(mesh)
 u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
 p_exact = 0.5 - x[1]
 
-f = -div(grad(u_exact)) - grad(p_exact)
-
+f = - div(grad(u_exact)) - grad(p_exact)
+g = - div(grad(u_exact)) - f             # pressure gradient
 # dt = 0.01
 # T = 3.0
 
@@ -128,10 +128,10 @@ plot(ph, title = "computed pressure")
 # Pv_exact = project(u_exact, W.sub(0)) 
 
 # compute errors
-L2_error_u = assemble(inner((uh-u_exact),(uh-u_exact))  * dx)
-H1_error_u = assemble(inner(grad(uh-u_exact), grad(uh-u_exact)) * dx)
-H1_error_p = assemble((div(ph) - p_exact)**2 * dx) 
+L2_error_u = assemble((u_exact-uh)**2 * dx)**.5
+H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5
+H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5 
 
 print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
-print "||u - uh; H^1|| = {0:1.4e}".format(H1_error_u)
+print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
 print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)

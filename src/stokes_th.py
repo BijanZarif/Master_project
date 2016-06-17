@@ -1,10 +1,10 @@
 from dolfin import *
 mesh = UnitSquareMesh(16, 16)
-P1 = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
-P2 = FiniteElement("Lagrange", mesh.ufl_cell(), 2)
+P1 = FunctionSpace(mesh, "Lagrange", 1)
+P2 = FunctionSpace(mesh, "Lagrange", 2)
 TH = (P2 * P2) * P1
 
-W = FunctionSpace(mesh, TH)
+W = MixedFunctionSpace(mesh, TH)
 
 # define solution
 x = SpatialCoordinate(mesh)
