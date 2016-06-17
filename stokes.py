@@ -35,20 +35,20 @@ f = -div(grad(u_exact)) - grad(p_exact)
 #f = Constant((0.0, 3.0))
 #u_in  = Expression((" 0 ", "x[0]*(x[0] - 1)*sin(pi*omega*t)"), omega=1, t=0.0)
 #u_out = Expression((" 0 ", "x[0]*(x[0] - 1)*sin(pi*omega*t)"), omega=1, t=0.0)  # OR PUT SOMETHING ELSE
-u_exact = Expression((" 0 ", "x[0]*(1-x[0])" ))
-p_exact = Expression("0.5-x[1]")
-
-u_exact = Expression((" 0 ", "sin(x[0])" ))
-p_exact = Expression("0.5-x[1]")
-
-
-plot(u_exact, mesh = mesh, title = "exact velocity")
-plot(p_exact, mesh = mesh, title = "exact pressure")
+u_exact = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+p_exact = Expression("0.5-x[1]", domain=mesh, degree=1)
+# 
+# u_exact = Expression((" 0 ", "sin(x[0])" ))
+# p_exact = Expression("0.5-x[1]")
 
 
-inflow = DirichletBC(W.sub(0), u_exact, "(x[1] > 1.0 - DOLFIN_EPS)&&on_boundary")
-outflow = DirichletBC(W.sub(0), u_exact, "(x[1] < DOLFIN_EPS)&&on_boundary")
-sides = DirichletBC(W.sub(0), (0.0, 0.0) , "on_boundary&&((x[0] < DOLFIN_EPS)||(x[0] > 1.0 - DOLFIN_EPS))")
+# plot(u_exact, mesh = mesh, title = "exact velocity")
+# plot(p_exact, mesh = mesh, title = "exact pressure")
+
+
+inflow = DirichletBC(W.sub(0), u_exact, "(x[1] > 1.0 - DOLFIN_EPS) && on_boundary")
+outflow = DirichletBC(W.sub(0), u_exact, "(x[1] < DOLFIN_EPS) && on_boundary")
+sides = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , "on_boundary && ((x[0] < DOLFIN_EPS) || (x[0] > 1.0 - DOLFIN_EPS))")
 
 # # this is to verify that I am actually applying some BC
 # U = Function(W)
@@ -125,13 +125,13 @@ plot(ph, title = "computed pressure")
 #plot(p_exact, mesh = mesh, title = "exact pressure")
 #interactive()
 
-Pv_exact = project(u_exact, W.sub(0)) 
+# Pv_exact = project(u_exact, W.sub(0)) 
 
 # compute errors
 L2_error_u = assemble(inner((uh-u_exact),(uh-u_exact))  * dx)
 H1_error_u = assemble(inner(grad(uh-u_exact), grad(uh-u_exact)) * dx)
-#H1_error_p = assemble((grad(ph) - p_exact)**2 * dx) 
+H1_error_p = assemble((div(ph) - p_exact)**2 * dx) 
 
-print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_U)
-print "||u - uh; H^1|| = {0:1.4e}".format(H1_error_U)
-print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_P)
+print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
+print "||u - uh; H^1|| = {0:1.4e}".format(H1_error_u)
+print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
