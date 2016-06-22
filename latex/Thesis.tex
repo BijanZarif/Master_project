@@ -166,4 +166,67 @@ The Crank-Nicolson discretization reads:
 
 where we set $u^{mid} = \frac{u^i + u^{i+1}}{2}$.
 
+\subsection{Spatial discretization}
+We multiply the Navier-Stokes equations, respectively, by the test functions $v$ and $q$. We choose $v \in \hat{V} = \set{v \in [H^1(\Omega)]^2 | v_|{_{\partial \Omega_{top} \cup \Omega_{bottom}}} = 0}$, and $q \in \hat{Q}$ (SPECIFY $\hat{Q}$). \\
+Problem: find $(u^{i+1}, p^{i+1}) \in \hat{V} \times \hat{Q}$ such that 
+
+\[
+\left\{  
+\begin{aligned}
+& \langle \rho \frac{u^{i+1} - u^i}{\Delta t},v \rangle_\Omega
++ \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
+- \langle v \nabla \cdot (\nabla u^{mid}) ,v \rangle_\Omega
++ \langle \nabla p^{mid} ,v \rangle_\Omega = \langle f^{mid} ,v \rangle_\Omega \\
+& \langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+\end{aligned}
+\right.
+\]
+
+for all $(v,q) \in V \times Q$.
+
+Since the boundary term in (METTERE RIFERIMENTO) is always zero, the following holds:
+
+\[
+\begin{aligned}
+\langle \nabla \cdot (\nu \nabla u - pI) ,v \rangle_\Omega & = \langle \nu \nabla u - pI ,\nabla v \rangle_\Omega \\
+														& = \langle \nu \nabla u  ,\nabla v \rangle  - \langle p ,\nabla \cdot v \rangle_\Omega										
+\end{aligned}
+\]
+
+Hence we obtain:
+
+\[
+- \langle \nabla \cdot (\nu \nabla u^{mid} - p^{mid}I) ,v \rangle_{\Omega} = \langle \nu \nabla u^{mid}, \nabla v \rangle_\Omega -  \langle p^{mid}, \nabla \cdot v \rangle_\Omega.
+\]
+
+So the numerical scheme reads:
+
+\[
+\left\{  
+\begin{aligned}
+& \langle \rho \frac{u^{i+1} - u^i}{\Delta t},v \rangle_\Omega
++ \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
++ \langle \nu \nabla u^{mid}, \nabla v \rangle_\Omega
+- \langle p^{mid} , \nabla \cdot v \rangle_\Omega = \langle f^{mid} ,v \rangle_\Omega \\
+& \langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+\end{aligned}
+\right.
+\]
+
+and then
+
+\[
+\left\{  
+\begin{aligned}
+\rho \langle u^{i+1},v \rangle_\Omega - \rho \langle u^i, v \rangle_\Omega & + \Delta t \rho \langle \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega \\
+& + \Delta t \nu \langle \nabla u^{mid}, \nabla v \rangle_\Omega \\
+& - \Delta t \langle p^{mid} , \nabla \cdot v \rangle_\Omega \\
+& = \Delta t \langle f^{mid} ,v \rangle_\Omega \\
+\langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+\end{aligned}
+\right.
+\]
+
+Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
+
 \end{document}
