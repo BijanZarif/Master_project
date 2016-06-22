@@ -1,7 +1,6 @@
 ## STOKES PROBLEM ##
-from numpy import *
 from fenics import *
-from mshr import *
+from mshr import *   # I need this if I want to use the functions below to create a mesh
 
 # domain = Rectangle(Point(0., 0.), Point(1.0,1.0))
 # mesh = generate_mesh(domain, 16)
@@ -23,32 +22,39 @@ v, q = TestFunctions(W)
 
 x = SpatialCoordinate(mesh)
 
-# USE: u_exact = as_vector((0, sin(x[0]))) as a solution to verify the convergence 
-u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
+# I have to remember that the u_exact has to satisfy as well the boundary conditions (and not only the system of equations)
+# that's why there's the pi*x[0], so the sin is 0 on the right boundary (i.e. x[0] = 1))
+u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
+#u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
 p_exact = 0.5 - x[1]
 
 f = - div(grad(u_exact)) - grad(p_exact)
+
+# Since the pressure is defined up to some constant, we compare the gradients
 g = - div(grad(u_exact)) - f             # pressure gradient
+
 # dt = 0.01
 # T = 3.0
 
 #f = Constant((0.0, 3.0))
 #u_in  = Expression((" 0 ", "x[0]*(x[0] - 1)*sin(pi*omega*t)"), omega=1, t=0.0)
 #u_out = Expression((" 0 ", "x[0]*(x[0] - 1)*sin(pi*omega*t)"), omega=1, t=0.0)  # OR PUT SOMETHING ELSE
-u_exact = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
-p_exact = Expression("0.5-x[1]", domain=mesh, degree=1)
-# 
-# u_exact = Expression((" 0 ", "sin(x[0])" ))
-# p_exact = Expression("0.5-x[1]")
 
 
-# plot(u_exact, mesh = mesh, title = "exact velocity")
-# plot(p_exact, mesh = mesh, title = "exact pressure")
+# u_exact = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
+ 
+#u_exact_e = Expression((" 0 ", "sin(x[0])" ))
+u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
+
+plot(u_exact_e, mesh = mesh, title = "exact velocity")
+plot(p_exact_e, mesh = mesh, title = "exact pressure")
 
 
-inflow = DirichletBC(W.sub(0), u_exact, "(x[1] > 1.0 - DOLFIN_EPS) && on_boundary")
-outflow = DirichletBC(W.sub(0), u_exact, "(x[1] < DOLFIN_EPS) && on_boundary")
+inflow = DirichletBC(W.sub(0), u_exact_e, "(x[1] > 1.0 - DOLFIN_EPS) && on_boundary")
+outflow = DirichletBC(W.sub(0), u_exact_e, "(x[1] < DOLFIN_EPS) && on_boundary")
 sides = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , "on_boundary && ((x[0] < DOLFIN_EPS) || (x[0] > 1.0 - DOLFIN_EPS))")
+# bc_V = DirichletBC(W.sub(0), u_exact_e, "on_boundary")
 
 # # this is to verify that I am actually applying some BC
 # U = Function(W)
@@ -62,8 +68,9 @@ sides = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , "on_boundary && ((x[0] < DO
 # exit()
 
 bcs = [inflow, outflow, sides]
+#bcs = [bc_V]
 
- 
+# BY MAGNE
 # a = inner(grad(u), grad(v)) * dx
 # b = q * div(u) * dx
 # 
@@ -125,11 +132,10 @@ plot(ph, title = "computed pressure")
 #plot(p_exact, mesh = mesh, title = "exact pressure")
 #interactive()
 
-# Pv_exact = project(u_exact, W.sub(0)) 
-
-# compute errors
+# compute errors "by hands"
+# 'assemble' carrying out the integral
 L2_error_u = assemble((u_exact-uh)**2 * dx)**.5
-H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5
+H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5     # 
 H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5 
 
 print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
