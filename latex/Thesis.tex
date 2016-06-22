@@ -1,1 +1,169 @@
 %My thesis!
+\documentclass[12pt,a4paper,titlepage]{report}
+\usepackage{amsmath}
+\usepackage{ amssymb }
+\usepackage{calligra}
+\usepackage{amsfonts}
+\usepackage[english]{babel}
+\usepackage{verbatim}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{microtype}
+\usepackage{lmodern} 
+\usepackage{braket}
+
+\usepackage[font=small,labelfont=bf]{caption}  %per la didascalia delle immagini
+\usepackage{mathrsfs}  %per fare le lettere calligrafiche
+\usepackage{bm}  %per mettere le lettere greche in grassetto
+\usepackage[T1]{fontenc}     %pacchetto lettere accentate
+\usepackage[utf8]{inputenc}   %pacchetto lettere accentate
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\setlength\parindent{0pt}  % toglie identazione ovunque
+
+% -----------------
+
+\begin{document}
+
+\section{The Stokes Problem}
+Let $\Omega$ be a unit square $[0,1]^2$, and let  $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, $\partial \Omega_{sides}$ be, respectively, the top, bottom, and lateral boundaries. (PUT A PICTURE) \\
+The strong formulation of the Stokes problem reads
+
+\[
+\begin{cases}
+- \nabla \cdot (\nabla u + pI) = f, & \mbox{in } \Omega \\
+\nabla \cdot u = 0, & \mbox{in } \Omega
+\end{cases}
+\]
+
+where we set Dirichlet boundary conditions as follows:
+
+\[
+\begin{cases}
+u(x,y) = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right] , & \mbox{on } \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \\
+
+\vspace{.2cm}
+
+u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \partial \Omega_{sides}
+\end{cases}
+\]
+
+In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{u \in H^1(\Omega) | u_{|_{\partial \Omega}} = 0} $. Our aim is to find $(u(x,y),p(x,y)) \in V \times Q$ such that
+
+\begin{align}
+\int_\Omega -\nabla \cdot (\nabla u + pI)v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega (\nabla \cdot u)q \,dx &= 0
+\end{align}
+
+Differentiating by part the right hand side of the first equation we obtain:
+
+\begin{align}
+\int_\Omega -\nabla \cdot (\nabla u + pI)v \,dx &= \int_\Omega (\nabla u + pI) \cdot \nabla v \,dx, \\
+&- \int_{\partial \Omega} (\nabla u + pI) \cdot n v \,ds.
+\end{align}
+
+Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
+
+\begin{align}
+\int_\Omega (\nabla u + pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega (\nabla \cdot u) q \,dx &= 0.
+\end{align}
+
+Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
+
+As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the errors
+
+\begin{itemize}
+\item $|| u_{exact} - u_h ||_{L^2}$,
+\item $ | \nabla(u_{exact} - u_h) |_{H^1}$ (seminorm),
+\item $|| \nabla(p_{exact}) - \nabla p_h ||_{H^1} $.
+\end{itemize}
+
+The latter is used since the pressure is defined up to some constant, and hence the difference $p_exact - p_h$ would be a constant. Therefore, we compare the two gradients.
+To compare exact and approximate solutions, we can choose the following exact solutions:
+
+\[
+u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
+p_{exact} = 1-y.
+\]
+
+Using the previous solution, the error is 0, since the method for solve the problem is exact for polynomials.
+A difference test case that could be use is:
+
+\[
+u_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
+p_{exact} = 1-y.
+\]
+
+Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!
+
+\section{The Navier-Stokes Equations}
+We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,,t)$ and the pressure $p(x,y,t)$ such that
+
+\[
+\begin{cases}
+\rho \dot{u} + \rho (\nabla u \cdot u) - \nabla \cdot (\nabla u - pI) = f, & \mbox{in } \Omega \\
+\nabla \cdot u = 0, & \mbox{in } \Omega
+\end{cases}
+\]
+
+As initial conditions (IC), we set $u(t=0) = u_0 = 0$. \\
+As boundary conditions (BC), we use
+
+\[
+\begin{cases}
+u(x,y,t) = u_{inflow}(x,y,t) , & \mbox{on } \partial \Omega_{top} \\
+u(x,y,t) = u_{outflow}(x,y,t) , & \mbox{on } \partial \Omega_{bottom} \\
+\sigma \cdot \vec{n} = 0,  & \mbox{on } \partial \Omega_{sides}
+\end{cases}
+\]
+
+where $\sigma = \nu \nabla u - pI$, and for this example
+
+\begin{equation}
+u_{inflow} = u_{outflow} =  \left[ \begin{array}{c} 0 \\ x(x-1)sin(\pi \omega x) \end{array} \right].
+\end{equation}
+
+In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in $\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}$, and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
+
+\begin{align}
+&\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} fv \, dx \\
+&\int_{\Omega} (\nabla \cdot u) q \, dx = 0.
+\end{align}
+
+I take the term $- \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx$, and integrate by parts:
+
+\[
+- \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n \, v \, dx.
+\]
+
+The boundary term can actually be divided in three different terms (one for each part of the boundary), as $\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{sides}$. Since we chose $v \in \hat{V}$, the term on $\partial \Omega_{top} \cup \partial \Omega_{bottom}$ is zero. The term on $\partial \Omega_{sides}$ is also zero: since $\sigma = \nu \nabla u - pI$ and $\sigma \cdot \vec{n} = 0$ on $\partial \Omega_{sides}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n \, v \, dx = 0$.
+
+The variational form becomes
+
+\begin{align}
+&\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} (\nu \nabla u - pI \cdot \nabla v \, dx = \int_{\Omega} fv \, dx \\
+&\int_{\Omega} (\nabla \cdot u) q \, dx = 0.
+\end{align}
+
+\subsection{Time discretization}
+We now want to use a Crank-Nicolson discretization (second order in time) of the N-S equations: let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t$ the time step. \\
+Let $u^i$ be an approximation of $u(t_i)$. We want to compute $u^{i+1}$ and $p^{i+1}$, i.e. an approximation of $u$ and $p$ respectively at the time level $t_{i+1}$, hence $u^{i+1} \approx u(t^{i+1})$ and $p^{i+1} \approx p(t^{i+1})$. \\
+The Crank-Nicolson discretization reads:
+
+\[
+\left\{  
+\begin{aligned}
+& \rho \frac{u^{i+1} - u^i}{\Delta t} + \rho (\nabla u^{mid} \cdot u^i) - \nabla \cdot (\nu \Delta u^{mid} - p^{mid}I) = f^{mid} \\
+& \nabla u^{i+1} = 0
+\end{aligned}
+\right.
+\]
+
+where we set $u^{mid} = \frac{u^i + u^{i+1}}{2}$.
+
+\end{document}
