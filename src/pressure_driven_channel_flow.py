@@ -1,3 +1,8 @@
+## NAVIER-STOKES EQUATIONS ##
+
+# rho * du/dt + rho * (grad(u) . u) - div( nu * grad(u) - pI ) = f
+# div( u ) = 0
+
 from dolfin import *
 
 N = 16
