@@ -148,10 +148,10 @@ As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the er
 \begin{itemize}
 \item $|| u_{exact} - u_h ||_{L^2}$,
 \item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
-\item $|| \nabla(p_{exact}) - \nabla p_h ||_{H^1} $.
+\item $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $.
 \end{itemize}
 
-The latter is used since the pressure is defined up to some constant, and hence the difference $p_exact - p_h$ would be a constant. Therefore, we compare the two gradients.
+The latter is used since the pressure is defined up to some constant, and hence the difference $p_{exact} - p_h$ would be a constant. Therefore, we compare the two gradients.
 To compare exact and approximate solutions, we can choose the following exact solutions:
 
 \[
@@ -170,7 +170,7 @@ p_{exact} = 1-y.
 Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!
 
 \section{The Navier-Stokes Equations on a fixed domain}
-We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,,t)$ and the pressure $p(x,y,t)$ such that
+We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
 
 \[
 \begin{cases}
@@ -196,7 +196,13 @@ where $\sigma = \nu \nabla u - pI$, and for this example
 u_{inflow} = u_{outflow} =  \left[ \begin{array}{c} 0 \\ x(x-1)sin(\pi \omega x) \end{array} \right].
 \end{equation}
 
-In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in $\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}$, and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
+In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
+
+\[
+\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}
+\]
+
+and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
 
 \begin{align}
 &\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} fv \, dx \\
