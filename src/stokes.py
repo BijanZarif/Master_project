@@ -34,12 +34,12 @@ u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the conv
 #u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
 p_exact = 0.5 - x[1]
 
-f = - nu*div(grad(u_exact)) - grad(p_exact)
+f = - nu*div(grad(u_exact)) + grad(p_exact)   # I changed the sign in the gradient
 
 # Since the pressure is defined up to some constant, we compare the gradients
-g = - nu*div(grad(u_exact)) - f             # pressure gradient
+g =  nu*div(grad(u_exact)) + f             # pressure gradient
 
-# u_exact = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+#u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
 u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
 p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
 
