@@ -54,15 +54,15 @@
 \\[3cm]
 \begin{minipage}{0.5\textwidth}
 \flushleft {
-\Large Advisors: \\
+\large Advisors: \\
  \textbf{Prof. Eleuterio F. Toro} \rule{0pt}{2.5ex}\\
  \normalsize University of Trento\\[0.4cm]
-\Large \textbf{Dr. Marie E. Rognes} \\
-\Large \textbf{Ms. Eleonora Piersanti} \\
+\large \textbf{Dr. Marie E. Rognes} \\
+\large \textbf{Ms. Eleonora Piersanti} \\
  \normalsize Simula Research Laboratory\\[0.4cm] \rule{0pt}{2.5ex}}\\
 \end{minipage}
 \begin{minipage}{0.45\textwidth}
-\flushright {\Large
+\flushright {\large
 Student: \\
 \rule{0pt}{2.5ex} \textbf{Carlo Cisale}\\
 \normalsize University of Trento} \\
@@ -159,15 +159,40 @@ u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad
 p_{exact} = 1-y.
 \]
 
-Using the previous solution, the error is 0, since the method for solve the problem is exact for polynomials.
-A difference test case that could be use is:
+Using the previous solution, the error is 0, since the method for solve the problem is exact for polynomials, as shown below
+
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+$|| u_{exact} - u_h ||_{L^2}$ & $4.9911 \times 10^{-14}$ \\
+\hline
+$ | u_{exact} - u_h |_{H^1}$ & $4.2006  \times 10^{-12}$ \\
+\hline
+$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $1.1943 \times 10^{-11}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+A difference test case that could be used is:
 
 \[
 u_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
 p_{exact} = 1-y.
 \]
 
-Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!
+(Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
+
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+$|| u_{exact} - u_h ||_{L^2}$ & $7.2813 \times 10^{-5}$ \\
+\hline
+$ | u_{exact} - u_h |_{H^1}$ & $5.6675  \times 10^{-3}$ \\
+\hline
+$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $7.8493 \times 10^{-5}$ \\
+\hline
+\end{tabular}
+\end{center}
 
 \section{The Navier-Stokes Equations on a fixed domain}
 We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
