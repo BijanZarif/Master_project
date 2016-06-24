@@ -1,5 +1,6 @@
 %My thesis!
-\documentclass[12pt,a4paper,titlepage]{report}
+\documentclass[11pt,a4paper,titlepage]{report}
+%\documentclass[a4paper,11pt,openright,twoside]{book}
 \usepackage{amsmath}
 \usepackage{ amssymb }
 \usepackage{calligra}
@@ -23,11 +24,78 @@
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
+
 \setlength\parindent{0pt}  % toglie identazione ovunque
 
 % -----------------
 
 \begin{document}
+
+%--------------------------
+
+\begin{titlepage}
+%\begin{adjustwidth*}{10pt}{-40pt}
+\begin{center}
+\vspace*{-2.7cm}
+\includegraphics{aquila_nome}
+\\
+\rule{\textwidth}{1pt}
+\\[0.5cm]
+{\Large DEPARTMENT OF MATHEMATICS}
+\\[0.35cm]
+{\Large MASTER DEGREE IN MATHEMATICS}
+\\[2.3cm]
+{\Large THESIS}
+\\[1.5cm]
+\textsc{\huge \textbf{Modeling and simulation of craniovertebral decompression}}
+%\\[0.4cm]
+%{\Large March 25th, 2015}
+%\\[3cm]
+\\[3cm]
+\begin{minipage}{0.5\textwidth}
+\flushleft {
+\Large Advisors: \\
+ \textbf{Prof. Eleuterio F. Toro} \rule{0pt}{2.5ex}\\
+ \normalsize University of Trento\\[0.4cm]
+\Large \textbf{Dr. Marie E. Rognes} \\
+\Large \textbf{Ms. Eleonora Piersanti} \\
+ \normalsize Simula Research Laboratory\\[0.4cm] \rule{0pt}{2.5ex}}\\
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\flushright {\Large
+Student: \\
+\rule{0pt}{2.5ex} \textbf{Carlo Cisale}\\
+\normalsize University of Trento} \\
+\end{minipage}
+
+\vspace*{\fill}
+{\Large ACADEMIC YEAR 2015-2016}
+\rule{\textwidth}{1pt}
+
+
+\end{center}
+%\end{adjustwidth*}
+\newpage
+\thispagestyle{empty}
+\phantom{}
+\end{titlepage}
+\newpage 
+\thispagestyle{empty}
+
+%--------------------------
+
+\tableofcontents 
+\pagenumbering{roman}
+
+\newpage
+
+\pagenumbering{arabic}
+
+\chapter{Introduction}
+
+\chapter{Medical background}
+
+\chapter{Mathematical models}
 
 \section{The Stokes Problem}
 Let $\Omega$ be a unit square $[0,1]^2$, and let  $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, $\partial \Omega_{sides}$ be, respectively, the top, bottom, and lateral boundaries. (PUT A PICTURE) \\
@@ -35,7 +103,7 @@ The strong formulation of the Stokes problem reads
 
 \[
 \begin{cases}
-- \nabla \cdot (\nabla u + pI) = f, & \mbox{in } \Omega \\
+- \nabla \cdot (\nu \nabla u - pI) = f, & \mbox{in } \Omega \\
 \nabla \cdot u = 0, & \mbox{in } \Omega
 \end{cases}
 \]
@@ -55,21 +123,21 @@ u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \parti
 In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{u \in H^1(\Omega) | u_{|_{\partial \Omega}} = 0} $. Our aim is to find $(u(x,y),p(x,y)) \in V \times Q$ such that
 
 \begin{align}
-\int_\Omega -\nabla \cdot (\nabla u + pI)v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega fv \,dx, \\
 \int_\Omega (\nabla \cdot u)q \,dx &= 0
 \end{align}
 
 Differentiating by part the right hand side of the first equation we obtain:
 
 \begin{align}
-\int_\Omega -\nabla \cdot (\nabla u + pI)v \,dx &= \int_\Omega (\nabla u + pI) \cdot \nabla v \,dx, \\
-&- \int_{\partial \Omega} (\nabla u + pI) \cdot n v \,ds.
+\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx, \\
+&- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n v \,ds.
 \end{align}
 
 Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
 
 \begin{align}
-\int_\Omega (\nabla u + pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
 \int_\Omega (\nabla \cdot u) q \,dx &= 0.
 \end{align}
 
@@ -79,11 +147,11 @@ As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the er
 
 \begin{itemize}
 \item $|| u_{exact} - u_h ||_{L^2}$,
-\item $ | \nabla(u_{exact} - u_h) |_{H^1}$ (seminorm),
-\item $|| \nabla(p_{exact}) - \nabla p_h ||_{H^1} $.
+\item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
+\item $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $.
 \end{itemize}
 
-The latter is used since the pressure is defined up to some constant, and hence the difference $p_exact - p_h$ would be a constant. Therefore, we compare the two gradients.
+The latter is used since the pressure is defined up to some constant, and hence the difference $p_{exact} - p_h$ would be a constant. Therefore, we compare the two gradients.
 To compare exact and approximate solutions, we can choose the following exact solutions:
 
 \[
@@ -101,12 +169,12 @@ p_{exact} = 1-y.
 
 Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!
 
-\section{The Navier-Stokes Equations}
-We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,,t)$ and the pressure $p(x,y,t)$ such that
+\section{The Navier-Stokes Equations on a fixed domain}
+We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
 
 \[
 \begin{cases}
-\rho \dot{u} + \rho (\nabla u \cdot u) - \nabla \cdot (\nabla u - pI) = f, & \mbox{in } \Omega \\
+\rho \dot{u} + \rho (\nabla u \cdot u) - \nabla \cdot (\nu \nabla u - pI) = f, & \mbox{in } \Omega \\
 \nabla \cdot u = 0, & \mbox{in } \Omega
 \end{cases}
 \]
@@ -128,7 +196,13 @@ where $\sigma = \nu \nabla u - pI$, and for this example
 u_{inflow} = u_{outflow} =  \left[ \begin{array}{c} 0 \\ x(x-1)sin(\pi \omega x) \end{array} \right].
 \end{equation}
 
-In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in $\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}$, and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
+In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
+
+\[
+\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}
+\]
+
+and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
 
 \begin{align}
 &\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} fv \, dx \\
@@ -184,7 +258,7 @@ Problem: find $(u^{i+1}, p^{i+1}) \in \hat{V} \times \hat{Q}$ such that
 
 for all $(v,q) \in V \times Q$.
 
-Since the boundary term in (METTERE RIFERIMENTO) is always zero, the following holds:
+Since the boundary term in (PUT REFERENCE) is always zero, the following holds:
 
 \[
 \begin{aligned}
@@ -228,5 +302,21 @@ and then
 \]
 
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
+
+\section{Navier-Stokes on a moving domain}
+
+\section{Navier-Stokes on a moving domain where the movement depends on $(u,p)$}
+
+\chapter{Numerical methods}
+
+\section{Finite element formulation}
+
+\chapter{Implementation}
+
+\chapter{Numerical results}
+
+\chapter{Discussion}
+
+\chapter{Conclusions}
 
 \end{document}
