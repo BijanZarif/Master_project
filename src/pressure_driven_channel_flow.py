@@ -27,7 +27,7 @@ u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "sy
 # p0 = Function(Q)   # it starts to zero
 
 dt = 0.05
-T = 0.5
+T = 2.0
 nu = 1.0/8.0
 rho = 1.0
 theta = 0.5 
@@ -76,7 +76,8 @@ a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
 b = q * div(u) * dx
 c = inner(grad(u_mid)*u0, v) * dx
 d = inner(grad(p), v) * dx
-F = dudt + a + b + c + d
+e = inner(f_mid,v)*dx
+F = dudt + a + b + c + d - e
 
 a0, L0 = lhs(F), rhs(F)
 
@@ -133,4 +134,5 @@ while t < T + DOLFIN_EPS:
 
 
 plot(u0)
+plot(p0)
 interactive()

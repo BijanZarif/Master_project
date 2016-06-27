@@ -4,6 +4,7 @@
 # div( u ) = 0
 
 from numpy import *
+from math import log 
 from matplotlib import pyplot as plt
 from fenics import *
 from mshr import *   # I need this if I want to use the functions below to create a mesh
@@ -16,6 +17,10 @@ h = [1./i for i in N]
 h2 = [1./(i**2) for i in N]
 errsL2 = []
 errH1 = []
+errL2pressure = []
+rates1 = []
+rates2 = []
+rates3 = []
 
 for n in N:
 
@@ -111,7 +116,7 @@ for n in N:
     
     
     # ----------------------- #
-    # IN THIS WAY I AM SETTING THE NULL SPACE FOR THE PRESSURE: (STILL MISTERIOUS)
+    # IN THIS WAY I AM SETTING THE NULL SPACE FOR THE PRESSURE
     # since p + C for some constant C is still a solution, I take the pressure with mean value 0
     
     constant_pressure = Function(W).vector()
@@ -141,28 +146,38 @@ for n in N:
     # compute errors "by hands"
     # 'assemble' carrying out the integral
     L2_error_u = assemble((u_exact-uh)**2 * dx)**.5
-    H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5     # 
-    H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5 
+    H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5
+    L2_error_p = assemble((p_exact - ph)**2 * dx)**.5
+    # H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5
+   
+   
+        
     
     errsL2.append(L2_error_u)
     errH1.append(H1_error_u)
+    errL2pressure.append(L2_error_p)
     
     print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
     print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
-    print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
+    print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
+    #print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
     
     
+#for i in range(len(h)-1):
+    # rates1.append( log2(errsL2[i+1]/errsL2[i])/log2(h[i+1]/h[i]) )
 
-#plt.loglog(h, errsL2)
+#print rates1
+#print range(len(h)-1)
+
 # errH1 and h^2 are parallel hence the convergence rate is 0
 
-# plt.loglog(h, errH1, label = 'Error H1 norm')
-# plt.loglog(h, h2, label = 'h^2')
-# plt.loglog(h,h, label = 'h')
-# plt.xlabel('h')
-# plt.ylabel('error')
-# plt.title('Rate of convergence')
-# plt.grid(True)
+plt.loglog(h, errH1, label = 'Error H1 norm')
+plt.loglog(h, h2, label = 'h^2')
+plt.loglog(h,h, label = 'h')
+plt.xlabel('h')
+plt.ylabel('error')
+plt.title('Rate of convergence')
+plt.grid(True)
 
 # fig = plt.figure
 # ax = plt.subplot(111)
@@ -172,10 +187,10 @@ for n in N:
 # ax.legend(loc = 'center left', bbox_to_anchor = (1,0.5))
 # plt.show()
 
-# plt.legend(loc = 'best')
-#plt.show()
+plt.legend(loc = 'best')
+plt.show()
 #plt.savefig("convergence_sine.png")
-#plt.savefig("convergence_poly.png")
+plt.savefig("convergence_poly.png")
 
 
 # in order to see whether the convergence is quadratic, I have to
