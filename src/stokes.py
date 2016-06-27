@@ -40,8 +40,8 @@ for n in N:
     
     # I have to remember that the u_exact has to satisfy as well the boundary conditions (and not only the system of equations)
     # that's why there's the pi*x[0], so the sin is 0 on the right boundary (i.e. x[0] = 1))
-    u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
-    #u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
+    # u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
+    u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
     p_exact = 0.5 - x[1]
     
     f = - nu*div(grad(u_exact)) + grad(p_exact)   # I changed the sign in the gradient
@@ -49,8 +49,8 @@ for n in N:
     # Since the pressure is defined up to some constant, we compare the gradients
     g =  nu*div(grad(u_exact)) + f             # pressure gradient
     
-    #u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
-    u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
+    u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+    # u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
     p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
     
     # plot(u_exact_e, mesh = mesh, title = "exact velocity")
@@ -155,17 +155,29 @@ for n in N:
 
 #plt.loglog(h, errsL2)
 # errH1 and h^2 are parallel hence the convergence rate is 0
-plt.loglog(h, errH1, label = 'Error H1 norm')
-plt.loglog(h, h2, label = 'h^2')
-plt.loglog(h,h, label = 'h')
-plt.xlabel('h')
-plt.ylabel('error')
-plt.title('Rate of convergence')
-plt.grid(True)
-plt.legend()
-plt.savefig("convergence.png")
 
-plt.show()
+# plt.loglog(h, errH1, label = 'Error H1 norm')
+# plt.loglog(h, h2, label = 'h^2')
+# plt.loglog(h,h, label = 'h')
+# plt.xlabel('h')
+# plt.ylabel('error')
+# plt.title('Rate of convergence')
+# plt.grid(True)
+
+# fig = plt.figure
+# ax = plt.subplot(111)
+# box = ax.get_position()
+# ax.set_position([ box.x0, box.y0, box.width*0.8, box.height ])
+# 
+# ax.legend(loc = 'center left', bbox_to_anchor = (1,0.5))
+# plt.show()
+
+# plt.legend(loc = 'best')
+#plt.show()
+#plt.savefig("convergence_sine.png")
+#plt.savefig("convergence_poly.png")
+
+
 # in order to see whether the convergence is quadratic, I have to
 # plot h^2 and if the two lines are parallel then the convergence of the
 # error is quadratic
