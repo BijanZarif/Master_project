@@ -161,18 +161,46 @@ p_{exact} = 1-y.
 
 Using the previous solution, the error is 0, since the method for solve the problem is exact for polynomials, as shown below
 
+%\begin{center}
+%\begin{tabular}{| c | c |}
+%\hline
+%$|| u_{exact} - u_h ||_{L^2}$ & $4.9911 \times 10^{-14}$ \\
+%\hline
+%$ | u_{exact} - u_h |_{H^1}$ & $4.2006  \times 10^{-12}$ \\
+%\hline
+%$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $1.1943 \times 10^{-11}$ \\
+%\hline
+%\end{tabular}
+%\end{center}
+
 \begin{center}
-\begin{tabular}{| c | c |}
+\begin{tabular}{| c | c | c | c |}
 \hline
-$|| u_{exact} - u_h ||_{L^2}$ & $4.9911 \times 10^{-14}$ \\
+$N = $ mesh dimension & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ \\
 \hline
-$ | u_{exact} - u_h |_{H^1}$ & $4.2006  \times 10^{-12}$ \\
+$ 4 $ & $2.7373 \times 10^{-14}$ & $3.2162 \times 10^{-13}$ & $4.8674 \times 10^{-13}$ \\
 \hline
-$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $1.1943 \times 10^{-11}$ \\
+$ 8$ & $1.3173  \times 10^{-12}$ & $7.5841 \times 10^{-11}$ & $1.4330 \times 10^{-10}$ \\
+\hline
+$ 16 $ & $ 8.4791 \times 10^{-14}$ & $9.1285 \times 10^{-12}$ & $3.5083 \times 10^{-11}$\\
+\hline
+$ 32$ & $9.0508 \times 10^{-14}$ & $1.6039 \times 10^{-11}$ & $1.2406 \times 10^{-10}$ \\
+\hline
+$ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ & $1.4692 \times 10^{-9}$\\
 \hline
 \end{tabular}
 \end{center}
 
+
+\vspace{1cm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{convergence_poly}
+%\caption{}
+\end{figure}
+\vspace{1cm}
+
+\newpage
 A difference test case that could be used is:
 
 \[
@@ -183,16 +211,34 @@ p_{exact} = 1-y.
 (Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
 
 \begin{center}
-\begin{tabular}{| c | c |}
+\begin{tabular}{| c | c | c | c |}
 \hline
-$|| u_{exact} - u_h ||_{L^2}$ & $7.2813 \times 10^{-5}$ \\
+$N = $ mesh dimension & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ \\
 \hline
-$ | u_{exact} - u_h |_{H^1}$ & $5.6675  \times 10^{-3}$ \\
+$ 4 $ & $1.9388 \times 10^{-3}$ & $5.0548 \times 10^{-2}$ & $2.4515 \times 10^{-3}$ \\
 \hline
-$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $7.8493 \times 10^{-5}$ \\
+$ 8$ & $2.4515  \times 10^{-4}$ & $1.2733 \times 10^{-2}$ & $2.2031 \times 10^{-4}$ \\
+\hline
+$ 16 $ & $ 3.0745 \times 10^{-5}$ & $3.1896 \times 10^{-3}$ & $3.7982 \times 10^{-5}$\\
+\hline
+$ 32$ & $3.8465 \times 10^{-6}$ & $7.9780 \times 10^{-4}$ & $6.6700 \times 10^{-6}$ \\
+\hline
+$ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$ & $1.1775 \times 10^{-6}$\\
 \hline
 \end{tabular}
 \end{center}
+
+Moreover, from the plot below we see a second order convergence, since the blue and green lines are parallel.
+
+\vspace{1cm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{convergence_sine}
+%\caption{Order 3, $IMAX = JMAX = 20, R_1 = 1, R_2 = 2$.}
+\end{figure}
+\vspace{1cm}
+
+
 
 \section{The Navier-Stokes Equations on a fixed domain}
 We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
