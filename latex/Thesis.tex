@@ -148,7 +148,7 @@ As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the er
 \begin{itemize}
 \item $|| u_{exact} - u_h ||_{L^2}$,
 \item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
-\item $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $.
+\item $|| p_{exact} - p_h ||_{L^2} $.
 \end{itemize}
 
 The latter is used since the pressure is defined up to some constant, and hence the difference $p_{exact} - p_h$ would be a constant. Therefore, we compare the two gradients.
@@ -159,7 +159,7 @@ u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad
 p_{exact} = 1-y.
 \]
 
-Using the previous solution, the error is 0, since the method for solve the problem is exact for polynomials, as shown below
+Using the previous solution, the error is 0, since the method for solving the problem is exact for polynomials, as shown below
 
 %\begin{center}
 %\begin{tabular}{| c | c |}
@@ -174,19 +174,19 @@ Using the previous solution, the error is 0, since the method for solve the prob
 %\end{center}
 
 \begin{center}
-\begin{tabular}{| c | c | c | c |}
+\begin{tabular}{| c | c | c | c | c |}
 \hline
-$N = $ mesh dimension & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ \\
+$N$ & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| p_{exact} - p_h ||_{L^2} $ & Rate \\
 \hline
-$ 4 $ & $2.7373 \times 10^{-14}$ & $3.2162 \times 10^{-13}$ & $4.8674 \times 10^{-13}$ \\
+$ 4 $ & $2.7373 \times 10^{-14}$ & $3.2162 \times 10^{-13}$ & $4.8674 \times 10^{-13}$ & \\
 \hline
-$ 8$ & $1.3173  \times 10^{-12}$ & $7.5841 \times 10^{-11}$ & $1.4330 \times 10^{-10}$ \\
+$ 8$ & $1.3173  \times 10^{-12}$ & $7.5841 \times 10^{-11}$ & $1.4330 \times 10^{-10}$ & $2.9834$ \\
 \hline
-$ 16 $ & $ 8.4791 \times 10^{-14}$ & $9.1285 \times 10^{-12}$ & $3.5083 \times 10^{-11}$\\
+$ 16 $ & $ 8.4791 \times 10^{-14}$ & $9.1285 \times 10^{-12}$ & $3.5083 \times 10^{-11}$ & $ 2.9952 $ \\
 \hline
-$ 32$ & $9.0508 \times 10^{-14}$ & $1.6039 \times 10^{-11}$ & $1.2406 \times 10^{-10}$ \\
+$ 32$ & $9.0508 \times 10^{-14}$ & $1.6039 \times 10^{-11}$ & $1.2406 \times 10^{-10}$ & $ 2.9987 $  \\
 \hline
-$ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ & $1.4692 \times 10^{-9}$\\
+$ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ & $1.4692 \times 10^{-9}$ & $ 2.9997 $ \\
 \hline
 \end{tabular}
 \end{center}
@@ -211,19 +211,19 @@ p_{exact} = 1-y.
 (Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
 
 \begin{center}
-\begin{tabular}{| c | c | c | c |}
+\begin{tabular}{| c | c | c | c | c |}
 \hline
-$N = $ mesh dimension & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ \\
+$N$ & $|| u_{exact} - u_h ||_{L^2}$ & $ | u_{exact} - u_h |_{H^1}$ & $|| p_{exact} - p_h ||_{H^1} $ & Rate \\
 \hline
-$ 4 $ & $1.9388 \times 10^{-3}$ & $5.0548 \times 10^{-2}$ & $2.4515 \times 10^{-3}$ \\
+$ 4 $ & $1.9388 \times 10^{-3}$ & $5.0548 \times 10^{-2}$ & $2.4515 \times 10^{-3}$ & \\
 \hline
-$ 8$ & $2.4515  \times 10^{-4}$ & $1.2733 \times 10^{-2}$ & $2.2031 \times 10^{-4}$ \\
+$ 8$ & $2.4515  \times 10^{-4}$ & $1.2733 \times 10^{-2}$ & $2.2031 \times 10^{-4}$ & $2.9834$ \\
 \hline
-$ 16 $ & $ 3.0745 \times 10^{-5}$ & $3.1896 \times 10^{-3}$ & $3.7982 \times 10^{-5}$\\
+$ 16 $ & $ 3.0745 \times 10^{-5}$ & $3.1896 \times 10^{-3}$ & $3.7982 \times 10^{-5}$ & $2.9952$ \\
 \hline
-$ 32$ & $3.8465 \times 10^{-6}$ & $7.9780 \times 10^{-4}$ & $6.6700 \times 10^{-6}$ \\
+$ 32$ & $3.8465 \times 10^{-6}$ & $7.9780 \times 10^{-4}$ & $6.6700 \times 10^{-6}$ & $ 2.9987 $ \\
 \hline
-$ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$ & $1.1775 \times 10^{-6}$\\
+$ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$ & $1.1775 \times 10^{-6}$ & $2.9997$ \\
 \hline
 \end{tabular}
 \end{center}
