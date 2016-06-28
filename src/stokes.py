@@ -177,6 +177,8 @@ plt.ylabel('error')
 plt.title('Rate of convergence')
 plt.grid(True)
 
+
+# TO PUT THE LEGEND OUTSIDE THE FIGURE
 # fig = plt.figure
 # ax = plt.subplot(111)
 # box = ax.get_position()
@@ -188,7 +190,9 @@ plt.grid(True)
 plt.legend(loc = 'best')
 plt.show()
 plt.savefig("convergence_sine.png")
-#plt.savefig("convergence_poly.png")
+
+# I don't plot for the polynomial because the error is 0
+# (it doesn't make sense to plot it)
 
 
 # in order to see whether the convergence is quadratic, I have to
