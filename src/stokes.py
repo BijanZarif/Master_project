@@ -188,8 +188,9 @@ plt.grid(True)
 # plt.show()
 
 plt.legend(loc = 'best')
-plt.show()
 plt.savefig("convergence_sine.png")
+plt.show()
+
 
 # I don't plot for the polynomial because the error is 0
 # (it doesn't make sense to plot it)
