@@ -18,6 +18,7 @@ h2 = [1./(i**2) for i in N]
 errsL2 = []
 errsH1 = []
 errsL2pressure = []
+errsH1pressure = []
 rates1 = []
 rates2 = []
 rates3 = []
@@ -46,15 +47,18 @@ for n in N:
     # I have to remember that the u_exact has to satisfy as well the boundary conditions (and not only the system of equations)
     # that's why there's the pi*x[0], so the sin is 0 on the right boundary (i.e. x[0] = 1))
     u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
-    # u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
-    p_exact = 0.5 - x[1]
+    #u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
+    p_exact = 0.5 - x[1]            # this function has mean value zero (its integral in [0,1] x [0,1] is zero)
+                                    # hence, I can use it as exact solution to compare it with the numerical solution
+                                    # since I put the constraint that mean_value(pressure) = 0
+                                    # which is equivalent to setting the null space of the matrix A as done later in the code
     
     f = - nu*div(grad(u_exact)) + grad(p_exact)   # I changed the sign in the gradient
     
     # Since the pressure is defined up to some constant, we compare the gradients
     g =  nu*div(grad(u_exact)) + f             # pressure gradient
     
-    # u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+    #u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
     u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
     p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
     
@@ -148,34 +152,35 @@ for n in N:
     L2_error_u = assemble((u_exact-uh)**2 * dx)**.5
     H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5
     L2_error_p = assemble((p_exact - ph)**2 * dx)**.5
-    # H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5
+    H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5
    
     errsL2.append(L2_error_u)
     errsH1.append(H1_error_u)
     errsL2pressure.append(L2_error_p)
+    errsH1pressure.append(H1_error_p)
     
-    print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
-    print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
-    print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
-    #print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
+    #print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
+    #print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
+    #print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
+    print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
     
     
-print errsL2
+#print errsL2
 for i in range(len(h)-1):
-    rates1.append(math.log(errsL2[i+1]/errsL2[i])/math.log(h[i+1]/h[i]) )
+    rates1.append(math.log(errsH1[i+1]/errsH1[i])/math.log(h[i+1]/h[i]) )
 
-print rates1
+#print rates1
 #print range(len(h)-1)
 
 # errsH1 and h^2 are parallel hence the convergence rate is 2
 
-plt.loglog(h, errsH1, label = 'Error H1 norm')
-plt.loglog(h, h2, label = 'h^2')
-plt.loglog(h,h, label = 'h')
-plt.xlabel('h')
-plt.ylabel('error')
-plt.title('Rate of convergence')
-plt.grid(True)
+# plt.loglog(h, errsH1, label = 'Error H1 norm')
+# plt.loglog(h, h2, label = 'h^2')
+# plt.loglog(h,h, label = 'h')
+# plt.xlabel('h')
+# plt.ylabel('error')
+# plt.title('Rate of convergence')
+# plt.grid(True)
 
 
 # TO PUT THE LEGEND OUTSIDE THE FIGURE
@@ -187,9 +192,9 @@ plt.grid(True)
 # ax.legend(loc = 'center left', bbox_to_anchor = (1,0.5))
 # plt.show()
 
-plt.legend(loc = 'best')
-plt.savefig("convergence_sine.png")
-plt.show()
+#plt.legend(loc = 'best')
+#plt.savefig("convergence_sine.png")
+#plt.show()
 
 
 # I don't plot for the polynomial because the error is 0
