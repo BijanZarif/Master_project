@@ -151,8 +151,13 @@ As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the er
 \item $|| p_{exact} - p_h ||_{L^2} $.
 \end{itemize}
 
-The latter is used since the pressure is defined up to some constant, and hence the difference $p_{exact} - p_h$ would be a constant. Therefore, we compare the two gradients.
-To compare exact and approximate solutions, we can choose the following exact solutions:
+Since the pressure is defined up to some constant, we add the constraint 
+
+\[
+\frac{1}{|\Omega |} \int_{\Omega} p = 0,
+\]
+
+so we can compare an exact solution with mean value zero with the approximate solution. In order to do so, we can choose the following exact solutions:
 
 \[
 u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
@@ -201,6 +206,22 @@ p_{exact} = \frac{1}{2}-y.
 \]
 
 (Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
+In the following tables, the convergence rate $k$ was computed as well, according to:
+
+\[
+k = \frac{log(\frac{E_{i+1}}{E_i})}{log(\frac{h_{i+1}}{h_i})}
+\]
+
+where we are assuming that $E_i \sim h^k_i$ and $E_{i+1} \sim h^k_{i+1}$. \\
+The following table shows a second order convergence rate in $H^1$, as confirmed by the convergence plot.
+
+\vspace{1cm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{convergence_sine}
+\caption{The plot shows a second order convergence, since the blue and green lines are parallel}
+\end{figure}
+\vspace{1cm}
 
 \begin{center}
 \begin{tabular}{| c | c | c | c | c |}
@@ -220,6 +241,8 @@ $ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$ & $1.9998$ & $ 2.9997 
 \end{tabular}
 \end{center}
 
+
+
 \begin{center}
 \begin{tabular}{| c | c | c | c | c |}
 \hline
@@ -237,15 +260,6 @@ $ 64 $ & $ 8.0070 \times 10^{-9} $  & $ 1.1775 \times 10^{-6}$ & & \\
 \hline
 \end{tabular}
 \end{center}
-
-\vspace{1cm}
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{convergence_sine}
-\caption{The plot shows a second order convergence, since the blue and green lines are parallel}
-\end{figure}
-\vspace{1cm}
-
 
 
 \section{The Navier-Stokes Equations on a fixed domain}
