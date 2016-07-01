@@ -162,14 +162,17 @@ for n in N:
     #print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
     #print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
     #print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
-    print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
+    #print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
     
     
 #print errsL2
-for i in range(len(h)-1):
-    rates1.append(math.log(errsH1[i+1]/errsH1[i])/math.log(h[i+1]/h[i]) )
+# for i in range(len(h)-1):
+#    rates1.append(math.log(errsH1[i+1]/errsH1[i])/math.log(h[i+1]/h[i]) )
 
-#print rates1
+for i in range(len(h)-1):
+    rates1.append(math.log(errsL2pressure[i+1]/errsL2pressure[i])/math.log(h[i+1]/h[i]) )
+
+print rates1
 #print range(len(h)-1)
 
 # errsH1 and h^2 are parallel hence the convergence rate is 2
