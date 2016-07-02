@@ -1,6 +1,6 @@
 from dolfin import *
 
-mesh = UnitSquareMesh(12,12, "crossed")    # crossed means the triangles are divided in 2
+mesh  = UnitSquareMesh(12,12, "crossed")    # crossed means the triangles are divided in 2
 plot(mesh)
 interactive()
 
@@ -11,7 +11,7 @@ Q = FunctionSpace(mesh, "Lagrange", 1)
 W = V * Q
 # W = FunctionSpace(mesh, TH)
 
-u, p = TrialFunctions(W)   # u is a trial function of V somehow, while p a trial function of Q
+u, p = TrialFunctions(W)   # u is a trial function of V, while p a trial function of Q
 v, q = TestFunctions(W)
 
 up0 = Function(W)
