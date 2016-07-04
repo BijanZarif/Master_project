@@ -66,7 +66,7 @@ t = dt
 U = Function(W)   # I want to store my solution here
 u, p = U.split()
 solver = PETScLUSolver()
-ufile = File("velocity.pvd")
+#ufile = File("velocity.pvd")
 while t < T - DOLFIN_EPS:
     
     
@@ -87,6 +87,7 @@ while t < T - DOLFIN_EPS:
     
     # I need to assign up0 because u0 and p0 are not "proper" functions
     up0.assign(U)   # the first part of U is u0, and the second part is p0
+    
     #ufile << up0.split()[0]
     
     t += dt
@@ -108,9 +109,6 @@ g = Constant(0.0)
 bc = DirichletBC(V1, g, "on_boundary")
 psi = Function(V1)
 solve(a == L, psi, bc)
-
-#problem = VariationalProblem(a, L, bc)
-#psi = problem.solve()
 
 plot(psi)
 interactive()
