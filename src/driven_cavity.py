@@ -3,7 +3,7 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [128]
+N = [16]
 dt = 0.01
 #dt = 0.05
 #dt = 0.025
@@ -13,7 +13,8 @@ T = 2.5
 nu = 1.0/1000.0
 rho = 1.0
 theta = 1.0 
-
+def epsilon(u):
+    return 0.5*(grad(u)+grad(u).T)
 
 for n in N:
 
@@ -60,12 +61,14 @@ for n in N:
     bcu = [up, walls]
     
     dudt = Constant(1.0/dt) * inner(u-u0, v) * dx
-    a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
-    b = q * div(u) * dx   # from continuity equation
-    c = inner(dot(grad(u_mid),u0), v) * dx
+    a = Constant(nu) * 2*inner(epsilon(u_mid), epsilon(v)) * dx
+    b = q * div(u_mid) * dx   # from continuity equation
+    #c = inner(dot(grad(u_mid),u0), v) * dx
+    c = inner(grad(u_mid)*u0, v) * dx
     # c = inner(grad(u0)*u0, v) * dx
-    d = inner(p, div(v)) * dx
+    d = inner(p_mid, div(v)) * dx
     L = inner(f_mid,v)*dx
+    #F = dudt + a + b + c + d - L
     F = dudt + a + b + c + d - L
     
     a0, L0 = lhs(F), rhs(F)
@@ -76,13 +79,26 @@ for n in N:
     
     U = Function(W)   # I want to store my solution here
     u, p = U.split()
-    # solver = PETScLUSolver()
-    solver = KrylovSolver("minres", "hypre_amg")
-    solver.parameters["relative_tolerance"] = 1e-10
-    solver.parameters["absolute_tolerance"] = 1e-10
-    solver.parameters["maximum_iterations"] = 1000
-    solver.parameters["monitor_convergence"] = True
-    solver.parameters["nonzero_initial_guess"] = True
+    U.vector()[:] = 1.0
+    for bc in bcu:
+        bc.apply(U.vector())
+    #plot(U[0], mode="color")
+    ff = FacetFunction("size_t", mesh)
+    ff.set_all(0)
+    CompiledSubDomain("(x[1] > 1.0 - DOLFIN_EPS)&& on_boundary").mark(ff, 1)
+    CompiledSubDomain("(x[1] < (1.0- DOLFIN_EPS))&& on_boundary").mark(ff, 2)
+    print assemble(sqrt(dot(U[0],U[0]))*ds(1, domain=mesh, subdomain_data=ff))
+    print assemble(sqrt(dot(U[0],U[0]))*ds(2, domain=mesh, subdomain_data=ff))
+    
+    #interactive()
+    #exit()
+    solver = PETScLUSolver()
+    #solver = KrylovSolver("gmres", "ilu")
+    #solver.parameters["relative_tolerance"] = 1e-10
+    #solver.parameters["absolute_tolerance"] = 1e-10
+    #solver.parameters["maximum_iterations"] = 1000
+    #solver.parameters["monitor_convergence"] = True
+    #solver.parameters["nonzero_initial_guess"] = True
     #ufile = File("velocity.pvd")
     while (t - T) <= DOLFIN_EPS :
         
