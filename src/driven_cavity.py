@@ -126,4 +126,4 @@ for n in N:
     print "dt = {}".format(dt)
     print "N = {}".format(n)
     print "min of streamfunction = {}".format(min(psi.vector()))
-    print "-------"
+    print "-------" 
