@@ -3,7 +3,7 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [16]
+N = [32]
 dt = 0.01
 #dt = 0.05
 #dt = 0.025
@@ -43,8 +43,9 @@ for n in N:
     p_mid = (1.0-theta)*p0 + theta*p
     
     # The BC should be correct
-    up = DirichletBC(W.sub(0), (1.0, 0.0), "(x[1] > 1.0 - DOLFIN_EPS)&& on_boundary" )
-    walls = DirichletBC(W.sub(0), (0.0, 0.0), "(x[1] < (1.0- DOLFIN_EPS))&& on_boundary" )
+    up = DirichletBC(W.sub(0), (1.0, 0.0), "near(x[1], 1.0) && on_boundary" )
+    walls = DirichletBC(W.sub(0), (0.0, 0.0), "( x[1] < 1.0 || (near(x[0],0.0) && near(x[1],1.0)) \
+                                               || (near(x[0],1.0) && near(x[1],1.0))) && on_boundary" )
     
     
     # # this is to verify that I am actually applying some BC
@@ -61,9 +62,8 @@ for n in N:
     bcu = [up, walls]
     
     dudt = Constant(1.0/dt) * inner(u-u0, v) * dx
-    a = Constant(nu) * 2*inner(epsilon(u_mid), epsilon(v)) * dx
+    a = Constant(nu) * 2.0*inner(epsilon(u_mid), epsilon(v)) * dx
     b = q * div(u_mid) * dx   # from continuity equation
-    #c = inner(dot(grad(u_mid),u0), v) * dx
     c = inner(grad(u_mid)*u0, v) * dx
     # c = inner(grad(u0)*u0, v) * dx
     d = inner(p_mid, div(v)) * dx
@@ -79,16 +79,17 @@ for n in N:
     
     U = Function(W)   # I want to store my solution here
     u, p = U.split()
-    U.vector()[:] = 1.0
-    for bc in bcu:
-        bc.apply(U.vector())
-    #plot(U[0], mode="color")
-    ff = FacetFunction("size_t", mesh)
-    ff.set_all(0)
-    CompiledSubDomain("(x[1] > 1.0 - DOLFIN_EPS)&& on_boundary").mark(ff, 1)
-    CompiledSubDomain("(x[1] < (1.0- DOLFIN_EPS))&& on_boundary").mark(ff, 2)
-    print assemble(sqrt(dot(U[0],U[0]))*ds(1, domain=mesh, subdomain_data=ff))
-    print assemble(sqrt(dot(U[0],U[0]))*ds(2, domain=mesh, subdomain_data=ff))
+
+    # U.vector()[:] = 1.0
+    # for bc in bcu:
+    #     bc.apply(U.vector())
+    # #plot(U[0], mode="color")
+    # ff = FacetFunction("size_t", mesh)
+    # ff.set_all(0)
+    # CompiledSubDomain("(x[1] > 1.0 - DOLFIN_EPS)&& on_boundary").mark(ff, 1)
+    # CompiledSubDomain("(x[1] < (1.0- DOLFIN_EPS))&& on_boundary").mark(ff, 2)
+    # print assemble(sqrt(dot(U[0],U[0]))*ds(1, domain=mesh, subdomain_data=ff))
+    # print assemble(sqrt(dot(U[0],U[0]))*ds(2, domain=mesh, subdomain_data=ff))
     
     #interactive()
     #exit()
