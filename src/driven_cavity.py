@@ -4,7 +4,7 @@ from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [128]
-dt = 0.1
+dt = 0.01
 #dt = 0.05
 #dt = 0.025
 #dt = 0.0125
@@ -12,7 +12,7 @@ dt = 0.1
 T = 2.5
 nu = 1.0/1000.0
 rho = 1.0
-theta = 0.5 
+theta = 1.0 
 
 
 for n in N:
@@ -59,10 +59,11 @@ for n in N:
     
     bcu = [up, walls]
     
-    dudt = Constant(dt**-1) * inner(u-u0, v) * dx
+    dudt = Constant(1.0/dt) * inner(u-u0, v) * dx
     a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
     b = q * div(u) * dx   # from continuity equation
-    c = inner(grad(u_mid)*u0, v) * dx
+    c = inner(dot(grad(u_mid),u0), v) * dx
+    # c = inner(grad(u0)*u0, v) * dx
     d = inner(p, div(v)) * dx
     L = inner(f_mid,v)*dx
     F = dudt + a + b + c + d - L
@@ -75,9 +76,15 @@ for n in N:
     
     U = Function(W)   # I want to store my solution here
     u, p = U.split()
-    solver = PETScLUSolver()
+    # solver = PETScLUSolver()
+    solver = KrylovSolver("minres", "hypre_amg")
+    solver.parameters["relative_tolerance"] = 1e-10
+    solver.parameters["absolute_tolerance"] = 1e-10
+    solver.parameters["maximum_iterations"] = 1000
+    solver.parameters["monitor_convergence"] = True
+    solver.parameters["nonzero_initial_guess"] = True
     #ufile = File("velocity.pvd")
-    while t <= T:
+    while (t - T) <= DOLFIN_EPS :
         
         print "solving for t = {}".format(t)
         
@@ -107,8 +114,8 @@ for n in N:
     #plot(u0)
     #interactive()
     
-    V1 = U.function_space().sub(0).sub(0).collapse()  # this is V from the beginning
-    
+    # V1 = U.function_space().sub(0).sub(0).collapse()  # this is V from the beginning
+    V1 = FunctionSpace(mesh, "CG", 1)
     psi = TrialFunction(V1)
     q1 = TestFunction(V1)
     a = dot(grad(psi), grad(q1))*dx
@@ -122,6 +129,8 @@ for n in N:
     
     #plot(psi)
     #interactive()
+    psifile = File("psi64.pvd")
+    psifile << psi
     
     print "dt = {}".format(dt)
     print "N = {}".format(n)
