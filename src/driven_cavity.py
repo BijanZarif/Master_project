@@ -2,12 +2,11 @@
 
 from dolfin import *
 
-#N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [32]
-dt = 0.01
+N = [2**2, 2**3, 2**4, 2**5, 2**6]
+#dt = 0.1
 #dt = 0.05
 #dt = 0.025
-#dt = 0.0125
+dt = 0.0125
 
 T = 2.5
 nu = 1.0/1000.0
@@ -103,7 +102,7 @@ for n in N:
     #ufile = File("velocity.pvd")
     while (t - T) <= DOLFIN_EPS :
         
-        print "solving for t = {}".format(t)
+        #print "solving for t = {}".format(t)
         
         # I need to reassemble the system
         A = assemble(a0)
@@ -146,10 +145,15 @@ for n in N:
     
     #plot(psi)
     #interactive()
-    psifile = File("psi64.pvd")
-    psifile << psi
+    
     
     print "dt = {}".format(dt)
     print "N = {}".format(n)
     print "min of streamfunction = {}".format(min(psi.vector()))
-    print "-------" 
+    print "-------"
+    
+    
+if n == 64:
+    print "N = 64"
+    psifile = File("psi64.pvd")
+    psifile << psi
