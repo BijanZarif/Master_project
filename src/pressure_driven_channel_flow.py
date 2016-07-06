@@ -152,6 +152,7 @@ for n in N :
         
         t += dt
         
+    print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
     #print "T = {}".format(t)
     print "u(1, 0.5, 0.5 ) = {}".format(U(Point(1, 0.5))[0])
