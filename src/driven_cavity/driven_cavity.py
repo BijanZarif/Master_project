@@ -11,7 +11,14 @@ dt = 0.0125
 T = 2.5
 nu = 1.0/1000.0
 rho = 1.0
-theta = 1.0 
+#theta = 1.0
+theta = 0.5
+
+# When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
+print "***************"
+print "* theta = {} *".format(theta)
+print "***************"
+
 def epsilon(u):
     return 0.5*(grad(u)+grad(u).T)
 
@@ -62,7 +69,14 @@ for n in N:
     
     dudt = Constant(1.0/dt) * inner(u-u0, v) * dx
     a = Constant(nu) * 2.0*inner(epsilon(u_mid), epsilon(v)) * dx
-    b = q * div(u_mid) * dx   # from continuity equation
+    
+    # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
+    #----------------
+    #b = q * div(u_mid) * dx   # from continuity equation
+    #----------------
+
+    b = q * div(u) * dx   # from continuity equation
+
     c = inner(grad(u_mid)*u0, v) * dx
     # c = inner(grad(u0)*u0, v) * dx
     d = inner(p_mid, div(v)) * dx
@@ -100,7 +114,9 @@ for n in N:
     #solver.parameters["monitor_convergence"] = True
     #solver.parameters["nonzero_initial_guess"] = True
     #ufile = File("velocity.pvd")
-    while (t - T) <= DOLFIN_EPS :
+    
+    #while (t - T) <= DOLFIN_EPS :
+    while t <= T + 1E-9:   
         
         #print "solving for t = {}".format(t)
         
@@ -126,7 +142,6 @@ for n in N:
         
         t += dt
             
-        
     #plot(u0)
     #interactive()
     
@@ -146,14 +161,14 @@ for n in N:
     #plot(psi)
     #interactive()
     
-    
+    print "t_final = {}".format(t - dt)
     print "dt = {}".format(dt)
     print "N = {}".format(n)
     print "min of streamfunction = {}".format(min(psi.vector()))
     print "-------"
     
     
-if n == 64:
-    print "N = 64"
-    psifile = File("psi64.pvd")
-    psifile << psi
+#if n == 64:
+#    print "N = 64"
+#    psifile = File("psi64.pvd")
+#    psifile << psi

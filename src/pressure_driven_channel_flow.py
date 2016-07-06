@@ -7,10 +7,10 @@ from dolfin import *
 
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
 #N = [2**2]
-dt = 0.1
+#dt = 0.1
 #dt = 0.05
 #dt = 0.025
-#dt = 0.0125
+dt = 0.0125
 
 for n in N :
     
@@ -126,8 +126,8 @@ for n in N :
     
     
     print "N = {}".format(n)
-    while (t - T) <= DOLFIN_EPS:
-    #while t <= T + DOLFIN_EPS:
+    #while (t - T) <= DOLFIN_EPS:
+    while t <= T + 1E-9:
         
          
         print "solving for t = {}".format(t) 
