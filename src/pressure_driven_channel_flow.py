@@ -6,13 +6,18 @@
 from dolfin import *
 
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
-#N = [64]
+#N = [2**2]
+dt = 0.1
+#dt = 0.05
+#dt = 0.025
+#dt = 0.0125
+
 for n in N :
     
    
-   # mesh = UnitSquareMesh(n, n, "crossed")    # crossed means the triangles are divided in 2
+    mesh = UnitSquareMesh(n, n, "crossed")    # crossed means the triangles are divided in 2
     
-    mesh = UnitSquareMesh(n, n) 
+    #mesh = UnitSquareMesh(n, n) 
     x = SpatialCoordinate(mesh)
     
     # Taylor-Hood elements
@@ -31,7 +36,7 @@ for n in N :
     # u0 = Function(V)   # it starts to zero
     # p0 = Function(Q)   # it starts to zero
     
-    dt = 0.001
+    
     T = 0.5
     nu = 1.0/8.0
     rho = 1.0
@@ -47,11 +52,15 @@ for n in N :
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
     
-    inflow = DirichletBC(W.sub(1), p_in, "(x[0] < DOLFIN_EPS)&& on_boundary" )
-    outflow = DirichletBC(W.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
-    walls = DirichletBC(W.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
+    # inflow = DirichletBC(W.sub(1), p_in, "(x[0] < DOLFIN_EPS)&& on_boundary" )
+    # outflow = DirichletBC(W.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
+    # walls = DirichletBC(W.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
     
-    # this is to verify that I am actually applying some BC
+    inflow = DirichletBC(W.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
+    outflow = DirichletBC(W.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
+    walls = DirichletBC(W.sub(0), (0.0, 0.0) , "( near(x[1], 0.0) || near(x[1], 1.0) ) && on_boundary")
+    
+    # #this is to verify that I am actually applying some BC
     # U = Function(W)
     # # this applies BC to a vector, where U is a function
     # inflow.apply(U.vector())
@@ -60,6 +69,7 @@ for n in N :
     # 
     # uh, ph = U.split()
     # plot(uh)
+    # plot(ph)
     # interactive()
     # exit()
     
@@ -116,8 +126,11 @@ for n in N :
     
     
     print "N = {}".format(n)
-    while t < T - DOLFIN_EPS:
+    while (t - T) <= DOLFIN_EPS:
+    #while t <= T + DOLFIN_EPS:
         
+         
+        print "solving for t = {}".format(t) 
         
         # I need to reassemble the system
         A = assemble(a0)
@@ -138,9 +151,9 @@ for n in N :
         up0.assign(U)   # the first part of U is u0, and the second part is p0
         
         t += dt
-        #print "t = {}".format(t)
         
-    print "T = {}".format(t)
+    print "dt = {}".format(dt)   
+    #print "T = {}".format(t)
     print "u(1, 0.5, 0.5 ) = {}".format(U(Point(1, 0.5))[0])
     print("------")    
     
