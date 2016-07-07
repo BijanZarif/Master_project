@@ -26,6 +26,7 @@
 
 
 \setlength\parindent{0pt}  % toglie identazione ovunque
+\usepackage[sc]{mathpazo}
 
 % -----------------
 
@@ -408,9 +409,51 @@ Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ an
 
 \chapter{Verification/Validation}
 
-\section{Stokes}
-\section{Channel flow}
+\section{Manifactured solution for Stokes problem}
+\section{Pressure-driven channel flow (2D)}
+% References:
+% Fenics book
+% http://faculty.kfupm.edu.sa/CHE/usamah/CHE204/CHE204-HD22%20-%20Flow%20Through%20Circular%20Pipe.pdf
+
 \section{Driven cavity}
+% References:
+% Fenics book, Quarteroni, Fluid dynamics F. White
+
+A typical benchmark problem for fluid flow solvers in the two-dimensional lid-driven cavity problem. We consider a square cavity $\Omega$ with sides of unit length, i.e. $\Omega = [0,1] \times [0,1]$, kinematic viscosity $\nu = 1/1000$, and density $\rho = 1$. No-slip boundary conditions are imposed on each edge of the square, except at the upper edge where the velocity is set to $\mathbf{u} = (1,0)^T$, as follows
+
+\[
+\begin{cases}
+\mathbf{u = 0}, & \mbox{on } \partial \Omega \backslash \Gamma \\
+\mathbf{u} = (1,0)^T, & \mbox{on } \Gamma
+\end{cases}
+\]
+
+where $ \Gamma = \set{ \mathbf{x} = (x,y)^T \in \partial \Omega | y = 1}$. We use finite elements on triangular grids of the type $\mathcal{P}_2-\mathcal{P}_1$. The initial condition for the velocity is set to zero. The resulting flow is a vortex developing in the upper right corner and then traveling towards the center of the square as the flow evolves. \\
+To verify the correctness of the solver, we consider the minimum of the \textit{stream function}. The stream function $\psi$ allows us to satisfy the continuity equation and then solve the momentum equation directly for the single variable $\psi$. It is defined by
+
+\[
+u = \nabla \times \psi = (\frac{\partial \psi}{\partial y} , - \frac{\partial \psi }{\partial x}),
+\]
+
+and it can be computed by solving the Poisson problem
+
+\[
+- \nabla^2 \psi = \omega,
+\]
+
+where $\omega$ is the vorticity given by
+
+\[
+\omega = \nabla \times u = \frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}.
+\]
+
+
+As a reference value, we use the one reported on the FEniCS book, where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$. In our case, a Crank-Nicolson (second order) discretization was used, with $\theta = 0.5$. A $64 \times 64$ number of elements was used, with $dt = 0.0125$ as time step. Hence, the obtained value was $min(\psi) = -0.061 121$, in fair agreement with the reference one. \\
+
+(MISSING: PUT MY STREAM FUNCTION, OYVIND'S, AND THE ERROR BETWEEN THEM. \\
+NOTE: Oyvind's stream function minimum is not exactly the same as the fenics book, what should I put then as a reference?)
+
+
 \section{ALE test case}
 See Vegard
 \section{ALE + elasticity test case}

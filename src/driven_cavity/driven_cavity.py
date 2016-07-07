@@ -3,6 +3,7 @@
 from dolfin import *
 
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
+N = [2**6]
 #dt = 0.1
 #dt = 0.05
 #dt = 0.025
@@ -84,7 +85,6 @@ for n in N:
     # c = inner(grad(u0)*u0, v) * dx
     d = inner(p_mid, div(v)) * dx
     L = inner(f_mid,v)*dx
-    #F = dudt + a + b + c + d - L
     F = dudt + a + b + c + d - L
     
     a0, L0 = lhs(F), rhs(F)
@@ -172,6 +172,6 @@ for n in N:
     
     
 #if n == 64:
-#    print "N = 64"
-#    psifile = File("psi64.pvd")
-#    psifile << psi
+#   print "N = 64"
+#   psifile = File("psi64_0.0125.pvd")
+#   psifile << psi
