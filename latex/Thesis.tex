@@ -38,7 +38,7 @@
 %\begin{adjustwidth*}{10pt}{-40pt}
 \begin{center}
 \vspace*{-2.7cm}
-\includegraphics{aquila_nome}
+\includegraphics{images/aquila_nome}
 \\
 \rule{\textwidth}{1pt}
 \\[0.5cm]
@@ -219,7 +219,7 @@ The following table shows a second order convergence rate in $H^1$, as confirmed
 \vspace{1cm}
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{convergence_sine}
+\includegraphics[width=\textwidth]{images/convergence_sine}
 \caption{The plot shows a second order convergence, since the blue and green lines are parallel}
 \end{figure}
 \vspace{1cm}
@@ -415,6 +415,8 @@ Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ an
 % Fenics book
 % http://faculty.kfupm.edu.sa/CHE/usamah/CHE204/CHE204-HD22%20-%20Flow%20Through%20Circular%20Pipe.pdf
 
+A typical test problem is finding the solution of the Navier-Stokes equations in a two-dimensional pressure-driven channel. We consider a viscous flow between parallel plates, where the geometry is the unit square $[0,1]^2$, and the kinematic viscosity is $\nu = 1/8$. We assume that both plates are fixed, i.e. no-slip boundary conditions are applied to the velocity at the upper and lower walls, and Neumann boundary conditions $\sigma \cdot \vec{n} = 0$ are applied at the inlet and outlet. Dirichlet boundary conditions are applied to the pressure at the inlet and outlet, with $p = 1$ at the inlet and $p = 0$ at the outlet. The initial condition for the velocity is $\mathbf{u} = (0,0)$. As a reference value in order to verify the agreement of our solution, we use the $x$-component of the velocity at the point $(x, y) = (1, 0.5)$ at final time $T = 0.5 $. The value reported on the FEniCS book [PUT REFERENCE] is $u_x(1, 0.5, T=0.5) \approx 0.44321183655681595$, while the one obtained in our results is $0.443217320106$.
+
 \section{Driven cavity}
 % References:
 % Fenics book, Quarteroni, Fluid dynamics F. White
@@ -448,7 +450,25 @@ where $\omega$ is the vorticity given by
 \]
 
 
-As a reference value, we use the one reported on the FEniCS book, where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$. In our case, a Crank-Nicolson (second order) discretization was used, with $\theta = 0.5$. A $64 \times 64$ number of elements was used, with $dt = 0.0125$ as time step. Hence, the obtained value was $min(\psi) = -0.061 121$, in fair agreement with the reference one. \\
+As a reference value, we use the one reported on the FEniCS book [REFERENCE], where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/oyvind.png}
+\vspace{-1cm}
+\caption{The plot shows the stream function, and its minimum value $-0.06097$ (THIS IS OYVIND'S ).}
+\end{figure}
+
+
+In our case, a Crank-Nicolson (second order) discretization was used, with $\theta = 0.5$. A $64 \times 64$ number of elements was used, with $dt = 0.0125$ as time step. Hence, the obtained value was $min(\psi) = -0.061 121$, in fair agreement with the reference one. \\
+
+\vspace{-.7cm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/mine.png}
+\vspace{-1cm}
+\caption{The plot shows the stream function, and its minimum value $-0.061 121$.}
+\end{figure}
 
 (MISSING: PUT MY STREAM FUNCTION, OYVIND'S, AND THE ERROR BETWEEN THEM. \\
 NOTE: Oyvind's stream function minimum is not exactly the same as the fenics book, what should I put then as a reference?)
