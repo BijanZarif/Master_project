@@ -15,6 +15,9 @@ rho = 1.0
 theta = 0.5
 
 # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
+
+# On the FEniCS book it says u_mid so the system is symmetric [Eleonora]
+# On all the other references I found it says u^{n+1}
 print "***************"
 print "* theta = {} *".format(theta)
 print "***************"
@@ -118,7 +121,7 @@ for n in N:
     #while (t - T) <= DOLFIN_EPS :
     while t <= T + 1E-9:   
         
-        #print "solving for t = {}".format(t)
+        print "solving for t = {}".format(t)
         
         # I need to reassemble the system
         A = assemble(a0)

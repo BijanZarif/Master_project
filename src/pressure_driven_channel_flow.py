@@ -6,7 +6,6 @@
 from dolfin import *
 
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
-#N = [2**2]
 #dt = 0.1
 #dt = 0.05
 #dt = 0.025
@@ -130,7 +129,7 @@ for n in N :
     while t <= T + 1E-9:
         
          
-        print "solving for t = {}".format(t) 
+        #print "solving for t = {}".format(t) 
         
         # I need to reassemble the system
         A = assemble(a0)
@@ -155,7 +154,7 @@ for n in N :
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
     #print "T = {}".format(t)
-    print "u(1, 0.5, 0.5 ) = {}".format(U(Point(1, 0.5))[0])
+    print "u(1, 0.5, t = 0.5) = {}".format(U(Point(1, 0.5))[0])
     print("------")    
     
     #plot(u0)
