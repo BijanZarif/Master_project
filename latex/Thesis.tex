@@ -144,13 +144,6 @@ Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\pa
 
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
 
-As $u_h$ and $p_h$ are two approximate solutions, we want as well compute the errors
-
-\begin{itemize}
-\item $|| u_{exact} - u_h ||_{L^2}$,
-\item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
-\item $|| p_{exact} - p_h ||_{L^2} $.
-\end{itemize}
 
 Since the pressure is defined up to some constant, we add the constraint 
 
@@ -158,110 +151,7 @@ Since the pressure is defined up to some constant, we add the constraint
 \frac{1}{|\Omega |} \int_{\Omega} p = 0,
 \]
 
-so we can compare an exact solution with mean value zero with the approximate solution. In order to do so, we can choose the following exact solutions:
-
-\[
-u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
-p_{exact} = \frac{1}{2}-y.
-\]
-
-Using the previous solution, the error is 0, since the method for solving the problem is exact for polynomials, as shown below
-
-%\begin{center}
-%\begin{tabular}{| c | c |}
-%\hline
-%$|| u_{exact} - u_h ||_{L^2}$ & $4.9911 \times 10^{-14}$ \\
-%\hline
-%$ | u_{exact} - u_h |_{H^1}$ & $4.2006  \times 10^{-12}$ \\
-%\hline
-%$|| \nabla p_{exact} - \nabla p_h ||_{H^1} $ & $1.1943 \times 10^{-11}$ \\
-%\hline
-%\end{tabular}
-%\end{center}
-
-\begin{center}
-\begin{tabular}{| c | c | c | c | c |}
-\hline
-$\mathbf{N}$ & $\mathbf{|| u_{exact} - u_h ||_{L^2}}$ & $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ & $  \mathbf{|| p_{exact} - p_h ||_{H^1}} $ & $  \mathbf{ || p_{exact} - p_h ||_{L^2}}$ \\
-\hline
-$ 4 $ & $2.7373 \times 10^{-14}$ & $3.2162 \times 10^{-13}$ & $4.8674 \times 10^{-13}$ & $ 2.7373 \times 10^{-14}$ \\
-\hline
-$ 8$ & $1.3173  \times 10^{-12}$ & $7.5841 \times 10^{-11}$ & $1.4330 \times 10^{-10}$ & $ 1.3172  \times 10^{-12}$ \\
-\hline
-$ 16 $ & $ 8.4791 \times 10^{-14}$ & $9.1285 \times 10^{-12}$ & $3.5083 \times 10^{-11}$ & $ 8.4791 \times 10^{-14}$ \\
-\hline
-$ 32$ & $9.0508 \times 10^{-14}$ & $1.6039 \times 10^{-11}$ & $1.2406 \times 10^{-10}$ & $ 9.0580 \times 10^{-14}$ \\
-\hline
-$ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ & $1.4692 \times 10^{-9}$ & $ 6.3504 \times 10^{-13}$ \\
-\hline
-\end{tabular}
-\end{center}
-
-
-\newpage
-A difference test case that could be used is:
-
-\[
-u_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
-p_{exact} = \frac{1}{2}-y.
-\]
-
-(Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
-In the following tables, the convergence rate $k$ was computed as well, according to:
-
-\[
-k = \frac{log(\frac{E_{i+1}}{E_i})}{log(\frac{h_{i+1}}{h_i})}
-\]
-
-where we are assuming that $E_i \sim h^k_i$ and $E_{i+1} \sim h^k_{i+1}$. \\
-The following table shows a second order convergence rate in $H^1$, as confirmed by the convergence plot.
-
-\vspace{1cm}
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{images/convergence_sine}
-\caption{The plot shows a second order convergence, since the blue and green lines are parallel}
-\end{figure}
-\vspace{1cm}
-
-\begin{center}
-\begin{tabular}{| c | c | c | c | c |}
-\hline
-$  \mathbf{N}$ & $ \mathbf{|| u_{exact} - u_h ||_{L^2}}$ & $  \mathbf{ | u_{exact} - u_h |_{H^1}}$ & \textbf{Rate in }  $ \mathbf{H^1}$ & \textbf{Rate in } $  \mathbf{L^2}$  \\
-\hline
-$ 4 $ & $1.9388 \times 10^{-3}$ & $5.0548 \times 10^{-2}$  & & \\
-\hline
-$ 8$ & $2.4515  \times 10^{-4}$ & $1.2733 \times 10^{-2}$ &  $1.9890$ &  $2.9834$  \\
-\hline
-$ 16 $ & $ 3.0745 \times 10^{-5}$ & $3.1896 \times 10^{-3}$ & $1.9971$ & $ 2.9952 $  \\
-\hline
-$ 32$ & $3.8465 \times 10^{-6}$ & $7.9780 \times 10^{-4}$ & $ 1.9992 $ & $ 2.9987 $ \\
-\hline
-$ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$ & $1.9998$ & $ 2.9997 $ \\
-\hline
-\end{tabular}
-\end{center}
-
-
-
-\begin{center}
-\begin{tabular}{| c | c | c | c | c |}
-\hline
-$\mathbf{N}$ & $\mathbf{|| p_{exact} - p_h ||_{L^2}}$ & $\mathbf{|| p_{exact} - p_h ||_{H^1}} $ & \textbf{Rate in }  $ \mathbf{H^1}$ & \textbf{Rate in } $  \mathbf{L^2}$  \\
-\hline
-$ 4 $ & $1.4420  \times 10^{-4} $ & $ 1.3578  \times 10^{-3}$ & & \\
-\hline
-$ 8 $ & $ 1.1896  \times 10^{-5} $ & $ 2.2031 \times 10^{-4}$ & & \\
-\hline
-$ 16 $ & $ 1.0089  \times 10^{-6} $  & $ 3.7982 \times 10^{5}$ & & \\
-\hline
-$ 32 $ & $  8.7143 \times 10^{-8} $  & $ 6.6700 \times 10^{-6}$ & & \\
-\hline
-$ 64 $ & $ 8.0070 \times 10^{-9} $  & $ 1.1775 \times 10^{-6}$ & & \\
-\hline
-\end{tabular}
-\end{center}
-
+so we can compare an exact solution with mean value zero with the approximate solution. 
 
 \section{The Navier-Stokes Equations on a fixed domain}
 We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
@@ -409,7 +299,138 @@ Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ an
 
 \chapter{Verification/Validation}
 
-\section{Method of manifactured solutions for the Stokes problem}
+\section{Method of manifactured solutions (MMS)}
+% References: 
+% Haga
+% FEniCS book page 390
+% http://prod.sandia.gov/techlib/access-control.cgi/2000/001444.pdf
+
+A test problem for which we can easily check the answer is performed using the \textit{manufactured solutions}. The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form 
+
+\[
+Du = g,
+\]
+
+where $D$ is the differential operator, $u$ is the solution, and $g$ is a source term. In the method of exact solution (MES), one chooses the function $g$ and then inverts the operator in order to solve for $u$. In MMS, one first manufactures a solution $u$, and then applies $D$ to $u$ to find $g$. \\
+
+Let us apply the manufactured solution technique to solve the Stokes equation [PUT REFERENCE TO THE EQUATION]. 
+
+[PUT A PICTURE OF THE PROBLEM]
+
+We consider a unit square $\Omega = [0,1]$, and kinematic viscosity $\nu = 1/8$. We assume no-slip boundary conditions on the sides of the square, while an inflow and outflow velocity is applied, respectively, on the upper and lower boundaries, as follows
+
+\[
+\begin{cases}
+u(x,y) = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right] , & \mbox{on } \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \\
+
+\vspace{.2cm}
+
+u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \partial \Omega_{sides}
+\end{cases}
+\]
+
+As a first example, we use the following manufactured solution:
+
+\[
+u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
+p_{exact} = \frac{1}{2}-y.
+\]
+
+Let $u_h$ and $p_h$ be two two approximate solutions obtained from the simulation, we now want compute the errors
+
+\begin{itemize}
+\item $|| u_{exact} - u_h ||_{L^2}$,
+\item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
+\item $|| p_{exact} - p_h ||_{L^2} $.
+\end{itemize}
+
+in order to compare our exact solution with the manufactured one.
+Using the previous exact solution, the error is 0, since the method for solving the problem is exact for polynomials, as shown below
+
+
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{N}$ & $\mathbf{|| u_{exact} - u_h ||_{L^2}}$ & $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ & $  \mathbf{ || p_{exact} - p_h ||_{L^2}}$ \\
+\hline
+$ 4 $ & $2.7373 \times 10^{-14}$ & $3.2162 \times 10^{-13}$ &  $ 2.7373 \times 10^{-14}$ \\
+\hline
+$ 8$ & $1.3173  \times 10^{-12}$ & $7.5841 \times 10^{-11}$ &  $ 1.3172  \times 10^{-12}$ \\
+\hline
+$ 16 $ & $ 8.4791 \times 10^{-14}$ & $9.1285 \times 10^{-12}$ & $ 8.4791 \times 10^{-14}$ \\
+\hline
+$ 32$ & $9.0508 \times 10^{-14}$ & $1.6039 \times 10^{-11}$ &  $ 9.0580 \times 10^{-14}$ \\
+\hline
+$ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ &  $ 6.3504 \times 10^{-13}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{1cm}
+
+A difference exact solution that could be used is:
+
+\[
+u_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
+p_{exact} = \frac{1}{2}-y.
+\]
+
+%(Reminder: I put the $\pi$ in order for the exact solution to satisfy the boundary conditions!)
+In the following tables, the convergence rate $k$ was computed, according to:
+
+\[
+k = \frac{log(\frac{E_{i+1}}{E_i})}{log(\frac{h_{i+1}}{h_i})}
+\]
+
+where we are assuming that $E_i \sim h^k_i$ and $E_{i+1} \sim h^k_{i+1}$. \\
+The following table shows a second order convergence rate in $H^1$, as confirmed by the convergence plot.
+
+\vspace{1cm}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/convergence_sine}
+\caption{The plot shows a second order convergence, since the blue and green lines are parallel.}
+\end{figure}
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{| c | c | c | c | c |}
+\hline
+$  \mathbf{N}$ & $ \mathbf{|| u_{exact} - u_h ||_{L^2}}$ & $  \mathbf{ | u_{exact} - u_h |_{H^1}}$ & \textbf{Rate in }  $ \mathbf{L^2}$ & \textbf{Rate in } $  \mathbf{H^1}$  \\
+\hline
+$ 4 $ & $1.9388 \times 10^{-3}$ & $5.0548 \times 10^{-2}$  & & \\
+\hline
+$ 8$ & $2.4515  \times 10^{-4}$ & $1.2733 \times 10^{-2}$ &  $2.9834$ &  $1.9890$   \\
+\hline
+$ 16 $ & $ 3.0745 \times 10^{-5}$ & $3.1896 \times 10^{-3}$ & $ 2.9952 $ & $1.9971$   \\
+\hline
+$ 32$ & $3.8465 \times 10^{-6}$ & $7.9780 \times 10^{-4}$ & $ 2.9987 $ & $ 1.9992 $  \\
+\hline
+$ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$  & $ 2.9997 $ & $1.9998$ \\
+\hline
+\end{tabular}
+\end{center}
+
+
+
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+$\mathbf{N}$ & $\mathbf{|| p_{exact} - p_h ||_{L^2}}$ & \textbf{Rate in } $  \mathbf{L^2}$  \\
+\hline
+$ 4 $ & $1.4420  \times 10^{-4} $ &  \\
+\hline
+$ 8 $ & $ 1.1896  \times 10^{-5} $ &  \\
+\hline
+$ 16 $ & $ 1.0089  \times 10^{-6} $   & \\
+\hline
+$ 32 $ & $  8.7143 \times 10^{-8} $  & \\
+\hline
+$ 64 $ & $ 8.0070 \times 10^{-9} $ & \\
+\hline
+\end{tabular}
+\end{center}
+
 
 
 
@@ -479,7 +500,7 @@ As a reference value, we use the one reported on the FEniCS book [REFERENCE], wh
 
 In our case, a Crank-Nicolson (second order) discretization was used, with $\theta = 0.5$. A $64 \times 64$ number of elements was used, with $dt = 0.0125$ as time step. Hence, the obtained value was $min(\psi) = -0.061 121$, in fair agreement with the reference one. \\
 
-\vspace{-.7cm}
+\vspace{-.3cm}
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/mine.png}
