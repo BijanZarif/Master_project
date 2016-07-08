@@ -52,7 +52,7 @@
 %\\[0.4cm]
 %{\Large March 25th, 2015}
 %\\[3cm]
-\\[3cm]
+\\[4.5cm]
 \begin{minipage}{0.5\textwidth}
 \flushleft {
 \large Advisors: \\
@@ -409,13 +409,30 @@ Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ an
 
 \chapter{Verification/Validation}
 
-\section{Manifactured solution for Stokes problem}
+\section{Method of manifactured solutions for the Stokes problem}
+
+
+
 \section{Pressure-driven channel flow (2D)}
 % References:
 % Fenics book
 % http://faculty.kfupm.edu.sa/CHE/usamah/CHE204/CHE204-HD22%20-%20Flow%20Through%20Circular%20Pipe.pdf
 
+% Should I add some theory on this?
+
 A typical test problem is finding the solution of the Navier-Stokes equations in a two-dimensional pressure-driven channel. We consider a viscous flow between parallel plates, where the geometry is the unit square $[0,1]^2$, and the kinematic viscosity is $\nu = 1/8$. We assume that both plates are fixed, i.e. no-slip boundary conditions are applied to the velocity at the upper and lower walls, and Neumann boundary conditions $\sigma \cdot \vec{n} = 0$ are applied at the inlet and outlet. Dirichlet boundary conditions are applied to the pressure at the inlet and outlet, with $p = 1$ at the inlet and $p = 0$ at the outlet. The initial condition for the velocity is $\mathbf{u} = (0,0)$. As a reference value in order to verify the agreement of our solution, we use the $x$-component of the velocity at the point $(x, y) = (1, 0.5)$ at final time $T = 0.5 $. The value reported on the FEniCS book [PUT REFERENCE] is $u_x(1, 0.5, T=0.5) \approx 0.44321183655681595$, while the one obtained in our results is $0.443217320106$.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{images/velocity_solution.png}
+\caption{The plot shows the solution $u(x,y)$ for $\nu = 1/8$.}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\textwidth]{images/velocity_profile.pdf}
+\caption{Velocity profile at the points $(0.5, 1)$ and $(0.5, 0)$.}
+\end{figure}
 
 \section{Driven cavity}
 % References:
