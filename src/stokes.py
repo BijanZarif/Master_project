@@ -152,16 +152,16 @@ for n in N:
     L2_error_u = assemble((u_exact-uh)**2 * dx)**.5
     H1_error_u = assemble(grad(uh-u_exact)**2 * dx)**.5
     L2_error_p = assemble((p_exact - ph)**2 * dx)**.5
-    H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5
+    #H1_error_p = assemble((grad(ph) - g)**2 * dx)**.5
    
     errsL2.append(L2_error_u)
     errsH1.append(H1_error_u)
     errsL2pressure.append(L2_error_p)
-    errsH1pressure.append(H1_error_p)
+    #errsH1pressure.append(H1_error_p)
     
-    #print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
-    #print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
-    #print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
+    print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
+    print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
+    print "||p - ph; L^2|| = {0:1.4e}".format(L2_error_p)
     #print "||p - ph; H^1|| = {0:1.4e}".format(H1_error_p)
     
     

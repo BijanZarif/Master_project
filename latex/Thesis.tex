@@ -22,6 +22,8 @@
 \usepackage[T1]{fontenc}     %pacchetto lettere accentate
 \usepackage[utf8]{inputenc}   %pacchetto lettere accentate
 
+\newtheorem*{remark}{Remark}
+
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
 
@@ -154,31 +156,136 @@ Since the pressure is defined up to some constant, we add the constraint
 so we can compare an exact solution with mean value zero with the approximate solution. 
 
 \section{The Navier-Stokes Equations on a fixed domain}
-We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
+% References:
+% - Quarteroni
+% - Vegard
+% - Drosdal
+
+The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. They describe the motion of a fluid with constant density $\rho$ in a domain $\Omega \subset \mathbb{R}^d$ (where $d=2,3$). They read
+
 
 \[
-\begin{cases}
-\rho \dot{u} + \rho (\nabla u \cdot u) - \nabla \cdot (\nu \nabla u - pI) = f, & \mbox{in } \Omega \\
-\nabla \cdot u = 0, & \mbox{in } \Omega
-\end{cases}
+\left\{  
+\begin{aligned}
+&\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (u \cdot \nabla)u - \nabla \cdot \sigma(\mathbf{u},p) = \mathbf{f},  & x \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+\end{aligned}
+\right.
 \]
 
-As initial conditions (IC), we set $u(t=0) = u_0 = 0$. \\
-As boundary conditions (BC), we use
+We are going to solve the problem for the velocity field $\mathbf{u}(x,y,t)$, and the pressure field $p(x,y,t)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
 
 \[
-\begin{cases}
-u(x,y,t) = u_{inflow}(x,y,t) , & \mbox{on } \partial \Omega_{top} \\
-u(x,y,t) = u_{outflow}(x,y,t) , & \mbox{on } \partial \Omega_{bottom} \\
-\sigma \cdot \vec{n} = 0,  & \mbox{on } \partial \Omega_{sides}
-\end{cases}
+\sigma(\mathbf{u}, p) = 2 \mu \epsilon(\mathbf{u}) - p \mathbb{I},
 \]
 
-where $\sigma = \nu \nabla u - pI$, and for this example
+where $\epsilon(\mathbf{u})$ is the symmetric strain rate tensor
 
-\begin{equation}
-u_{inflow} = u_{outflow} =  \left[ \begin{array}{c} 0 \\ x(x-1)sin(\pi \omega x) \end{array} \right].
-\end{equation}
+\[
+\epsilon(\mathbf{u}) = \frac{1}{2} (\nabla \mathbf{u} + (\nabla \mathbf{u})^T).
+\]
+
+The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a forcing term per unit of mass. Setting $\nu = \frac{\mu}{\rho}$ the kinematic viscosity, and dividing the first equation by $\rho$, the system can be rewritten as
+
+\[
+\left\{  
+\begin{aligned}
+&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+\end{aligned}
+\right.
+\]
+
+The term $(\mathbf{u} \cdot \nabla)\mathbf{u}$ describes the process of convective transport, while $- \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] $ describes the process of molecular diffusion.\\
+Since $\nu$ is constant, from the continuity equation we obtain
+
+\[
+\nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] = \nu [\Delta \mathbf{u} + \nabla(\nabla \cdot \mathbf{u})] = \nu \Delta \mathbf{u},
+\]
+
+hence the system can be written in the equivalent form
+
+\[
+\left\{  
+\begin{aligned}
+&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+\end{aligned}
+\right.
+\]
+
+In order for the problem to be well posed, it is necessary to assign an initial condition 
+
+\[
+\mathbf{u} (\mathbf{x}, 0) = \mathbf{u}_0(\mathbf{x}) \quad \forall \mathbf{x} \in \Omega,
+\]
+
+where $\mathbf{u}_0$ is a given divergence-free vector field, together with suitable boundary conditions, such as
+
+\[
+\left\{  
+\begin{aligned}
+& \mathbf{u}(\mathbf{x},t) = \phi (\mathbf{x}, t) & \forall \mathbf{x} \in \Gamma_D \\
+& \left( \nu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n} \right) (\mathbf{x},t) = \psi(\mathbf{x},t) & \forall \mathbf{x} \in \Gamma_N
+\end{aligned}
+\right.
+\]
+
+where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma_N$ give a partition of the domain boundary $\partial \Omega$, that is $\Gamma_D 	\cup \Gamma_N = \partial \Omega, \mathring{\Gamma}_D \cap \mathring{\Gamma}_N = \emptyset$. Moreover, $\mathbf{n}$ is the outward unit normal vector to $\partial \Omega$. The second equation in [PUT REFERENCE TO THE PREVIOUS SYSTEM] can also be written in another form
+
+\[
+[ \nu (\nabla \mathbf{u} + \nabla \mathbf{u}^T)  - p\mathbf{n} ] = \psi(\mathbf{x}, t)  \quad \forall \mathbf{x} \in \Gamma_N.
+\]
+
+\begin{remark}
+\normalfont{In our notation, if $\mathbf{u} = (u_x, u_y)^T$ and $\mathbf{x} = (x, y)$, then $\nabla \mathbf{u}$ is defined as
+
+\[
+\nabla \mathbf{u} = 
+\begin{pmatrix}
+\frac{\partial u_x}{\partial x} & \frac{\partial u_x}{\partial y} \\
+\frac{\partial u_y}{\partial x} & \frac{\partial u_y}{\partial y}
+\end{pmatrix}
+\]
+
+
+}
+\end{remark}
+
+%--------------
+% This is from the channel_flow.py , I don't need this
+
+%We now want to solve N-S equations. The problem reads: find the velocity $u(x,y,t)$ and the pressure $p(x,y,t)$ such that
+%
+%\[
+%\begin{cases}
+%\rho \dot{u} + \rho (\nabla u \cdot u) - \nabla \cdot (\nu \nabla u - pI) = f, & \mbox{in } \Omega \\
+%\nabla \cdot u = 0, & \mbox{in } \Omega
+%\end{cases}
+%\]
+%
+%As initial conditions (IC), we set $u(t=0) = u_0 = 0$. \\
+%As boundary conditions (BC), we use
+%
+%\[
+%\begin{cases}
+%u(x,y,t) = u_{inflow}(x,y,t) , & \mbox{on } \partial \Omega_{top} \\
+%u(x,y,t) = u_{outflow}(x,y,t) , & \mbox{on } \partial \Omega_{bottom} \\
+%\sigma \cdot \vec{n} = 0,  & \mbox{on } \partial \Omega_{sides}
+%\end{cases}
+%\]
+%
+%where $\sigma = \nu \nabla u - pI$, and for this example
+%
+%\begin{equation}
+%u_{inflow} = u_{outflow} =  \left[ \begin{array}{c} 0 \\ x(x-1)sin(\pi \omega x) \end{array} \right].
+%\end{equation}
+
+%--------
+
+\subsection{Derivation of the Navier-Stokes equations}
+
+\subsection{Weak formulation of Navier-Stokes equations}
 
 In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
 
@@ -207,6 +314,9 @@ The variational form becomes
 &\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} (\nu \nabla u - pI \cdot \nabla v \, dx = \int_{\Omega} fv \, dx \\
 &\int_{\Omega} (\nabla \cdot u) q \, dx = 0.
 \end{align}
+% -----------
+
+
 
 \subsection{Time discretization}
 We now want to use a Crank-Nicolson discretization (second order in time) of the N-S equations: let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t$ the time step. \\
@@ -418,15 +528,15 @@ $ 64$ & $4.8092 \times 10^{-7}$ & $1.9948 \times 10^{-4}$  & $ 2.9997 $ & $1.999
 \hline
 $\mathbf{N}$ & $\mathbf{|| p_{exact} - p_h ||_{L^2}}$ & \textbf{Rate in } $  \mathbf{L^2}$  \\
 \hline
-$ 4 $ & $1.4420  \times 10^{-4} $ &  \\
+$ 4 $ & $1.4420  \times 10^{-4} $ & \\
 \hline
-$ 8 $ & $ 1.1896  \times 10^{-5} $ &  \\
+$ 8 $ & $ 1.1896  \times 10^{-5} $ & $3.5995$ \\
 \hline
-$ 16 $ & $ 1.0089  \times 10^{-6} $   & \\
+$ 16 $ & $ 1.0089  \times 10^{-6} $ & $3.5596$ \\
 \hline
-$ 32 $ & $  8.7143 \times 10^{-8} $  & \\
+$ 32 $ & $  8.7143 \times 10^{-8} $ & $3.5332$ \\
 \hline
-$ 64 $ & $ 8.0070 \times 10^{-9} $ & \\
+$ 64 $ & $ 8.0070 \times 10^{-9} $ & $3.4440$ \\
 \hline
 \end{tabular}
 \end{center}
