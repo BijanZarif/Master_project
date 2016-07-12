@@ -123,37 +123,7 @@ u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \parti
 \end{cases}
 \]
 
-In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{u \in H^1(\Omega) | u_{|_{\partial \Omega}} = 0} $. Our aim is to find $(u(x,y),p(x,y)) \in V \times Q$ such that
 
-\begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega fv \,dx, \\
-\int_\Omega (\nabla \cdot u)q \,dx &= 0
-\end{align}
-
-Differentiating by part the right hand side of the first equation we obtain:
-
-\begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx, \\
-&- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n v \,ds.
-\end{align}
-
-Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
-
-\begin{align}
-\int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
-\int_\Omega (\nabla \cdot u) q \,dx &= 0.
-\end{align}
-
-Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
-
-
-Since the pressure is defined up to some constant, we add the constraint 
-
-\[
-\frac{1}{|\Omega |} \int_{\Omega} p = 0,
-\]
-
-so we can compare an exact solution with mean value zero with the approximate solution. 
 
 \section{The Navier-Stokes Equations on a fixed domain}
 % References:
@@ -238,7 +208,7 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 \]
 
 \begin{remark}
-\normalfont{In our notation, if $\mathbf{u} = (u_x, u_y)^T$ and $\mathbf{x} = (x, y)$, then $\nabla \mathbf{u}$ is defined as
+\normalfont{In our notation, if $\mathbf{u} = (u_x, u_y)^T$ and $\mathbf{x} = (x, y)^T$, then $\nabla \mathbf{u}$ is defined as
 
 \[
 \nabla \mathbf{u} = 
@@ -285,6 +255,49 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 \subsection{Derivation of the Navier-Stokes equations}
 
+
+\section{Navier-Stokes on a moving domain}
+
+\section{Navier-Stokes on a moving domain where the movement depends on $(u,p)$}
+
+\chapter{Numerical methods}
+
+\section{Finite element formulation}
+
+\subsection{Weak formulation of Stokes equations}
+
+In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{u \in H^1(\Omega) | u_{|_{\partial \Omega}} = 0} $. Our aim is to find $(u(x,y),p(x,y)) \in V \times Q$ such that
+
+\begin{align}
+\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega (\nabla \cdot u)q \,dx &= 0
+\end{align}
+
+Differentiating by part the right hand side of the first equation we obtain:
+
+\begin{align}
+\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx, \\
+&- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n v \,ds.
+\end{align}
+
+Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
+
+\begin{align}
+\int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
+\int_\Omega (\nabla \cdot u) q \,dx &= 0.
+\end{align}
+
+Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
+
+
+Since the pressure is defined up to some constant, we add the constraint 
+
+\[
+\frac{1}{|\Omega |} \int_{\Omega} p = 0,
+\]
+
+so we can compare an exact solution with mean value zero with the approximate solution. 
+
 \subsection{Weak formulation of Navier-Stokes equations}
 
 In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
@@ -317,6 +330,11 @@ The variational form becomes
 % -----------
 
 
+
+
+
+\section{FEniCS}
+\section{Numerical schemes}
 
 \subsection{Time discretization}
 We now want to use a Crank-Nicolson discretization (second order in time) of the N-S equations: let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t$ the time step. \\
@@ -397,15 +415,7 @@ and then
 
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
 
-\section{Navier-Stokes on a moving domain}
 
-\section{Navier-Stokes on a moving domain where the movement depends on $(u,p)$}
-
-\chapter{Numerical methods}
-
-\section{Finite element formulation}
-\section{FEniCS}
-\section{Numerical schemes}
 
 \chapter{Verification/Validation}
 
