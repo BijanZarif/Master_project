@@ -6,11 +6,12 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**6]
-#dt = 0.1
+N = [2**3]
+
+dt = 0.1
 #dt = 0.05
 #dt = 0.025
-dt = 0.0125
+#dt = 0.0125
 
 for n in N :
     
@@ -21,23 +22,27 @@ for n in N :
     x = SpatialCoordinate(mesh)
     
     # Taylor-Hood elements
-    V = VectorFunctionSpace(mesh, "Lagrange", 2)
-    Q = FunctionSpace(mesh, "Lagrange", 1)
-    # TH = V * Q
-    W = V * Q
-    # W = FunctionSpace(mesh, TH)
+    V = VectorFunctionSpace(mesh, "Lagrange", 2)  # space for u, v
+    P = FunctionSpace(mesh, "Lagrange", 1)        # space for p, q
+    W = VectorFunctionSpace(mesh, "Lagrange", 1)       # space for w
+    VP = V * P                  
     
-    u, p = TrialFunctions(W)   # u is a trial function of V somehow, while p a trial function of Q
-    v, q = TestFunctions(W)
+    # TH = V * P
+    # VP = FunctionSpace(mesh, TH)
     
-    up0 = Function(W)
+    u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
+    w = TrialFunction(W)
+    
+    v, q = TestFunctions(VP)
+    z = TestFunction(W)
+    
+    # The functions are initialized to zero
+    up0 = Function(VP)
     u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
-    
-    # u0 = Function(V)   # it starts to zero
-    # p0 = Function(Q)   # it starts to zero
+    w0 = Function(W)
     
     
-    T = 0.5
+    T = 2.5
     nu = 1.0/8.0
     rho = 1.0
     theta = 0.5 
@@ -52,16 +57,18 @@ for n in N :
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
     
-    # inflow = DirichletBC(W.sub(1), p_in, "(x[0] < DOLFIN_EPS)&& on_boundary" )
-    # outflow = DirichletBC(W.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
-    # walls = DirichletBC(W.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
+    # inflow = DirichletBC(VP.sub(1), p_in, "(x[0] < DOLFIN_EPS)&& on_boundary" )
+    # outflow = DirichletBC(VP.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
+    # walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
     
-    inflow = DirichletBC(W.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
-    outflow = DirichletBC(W.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
-    walls = DirichletBC(W.sub(0), (0.0, 0.0) , "( near(x[1], 0.0) || near(x[1], 1.0) ) && on_boundary")
+    inflow = DirichletBC(VP.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
+    outflow = DirichletBC(VP.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
+    walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "( near(x[1], 0.0) || near(x[1], 1.0) ) && on_boundary")
+    
+    poisson = DirichletBC(W, u0, "on_boundary")
     
     # #this is to verify that I am actually applying some BC
-    # U = Function(W)
+    # U = Function(VP)
     # # this applies BC to a vector, where U is a function
     # inflow.apply(U.vector())
     # outflow.apply(U.vector())
@@ -77,24 +84,29 @@ for n in N :
     
     bcu = [inflow, outflow, walls]
     
-    # F0 = rho*u*v*dx - rho*u0*v*dx + \
-    #      dt*rho*dot(grad(u_mid), u0)*v*dx + dt*v*dot(grad(u_mid), grad(v)) - dt*p_mid*div(v)*dx - dt*f_mid*v*dx
     
-    # dot JUST FOR 1-1 RANK
-    # inner FOR GREATER RANKS
+    #-------- NAVIER-STOKES --------
     
-    # Ovind suggested: divide your form in different passages so if you have an error you are going to see exactly
-    # what part of the form gives the error
-    
+    # Weak formulation
     dudt = Constant(dt**-1) * inner(u-u0, v) * dx
     a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
-    b = q * div(u) * dx
-    c = inner(grad(u_mid)*u0, v) * dx
+    c = inner(grad(u_mid)* (u0 - w0), v) * dx    # term with the mesh velocity w
     d = inner(grad(p), v) * dx
-    L = inner(f_mid,v)*dx
+    L = inner(f_mid,v)*dx # linear form
+    b = q * div(u) * dx   # from the continuity equation
+    
     F = dudt + a + b + c + d - L
     
-    a0, L0 = lhs(F), rhs(F)
+    # Bilinear and linear forms
+    a0, L0 = lhs(F), rhs(F)    
+    
+    # -------- POISSON PROBLEM FOR w:  div( grad(w) ) = 0 --------
+    
+    a1 = inner(grad(w), grad(z))*dx
+    L1 = dot(Constant((0.0,0.0)),z)*dx  
+    #L1 = Expression("0.0")   
+    # ----------------------
+    
     
     #F0 = rho*dot(u,v)*dx
     #F0 -= rho*dot(u0,v)*dx
@@ -121,17 +133,25 @@ for n in N :
     
     t = dt
     
-    U = Function(W)   # I want to store my solution here
+    VP_ = Function(VP)   # I want to store my solution here
+    W_ = Function(W)
+    
+    X = Function(W)
+    X.vector()[:] = 0.0
+    
     solver = PETScLUSolver()
     
     
-    print "N = {}".format(n)
+    #print "N = {}".format(n)
     #while (t - T) <= DOLFIN_EPS:
     while t <= T + 1E-9:
         
          
-        print "solving for t = {}".format(t) 
+        print "Solving for t = {}".format(t) 
         
+        # ------- Solving the Navier-Stokes equations -------
+        
+        print "Solving the Navier-Stokes equations"
         # I need to reassemble the system
         A = assemble(a0)
         b = assemble(L0)
@@ -140,29 +160,60 @@ for n in N :
         for bc in bcu:
             bc.apply(A, b)
         
-        # Ax=b, where U is the x vector    
-        solver.solve(A, U.vector(), b)
+        # Ax = b, where U is the x vector    
+        solver.solve(A, VP_.vector(), b)
         
-        # Move to next time step (in case I had separate equations)
-        # u0.assign(u)
-        # p0.assign(p)
         
+
+        # ------- Solving the Poisson problem -------
+        
+       # print "Solving the Poisson problem"
+        A1 = assemble(a1)
+        b1 = assemble(L1)
+        
+        poisson = DirichletBC(W, u0, "on_boundary")  # I need to do this so I can update the boundary conditions at every step
+        
+        for bc in [poisson]:
+           bc.apply(A1, b1)
+        
+        
+        solve(A1, W_.vector(), b1)
+        
+        
+        # ------ Compute the mesh displacement -------
+        
+        #print "The displacement is: {}".format(X)
+        X.vector()[:] += w0.vector()[:]*dt
+        
+        
+        # ------- Move the mesh ------
+        
+        
+        ALE.move(mesh, X)
+        mesh.bounding_box_tree().build(mesh)
+        
+        # -------- Update of solutions so the cycle can start again --------
         # I need to assign up0 because u0 and p0 are not "proper" functions
-        up0.assign(U)   # the first part of U is u0, and the second part is p0
+        up0.assign(VP_)   # the first part of U is u0, and the second part is p0
+        w0.assign(W_)
         
         t += dt
         
+        
+    u0, p0 = VP_.split() 
+    plot(u0) 
+    #plot(w0)    
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
     #print "T = {}".format(t)
     #print "u(1, 0.5, t = 0.5) = {}".format(U(Point(1, 0.5))[0])
     print("------")    
     
-    plot(u0)
+    #plot(u0)
     #plot(p0)
     interactive()
     
-    u0, p0 = U.split()
+    #u0, p0 = VP_.split()
     #ufile = File("velocity_64_0.0125.pvd")
     #ufile << u0
     
