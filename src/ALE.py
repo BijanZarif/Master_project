@@ -8,7 +8,7 @@ from dolfin import *
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [2**3]
 
-dt = 0.1
+dt = 0.01
 #dt = 0.05
 #dt = 0.025
 #dt = 0.0125
@@ -42,7 +42,7 @@ for n in N :
     w0 = Function(W)
     
     
-    T = 2.5
+    T = 1.0
     nu = 1.0/8.0
     rho = 1.0
     theta = 0.5 
@@ -57,6 +57,8 @@ for n in N :
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
     
+    # ------------- Boundary conditions for Navier-Stokes
+    
     # inflow = DirichletBC(VP.sub(1), p_in, "(x[0] < DOLFIN_EPS)&& on_boundary" )
     # outflow = DirichletBC(VP.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
     # walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
@@ -65,24 +67,44 @@ for n in N :
     outflow = DirichletBC(VP.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
     walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "( near(x[1], 0.0) || near(x[1], 1.0) ) && on_boundary")
     
-    poisson = DirichletBC(W, u0, "on_boundary")
+    # -------------- Boundary conditions for Poisson 
+    # Putting as boundary condition this one, I am applying Dirichlet boundary conditions up and down, but not on the walls,
+    # but like this I have movement of the mesh just on the walls, and not up and down ===> BIG MESS: the mesh deformates 
+    #poisson = DirichletBC(W, u0, "on_boundary")
+    
+    
+#    w_up = Expression(("0", "0.02*sin(4*pi*t)"), t = 0.5)
+    w_up = Expression(("0", "0.01-0.02*t"), t = 0.5)
+    up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")   
+    contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0) || near(x[1], 0.0 )) \
+                          || (near(x[0], 0.0) && near(x[1], 0.0)) \
+                          || (near(x[0], 1.0) && near(x[1], 1.0) ) \
+                          && on_boundary")
     
     # #this is to verify that I am actually applying some BC
     # U = Function(VP)
     # # this applies BC to a vector, where U is a function
     # inflow.apply(U.vector())
     # outflow.apply(U.vector())
-    # walls.apply(U.vector())
-    # 
+    # walls.apply(U.vector()) 
     # uh, ph = U.split()
     # plot(uh)
     # plot(ph)
     # interactive()
     # exit()
     
+    # w = Function(W)
+    # up.apply(w.vector())
+    # contour.apply(w.vector())   
+    # plot(w)
+    # interactive()
+    # exit()
+    
+    
     # Neumann condition: sigma.n = 0        on the sides (I put in the variational form and the term on the sides is zero)
     
     bcu = [inflow, outflow, walls]
+    bcw = [up, contour]
     
     
     #-------- NAVIER-STOKES --------
@@ -146,7 +168,8 @@ for n in N :
     #while (t - T) <= DOLFIN_EPS:
     while t <= T + 1E-9:
         
-         
+        w_up.t = t
+        print float(sin(t))
         print "Solving for t = {}".format(t) 
         
         # ------- Solving the Navier-Stokes equations -------
@@ -171,9 +194,11 @@ for n in N :
         A1 = assemble(a1)
         b1 = assemble(L1)
         
-        poisson = DirichletBC(W, u0, "on_boundary")  # I need to do this so I can update the boundary conditions at every step
+        #poisson = DirichletBC(W, u0, "on_boundary")  # I need to do this so I can update the boundary conditions at every step
         
-        for bc in [poisson]:
+        #bcw = [up, contour]
+        
+        for bc in bcw:
            bc.apply(A1, b1)
         
         
@@ -184,7 +209,9 @@ for n in N :
         
         #print "The displacement is: {}".format(X)
         X.vector()[:] += w0.vector()[:]*dt
-        
+        #plot(X, title="displacement")
+        plot(w0, title="velocity")
+        interactive()
         
         # ------- Move the mesh ------
         
@@ -198,8 +225,10 @@ for n in N :
         w0.assign(W_)
         
         t += dt
+        plot(mesh, interactive= True)
         
         
+    exit()    
     u0, p0 = VP_.split() 
     plot(u0) 
     #plot(w0)    
