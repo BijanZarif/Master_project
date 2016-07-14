@@ -42,7 +42,7 @@ for n in N :
     w0 = Function(W)
     
     
-    T = 1.0
+    T = 1.5
     nu = 1.0/8.0
     rho = 1.0
     theta = 0.5 
@@ -63,9 +63,12 @@ for n in N :
     # outflow = DirichletBC(VP.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
     # walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
     
+    w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)
+    
     inflow = DirichletBC(VP.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
     outflow = DirichletBC(VP.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
-    walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "( near(x[1], 0.0) || near(x[1], 1.0) ) && on_boundary")
+    upper_wall =  DirichletBC(VP.sub(0), w_up, "near(x[1], 1.0) && on_boundary")
+    lower_wall = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[1], 0.0) && on_boundary")
     
     # -------------- Boundary conditions for Poisson 
     # Putting as boundary condition this one, I am applying Dirichlet boundary conditions up and down, but not on the walls,
@@ -73,8 +76,8 @@ for n in N :
     #poisson = DirichletBC(W, u0, "on_boundary")
     
     
-#    w_up = Expression(("0", "0.02*sin(4*pi*t)"), t = 0.5)
-    w_up = Expression(("0", "0.01-0.02*t"), t = 0.5)
+  
+    #w_up = Expression(("0", "0.01-0.02*t"), t = 0.5)
     up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")   
     contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0) || near(x[1], 0.0 )) \
                           || (near(x[0], 0.0) && near(x[1], 0.0)) \
@@ -103,7 +106,7 @@ for n in N :
     
     # Neumann condition: sigma.n = 0        on the sides (I put in the variational form and the term on the sides is zero)
     
-    bcu = [inflow, outflow, walls]
+    bcu = [inflow, outflow, upper_wall, lower_wall]
     bcw = [up, contour]
     
     
@@ -158,8 +161,12 @@ for n in N :
     VP_ = Function(VP)   # I want to store my solution here
     W_ = Function(W)
     
-    X = Function(W)
-    X.vector()[:] = 0.0
+    # Y is the adding displacement (what we add in order to move the mesh)
+    Y = Function(W)  # by default this is 0 in all the components
+    
+    X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+
+    
     
     solver = PETScLUSolver()
     
@@ -169,7 +176,7 @@ for n in N :
     while t <= T + 1E-9:
         
         w_up.t = t
-        print float(sin(t))
+        #print float(sin(t))
         print "Solving for t = {}".format(t) 
         
         # ------- Solving the Navier-Stokes equations -------
@@ -208,15 +215,18 @@ for n in N :
         # ------ Compute the mesh displacement -------
         
         #print "The displacement is: {}".format(X)
-        X.vector()[:] += w0.vector()[:]*dt
-        #plot(X, title="displacement")
-        plot(w0, title="velocity")
-        interactive()
+        Y.vector()[:] = w0.vector()[:]*dt
+        X.vector()[:] += Y.vector()[:]
+        
+        #plot(Y, title="added displacement")
+        #plot(X, title = "total displacement" )
+        #plot(w0, title="mesh velocity")
+        #interactive()
         
         # ------- Move the mesh ------
         
         
-        ALE.move(mesh, X)
+        ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
         
         # -------- Update of solutions so the cycle can start again --------
@@ -224,8 +234,12 @@ for n in N :
         up0.assign(VP_)   # the first part of U is u0, and the second part is p0
         w0.assign(W_)
         
+        u0, p0 = VP_.split()
+        #plot(u0, interactive = True)
+        
+        
         t += dt
-        plot(mesh, interactive= True)
+        plot(mesh, interactive = True)
         
         
     exit()    
