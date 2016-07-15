@@ -116,7 +116,8 @@ for n in N :
     dudt = Constant(dt**-1) * inner(u-u0, v) * dx
     a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
     c = inner(grad(u_mid)* (u0 - w0), v) * dx    # term with the mesh velocity w
-    d = inner(grad(p), v) * dx
+    d = inner(grad(p), v) * dx  # this is fine because I set sigma.n = 0 in this case, be careful when I apply
+                                # some other Neumann BC
     L = inner(f_mid,v)*dx # linear form
     b = q * div(u) * dx   # from the continuity equation
     
@@ -197,7 +198,7 @@ for n in N :
 
         # ------- Solving the Poisson problem -------
         
-       # print "Solving the Poisson problem"
+        print "Solving the Poisson problem"
         A1 = assemble(a1)
         b1 = assemble(L1)
         
@@ -214,7 +215,7 @@ for n in N :
         
         # ------ Compute the mesh displacement -------
         
-        #print "The displacement is: {}".format(X)
+        
         Y.vector()[:] = w0.vector()[:]*dt
         X.vector()[:] += Y.vector()[:]
         

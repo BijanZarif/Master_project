@@ -30,6 +30,8 @@
 \setlength\parindent{0pt}  % toglie identazione ovunque
 \usepackage[sc]{mathpazo}
 
+
+
 % -----------------
 
 \begin{document}
@@ -258,6 +260,33 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 \section{Navier-Stokes on a moving domain}
 
+
+\subsection{The ALE formulation}
+Let us start with the system [PUT REFERENCE OF N-S EQUATIONS]. Our aim is now to allow a piece of the boundary to move. We are going to define the \textit{mesh velocity} $w$ as $w = \dot{x}$, so the Navier-Stokes equations become
+
+
+where $x$ is the \textit{mesh displacement}. Moreover, the mesh velocity will have to satisfy 
+
+\[
+\left\{  
+\begin{aligned}
+& \Delta w = 0 	& \text{in } \, \Omega_t \\
+& w = u 				& \text{on } \partial \Omega_t
+\end{aligned}
+\right.
+\]
+
+Hence, the ALE formulation of the Navier-Stokes problem reads
+
+\[
+\left\{  
+\begin{aligned}
+&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0
+\end{aligned}
+\right.
+\]
+
 \section{Navier-Stokes on a moving domain where the movement depends on $(u,p)$}
 
 \chapter{Numerical methods}
@@ -300,6 +329,7 @@ so we can compare an exact solution with mean value zero with the approximate so
 
 \subsection{Weak formulation of Navier-Stokes equations}
 
+
 In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
 
 \[
@@ -324,9 +354,74 @@ The boundary term can actually be divided in three different terms (one for each
 The variational form becomes
 
 \begin{align}
-&\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} (\nu \nabla u - pI \cdot \nabla v \, dx = \int_{\Omega} fv \, dx \\
-&\int_{\Omega} (\nabla \cdot u) q \, dx = 0.
+& \int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} (\nu \nabla u - pI \cdot \nabla v \, dx = \int_{\Omega} fv \, dx \\
+& \int_{\Omega} (\nabla \cdot u) q \, dx = 0.
 \end{align}
+
+
+\subsection{Weak formulation of Navier-Stokes and ALE}
+
+% variational form for N-S
+% variational form for Poisson problem for w
+
+From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $v$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We hence obtain:
+
+
+\[
+\begin{aligned}
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, v \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, v \, dx
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
+& \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0 , & x \in \Omega_t, \, t>0
+\end{aligned}
+\]
+
+
+As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \frac{1}{\rho}  pI)\mathbf{v} \, dx$ can be integrated by parts:
+
+\[
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds.
+\]
+
+The boundary $\partial \Omega$ can be divided in two boundaries $ \partial \Omega = \partial \Omega_D \cup \partial \Omega_N $, where $\partial \Omega_D$ and $\partial \Omega_N$ are respectively the Dirichlet boundary and the Neumann boundary. 
+Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero: since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, dx = 0$. The variational formulation reads:
+
+\[
+\begin{aligned}
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
+& \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , & x \in \Omega_t, \, t>0
+\end{aligned}
+\]
+
+We now want to write the variational formulation form for Poisson: let $z$ be a test function in [SPECIFY THE SPACE]. Integrating by parts equation [PUT REFERENCE], we obtain
+
+\[
+\int_{\Omega} \nabla^2 w \, z \, dx = - \int_{\Omega} \nabla w \cdot \nabla z + \int_{\partial \Omega} \frac{\partial w}{\partial n} z \, ds.
+\]
+
+Since we are assuming Dirichlet boundary condition on the entire boundary, I choose $z = 0$ everywhere, hence the term $\int_{\partial \Omega} \frac{\partial w}{\partial n} \, z \, dx  = 0 $ (we should notice as well that $w = u$ on the boundary, so the boundary it is divided in a part where $w = 0$, and another part where $w = $ some value of the velocity given in the Navier-Stokes boundary conditions). 
+
+Finally,
+
+\[
+\int_{\Omega} \nabla^2 w \, z \, dx = - \int_{\Omega} \nabla w \cdot \nabla z \, dx = 0.
+\]
+
+The problem reads: find $w \in$ [SOME SPACE TO SPECIFY] such that
+
+\[
+\begin{aligned}
+-  \int_{\Omega_t} \nabla w & \cdot \nabla z \, dx = 0, & \text{in } \Omega_t, \\
+& w = u, & \text{on } \partial \Omega_t
+\end{aligned}
+\]
+
+$\forall z \in $ [SPECIFY SPACE].
+
 % -----------
 
 
@@ -334,7 +429,7 @@ The variational form becomes
 
 
 \section{FEniCS}
-\section{Numerical schemes}
+\section{Numerical scheme for Navier-Stokes}
 
 \subsection{Time discretization}
 We now want to use a Crank-Nicolson discretization (second order in time) of the N-S equations: let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t$ the time step. \\
@@ -363,7 +458,7 @@ Problem: find $(u^{i+1}, p^{i+1}) \in \hat{V} \times \hat{Q}$ such that
 + \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
 - \langle v \nabla \cdot (\nabla u^{mid}) ,v \rangle_\Omega
 + \langle \nabla p^{mid} ,v \rangle_\Omega = \langle f^{mid} ,v \rangle_\Omega \\
-& \langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+& \langle \nabla \cdot u^{i+1},q \rangle_\Omega.
 \end{aligned}
 \right.
 \]
@@ -394,7 +489,7 @@ So the numerical scheme reads:
 + \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
 + \langle \nu \nabla u^{mid}, \nabla v \rangle_\Omega
 - \langle p^{mid} , \nabla \cdot v \rangle_\Omega = \langle f^{mid} ,v \rangle_\Omega \\
-& \langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+& \langle \nabla \cdot u^{i+1},q \rangle_\Omega =  0.
 \end{aligned}
 \right.
 \]
@@ -402,19 +497,31 @@ So the numerical scheme reads:
 and then
 
 \[
-\left\{  
 \begin{aligned}
 \rho \langle u^{i+1},v \rangle_\Omega - \rho \langle u^i, v \rangle_\Omega & + \Delta t \rho \langle \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega \\
 & + \Delta t \nu \langle \nabla u^{mid}, \nabla v \rangle_\Omega \\
 & - \Delta t \langle p^{mid} , \nabla \cdot v \rangle_\Omega \\
 & = \Delta t \langle f^{mid} ,v \rangle_\Omega \\
-\langle \nabla \cdot u^{i+1},v \rangle_\Omega.
+\langle \nabla \cdot u^{i+1},q \rangle_\Omega  = 0.
 \end{aligned}
-\right.
 \]
 
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
 
+\section{Numerical scheme for Navier-Stokes + ALE}
+From the variational form of the N-S equations and the previous discussion, the discretization of the ALE formulation reads
+
+\[
+\begin{aligned}
+\rho \langle u^{i+1},v \rangle_\Omega - \rho \langle u^i, v \rangle_\Omega & + \Delta t \rho \langle \nabla u^{mid} \cdot (u^i -w^i)  ,v \rangle_\Omega \\
+& + \Delta t \nu \langle \nabla u^{mid}, \nabla v \rangle_\Omega \\
+& - \Delta t \langle p^{mid} , \nabla \cdot v \rangle_\Omega \\
+& = \Delta t \langle f^{mid} ,v \rangle_\Omega \\
+\langle \nabla \cdot u^{i+1},q \rangle_\Omega = 0.
+\end{aligned}
+\]
+
+% missing: numerical scheme for the poisson problem, last page of notes 
 
 
 \chapter{Verification/Validation}
