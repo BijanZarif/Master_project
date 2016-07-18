@@ -521,7 +521,44 @@ From the variational form of the N-S equations and the previous discussion, the 
 \end{aligned}
 \]
 
-% missing: numerical scheme for the poisson problem, last page of notes 
+At the same I will solve the problem
+
+\[
+\begin{aligned}
+-  \int_{\Omega_t} \nabla w & \cdot \nabla z \, dx = 0, & \text{in } \Omega_t, \\
+& w = u, & \text{on } \partial \Omega_t
+\end{aligned}
+\]
+
+Hence the system becomes:
+
+\[
+\begin{aligned}
+-  \int_{\Omega_i} \nabla w^{i+1} & \cdot \nabla z \, dx = 0, & \text{in } \Omega_i, \\
+& w^{i+1} = u^{i+1}, & \text{on } \partial \Omega_i
+\end{aligned}
+\]
+
+The algorithm reads:
+
+-Start from $\Omega_0, w^0$ \\
+-for each time step $t_0, t_1, ..., t_n$
+\begin{itemize}
+\item solve N-S on $\Omega_i$ adding the mesh velocity term $w^i$ (from here find $u^{i+1}, p^{i+1}$;
+\item solve Poisson problem for $w^{i+1}$, where 
+
+\[
+\begin{aligned}
+-  \int_{\Omega_i} \nabla w^{i+1} & \cdot \nabla z \, dx = 0, & \text{in } \Omega_i, \\
+& w^{i+1} = u^{i+1}, & \text{on } \partial \Omega_i
+\end{aligned}
+\]
+
+\item compute the mesh displacement $x^{i+1}$: $\frac{x^{i+1} - x^{i}}{\Delta t} = w^{i+1}$, $x^{i+1} = x^{i} + \Delta t w^{i+1}$;
+\item move the mesh using $\mathrm{ALE.move()}$;
+\item update the velocity $u^i$ with $u^{i+1}$, and the mesh velocity $w^i$ with $w^{i+1}$.
+
+\end{itemize}
 
 
 \chapter{Verification/Validation}
