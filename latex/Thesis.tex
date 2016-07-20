@@ -102,30 +102,6 @@ Student: \\
 
 \chapter{Mathematical models}
 
-\section{The Stokes Problem}
-Let $\Omega$ be a unit square $[0,1]^2$, and let  $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, $\partial \Omega_{sides}$ be, respectively, the top, bottom, and lateral boundaries. (PUT A PICTURE) \\
-The strong formulation of the Stokes problem reads
-
-\[
-\begin{cases}
-- \nabla \cdot (\nu \nabla u - pI) = f, & \mbox{in } \Omega \\
-\nabla \cdot u = 0, & \mbox{in } \Omega
-\end{cases}
-\]
-
-where we set Dirichlet boundary conditions as follows:
-
-\[
-\begin{cases}
-u(x,y) = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right] , & \mbox{on } \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \\
-
-\vspace{.2cm}
-
-u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \partial \Omega_{sides}
-\end{cases}
-\]
-
-
 
 \section{The Navier-Stokes Equations on a fixed domain}
 % References:
@@ -139,8 +115,8 @@ The flow in the SAS and in the spinal cord can be described by the incompressibl
 \[
 \left\{  
 \begin{aligned}
-&\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (u \cdot \nabla)u - \nabla \cdot \sigma(\mathbf{u},p) = \mathbf{f},  & x \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+&\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (\mathbf{u} \cdot \nabla)\mathbf{u} - \nabla \cdot \sigma(\mathbf{u},p) = \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
 \end{aligned}
 \right.
 \]
@@ -311,25 +287,25 @@ where $k$ is an elastic constant.
 
 \subsection{Weak formulation of Stokes equations}
 
-In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{u \in H^1(\Omega) | u_{|_{\partial \Omega}} = 0} $. Our aim is to find $(u(x,y),p(x,y)) \in V \times Q$ such that
+In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{\mathbf{u} \in H^1(\Omega) | \mathbf{u}_{|_{\partial \Omega}} = 0} $. Our aim is to find $(\mathbf{u}(x,y),p(x,y)) \in V \times Q$ such that
 
 \begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega fv \,dx, \\
-\int_\Omega (\nabla \cdot u)q \,dx &= 0
+\int_\Omega -\nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \,dx &= \int_\Omega f \mathbf{v} \,dx, \\
+\int_\Omega (\nabla \cdot \mathbf{u})q \,dx &= 0
 \end{align}
 
 Differentiating by part the right hand side of the first equation we obtain:
 
 \begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla u - pI)v \,dx &= \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx, \\
-&- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n v \,ds.
+\int_\Omega -\nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \,dx &= \int_\Omega (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \,dx, \\
+&- \int_{\partial \Omega} (\nu \nabla \mathbf{u} - pI) \cdot n \mathbf{v} \,ds.
 \end{align}
 
-Since we set Dirichlet boundary conditions on the entire boundary and $v_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
+Since we set Dirichlet boundary conditions on the entire boundary and $\mathbf{v}_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
 
 \begin{align}
-\int_\Omega (\nu \nabla u - pI) \cdot \nabla v \,dx &= \int_\Omega fv \,dx, \\
-\int_\Omega (\nabla \cdot u) q \,dx &= 0.
+\int_\Omega (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \,dx &= \int_\Omega f\mathbf{v} \,dx, \\
+\int_\Omega (\nabla \cdot \mathbf{u}) q \,dx &= 0.
 \end{align}
 
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
@@ -349,29 +325,29 @@ so we can compare an exact solution with mean value zero with the approximate so
 In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
 
 \[
-\hat{V} = \set{v \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}
+\hat{V} = \set{\mathbf{v} \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}
 \]
 
-and $q \in \hat{Q}$. Let us multiply the N-S equations by $v$ and $q$ and integrate on $\Omega$:
+and $q \in \hat{Q}$. Let us multiply the N-S equations by $\mathbf{v}$ and $q$ and integrate on $\Omega$:
 
 \begin{align}
-&\int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} fv \, dx \\
-&\int_{\Omega} (\nabla \cdot u) q \, dx = 0.
+&\int_{\Omega} \rho \, \frac{\partial \mathbf{u}} {\partial t} \, \mathbf{v} \, dx + \int_{\Omega} \rho (\nabla \mathbf{u} \cdot \mathbf{u} )\mathbf{v} \, dx - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \, dx = \int_{\Omega} f\mathbf{v} \, dx \\
+&\int_{\Omega} (\nabla \cdot \mathbf{u}) q \, dx = 0.
 \end{align}
 
-I take the term $- \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx$, and integrate by parts:
+I take the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and integrate by parts:
 
 \[
-- \int_{\Omega} \nabla \cdot (\nu \nabla u - pI)v \, dx = \int_{\Omega} (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n \, v \, dx.
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \, dx = \int_{\Omega} (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, dx.
 \]
 
-The boundary term can actually be divided in three different terms (one for each part of the boundary), as $\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{sides}$. Since we chose $v \in \hat{V}$, the term on $\partial \Omega_{top} \cup \partial \Omega_{bottom}$ is zero. The term on $\partial \Omega_{sides}$ is also zero: since $\sigma = \nu \nabla u - pI$ and $\sigma \cdot \vec{n} = 0$ on $\partial \Omega_{sides}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\nu \nabla u - pI) \cdot n \, v \, dx = 0$.
+The boundary term can actually be divided in three different terms (one for each part of the boundary), as $\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{sides}$. Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{top} \cup \partial \Omega_{bottom}$ is zero. The term on $\partial \Omega_{sides}$ is also zero: since $\sigma = \nu \nabla \mathbf{u} - pI$ and $\sigma \cdot \mathbf{n} = 0$ on $\partial \Omega_{sides}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\nu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, dx = 0$.
 
 The variational form becomes
 
 \begin{align}
-& \int_{\Omega} \rho \, \dot{u} \, v \, dx + \int_{\Omega} \rho (\nabla u \cdot u)v \, dx - \int_{\Omega} (\nu \nabla u - pI \cdot \nabla v \, dx = \int_{\Omega} fv \, dx \\
-& \int_{\Omega} (\nabla \cdot u) q \, dx = 0.
+& \int_{\Omega} \rho \, \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx + \int_{\Omega} \rho (\nabla \mathbf{u} \cdot \mathbf{u})\mathbf{v} \, dx - \int_{\Omega} (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx = \int_{\Omega} f\mathbf{v} \, dx \\
+& \int_{\Omega} (\nabla \cdot \mathbf{u}) q \, dx = 0.
 \end{align}
 
 
@@ -385,8 +361,8 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $v$ the 
 
 \[
 \begin{aligned}
-& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, v \, dx 
-+ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, v \, dx
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
 =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
 & \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0 , & x \in \Omega_t, \, t>0
@@ -397,11 +373,15 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $v$ the 
 As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \frac{1}{\rho}  pI)\mathbf{v} \, dx$ can be integrated by parts:
 
 \[
-- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds.
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
 \]
 
 The boundary $\partial \Omega$ can be divided in two boundaries $ \partial \Omega = \partial \Omega_D \cup \partial \Omega_N $, where $\partial \Omega_D$ and $\partial \Omega_N$ are respectively the Dirichlet boundary and the Neumann boundary. 
-Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero: since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, dx = 0$. The variational formulation reads:
+Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero: since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$, the remaining term on the boundary is also zero. Hence,
+
+\[- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \mathbf{n} \, \mathbf{v} \, dx = 0.\]
+
+The variational formulation reads:
 
 \[
 \begin{aligned}
@@ -646,34 +626,47 @@ Du = g,
 
 where $D$ is the differential operator, $u$ is the solution, and $g$ is a source term. In the method of exact solution (MES), one chooses the function $g$ and then inverts the operator in order to solve for $u$. In MMS, one first manufactures a solution $u$, and then applies $D$ to $u$ to find $g$. \\
 
-Let us apply the manufactured solution technique to solve the Stokes equation [PUT REFERENCE TO THE EQUATION]. 
+We want to apply the manufactured solution technique to solve the Stokes equation. Let $\Omega$ be the unit square $\Omega = [0,1]^2$, and 
 
-[PUT A PICTURE OF THE PROBLEM]
+\vspace{0.2cm}
+\[
+\begin{cases}
+- \nabla \cdot (\nu \nabla \mathbf{u} - pI) = f, & \mbox{in } \Omega \\
+\nabla \cdot \mathbf{u} = 0, & \mbox{in } \Omega
+\end{cases}
+\]
+\vspace{0.2cm}
 
-We consider a unit square $\Omega = [0,1]$, and kinematic viscosity $\nu = 1/8$. We assume no-slip boundary conditions on the sides of the square, while an inflow and outflow velocity is applied, respectively, on the upper and lower boundaries, as follows
+where kinematic viscosity $\nu = 1/8$. Let 
+
+\[
+\partial \Omega = \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \cup \partial \Omega_{sides}
+\]
+
+where $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, and $\partial \Omega_{sides}$ are the top, bottom, and lateral boundaries, respectively. We assume no-slip boundary conditions on the sides of the square, while an inflow and outflow velocity is applied, respectively, on the upper and lower boundaries, as follows
 
 \[
 \begin{cases}
-u(x,y) = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right] , & \mbox{on } \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \\
+\mathbf{u}(x,y) = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right] , & \mbox{on } \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \\
 
 \vspace{.2cm}
 
-u(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \partial \Omega_{sides}
+\mathbf{u}(x,y) = \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], & \mbox{on } \partial \Omega_{sides}
 \end{cases}
 \]
 
 As a first example, we use the following manufactured solution:
 
 \[
-u_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
+\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
 p_{exact} = \frac{1}{2}-y.
 \]
 
-Let $u_h$ and $p_h$ be two two approximate solutions obtained from the simulation, we now want compute the errors
+Let $\mathbf{u}_h$ and $p_h$ be two two approximate solutions obtained from the simulation, we now want compute the errors
 
 \begin{itemize}
-\item $|| u_{exact} - u_h ||_{L^2}$,
-\item $ | u_{exact} - u_h |_{H^1}$ (seminorm),
+\item $|| \mathbf{u}_{exact} - \mathbf{u}_h ||_{L^2}$,
+\item $ | \mathbf{u}_{exact} - \mathbf{u}_h |_{H^1}$ (seminorm),
 \item $|| p_{exact} - p_h ||_{L^2} $.
 \end{itemize}
 
@@ -704,7 +697,7 @@ $ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ &  $ 6.3504 \times 1
 A difference exact solution that could be used is:
 
 \[
-u_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
+\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
 p_{exact} = \frac{1}{2}-y.
 \]
 
@@ -805,7 +798,7 @@ where $ \Gamma = \set{ \mathbf{x} = (x,y)^T \in \partial \Omega | y = 1}$. We us
 To verify the correctness of the solver, we consider the minimum of the \textit{stream function}. The stream function $\psi$ allows us to satisfy the continuity equation and then solve the momentum equation directly for the single variable $\psi$. It is defined by
 
 \[
-u = \nabla \times \psi = (\frac{\partial \psi}{\partial y} , - \frac{\partial \psi }{\partial x}),
+\mathbf{u} = \nabla \times \psi = (\frac{\partial \psi}{\partial y} , - \frac{\partial \psi }{\partial x}),
 \]
 
 and it can be computed by solving the Poisson problem
@@ -817,7 +810,7 @@ and it can be computed by solving the Poisson problem
 where $\omega$ is the vorticity given by
 
 \[
-\omega = \nabla \times u = \frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}.
+\omega = \nabla \times \mathbf{u} = \frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}.
 \]
 
 
