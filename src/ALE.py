@@ -63,7 +63,7 @@ for n in N :
     # outflow = DirichletBC(VP.sub(1), p_out, "(x[0] > (1- DOLFIN_EPS))&& on_boundary" )
     # walls = DirichletBC(VP.sub(0), (0.0, 0.0) , "((x[1] < DOLFIN_EPS)||(x[1] > (1 - DOLFIN_EPS)))&& on_boundary")
     
-    w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)
+    w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
     
     inflow = DirichletBC(VP.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
     outflow = DirichletBC(VP.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
@@ -232,7 +232,7 @@ for n in N :
         
         # -------- Update of solutions so the cycle can start again --------
         # I need to assign up0 because u0 and p0 are not "proper" functions
-        up0.assign(VP_)   # the first part of U is u0, and the second part is p0
+        up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
         
         u0, p0 = VP_.split()

@@ -262,16 +262,13 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 
 \subsection{The ALE formulation}
-Let us start with the system [PUT REFERENCE OF N-S EQUATIONS]. Our aim is now to allow a piece of the boundary to move. We are going to define the \textit{mesh velocity} $w$ as $w = \dot{x}$, so the Navier-Stokes equations become
-
-
-where $x$ is the \textit{mesh displacement}. Moreover, the mesh velocity will have to satisfy 
+Let us start with the system [PUT REFERENCE OF N-S EQUATIONS]. Our aim is now to allow a piece of the boundary to move. We are going to define the \textit{mesh velocity} $\mathbf{w}$ as $\mathbf{w} = \dot{\mathbf{y}}$, where $\mathbf{y}$ is the \textit{mesh displacement}. Moreover, the mesh velocity will have to satisfy 
 
 \[
 \left\{  
 \begin{aligned}
-& \Delta w = 0 	& \text{in } \, \Omega_t \\
-& w = u 				& \text{on } \partial \Omega_t
+& \Delta \mathbf{w} = 0 	& \text{in } \, \Omega_t \\
+& \mathbf{w} = \mathbf{u} 				& \text{on } \partial \Omega_t
 \end{aligned}
 \right.
 \]
@@ -287,7 +284,26 @@ Hence, the ALE formulation of the Navier-Stokes problem reads
 \right.
 \]
 
-\section{Navier-Stokes on a moving domain where the movement depends on $(u,p)$}
+\section{Navier-Stokes on a moving domain where the movement depends on $(\mathbf{u},p)$}
+
+Starting from the previous case, we introduce a new equation to the system 
+
+\[
+\left\{  
+\begin{aligned}
+&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0 \\
+& \mathbf{u} = (0, -2cos(4 \pi t) x(x-1) )^T, & x \in \Omega_{up} \\
+& \mathbf{u} = (0,0)^T, & x \in \Omega_{down} \\
+& \mathbf{w} = \dot{\mathbf{y}} & \text{on } \partial \Omega_t \\
+& (\sigma \cdot \hat{\mathbf{n}}) \cdot \hat{\mathbf{y}} = ky & \text{on } \partial \Omega_{spring} \\
+& \mathbf{u} = \dot{\mathbf{y}} = \frac{\partial \mathbf{y}}{\partial t}  & \text{on } \partial \Omega_{t} \\
+\end{aligned}
+\right.
+\]
+
+where $k$ is an elastic constant. 
+
 
 \chapter{Numerical methods}
 
@@ -421,6 +437,59 @@ The problem reads: find $w \in$ [SOME SPACE TO SPECIFY] such that
 \]
 
 $\forall z \in $ [SPECIFY SPACE].
+
+
+
+\subsection{Weak formulation of  ALE + elastic}
+
+From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We hence obtain:
+
+
+\[
+\begin{aligned}
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, v \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, v \, dx
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
+& \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0 , & x \in \Omega_t, \, t>0
+\end{aligned}
+\]
+
+
+As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \frac{1}{\rho}  pI)\mathbf{v} \, dx$ can be integrated by parts:
+
+\[
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds.
+\]
+
+The boundary $\partial \Omega$ can be divided in three boundaries:
+
+\[
+\partial \Omega = \partial \Omega_{N} \cup \partial \Omega_{D} \cup \partial \Omega_{spring}
+\]
+
+where $\partial \Omega_D$, $\partial \Omega_N$, and $\partial \Omega_{spring}$ are respectively the Dirichlet and Neumann boundaries. On $\partial \Omega_{spring}$, we apply the condition $(\sigma \cdot \hat{\mathbf{n}}) \cdot \mathbf{\hat{y}} = ky$, which is the equilibrium of stresses. \\
+Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and we set $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$. Hence, 
+
+\[
+\begin{aligned}
+- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, dx & =
+- \int_{\partial \Omega_{spring}} (\sigma \cdot \vec{\mathbf{n}}) \, \mathbf{v} \, dx \\
+& = - \int_{\partial \Omega_{spring}} ky \, \mathbf{v} \, dx 
+\end{aligned}
+\]
+
+The variational formulation reads:
+\[
+\begin{aligned}
+\int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
+&+ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
+& - \int_{\partial \Omega_{spring}} ky \, \mathbf{v} \, dx \\
+& =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
+\int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , & & x \in \Omega_t, \, t>0
+\end{aligned}
+\]
 
 % -----------
 
