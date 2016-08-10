@@ -46,8 +46,8 @@ for n in N:
     
     # I have to remember that the u_exact has to satisfy as well the boundary conditions (and not only the system of equations)
     # that's why there's the pi*x[0], so the sin is 0 on the right boundary (i.e. x[0] = 1))
-    u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
-    #u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
+    #u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
+    u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
     p_exact = 0.5 - x[1]            # this function has mean value zero (its integral in [0,1] x [0,1] is zero)
                                     # hence, I can use it as exact solution to compare it with the numerical solution
                                     # since I put the constraint that mean_value(pressure) = 0
@@ -58,8 +58,8 @@ for n in N:
     # Since the pressure is defined up to some constant, we compare the gradients
     g =  nu*div(grad(u_exact)) + f             # pressure gradient
     
-    #u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
-    u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
+    u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+    #u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
     p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
     
     # plot(u_exact_e, mesh = mesh, title = "exact velocity")

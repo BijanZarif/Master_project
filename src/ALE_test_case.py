@@ -25,6 +25,7 @@ for n in N :
     V = VectorFunctionSpace(mesh, "Lagrange", 2)  # space for u, v
     P = FunctionSpace(mesh, "Lagrange", 1)        # space for p, q
     W = VectorFunctionSpace(mesh, "Lagrange", 1)       # space for w
+    Z = VectorFunctionSpace(mesh,"CG",3)
     VP = V * P                  
     
     # TH = V * P
@@ -50,12 +51,39 @@ for n in N :
     f = Constant((0.0, 0.0))
     #g = Constant((0.0, 0.0))
     
-    p_in  = Constant(1.0)
-    p_out = Constant(0.0) 
+    #p_in  = Constant(1.0)
+    p_out = Constant(1.0) 
     
     u_mid = (1.0-theta)*u0 + theta*u
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
+    
+    # ------------------
+    
+    #w1 = -2*cos(4*pi*t)*x[0]*(x[0] - 1)
+    #y1 = -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)
+    
+    #y_t = Expression(( "0", "y1" ))   # displacement
+    u_exact = as_vector( (x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) )*(x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) - 1), \
+                        -2*cos(4*pi*t)*x[0]*(x[0] - 1) )
+    p_exact = 0.5 - x[1] 
+    
+    u_exact_e = Expression((" (x[1] - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) )*(x[1]) - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) - 1) ", \
+                            " -2*cos(4*pi*t)*x[0]*(x[0] - 1) " ), t = 0.0, domain=mesh, degree=2)
+    p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
+        
+    u_e = interpolate(u_exact_e,Z)
+    
+    # MISSING
+    # du/dt = as_vector(w1,d(w1)/dt )
+    # du_exact = as_vector( -2*cos(4*pi*t)*x[0]*(x[0] - 1), 8*pi*sin(4*pi*t)*x[0]*(x[0] - 1))
+    
+    # w0 =.....
+    
+    # f = - rho*nu*div(grad(u_exact)) + grad(p_exact) + rho*dot(grad(u_exact), u_exact - w0) + du_exact
+    # I also need the term du/dt because now I chose as exact solution a solution that varies in time
+    
+    
     
     # ------------- Boundary conditions for Navier-Stokes
     
@@ -65,21 +93,17 @@ for n in N :
     
     w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
     
-    inflow = DirichletBC(VP.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
+    inflow = DirichletBC(VP.sub(0), Expression(("x[1]*(1-x[1])", "0")), "near(x[0], 0.0) && on_boundary" )
     outflow = DirichletBC(VP.sub(1), p_out, "near(x[0], 1.0) && on_boundary" )
-    upper_wall =  DirichletBC(VP.sub(0), w_up, "near(x[1], 1.0) && on_boundary")
-    lower_wall = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[1], 0.0) && on_boundary")
+    upper_wall =  DirichletBC(VP.sub(0), (0.0, 0.0), "near(x[1], 1.0) && on_boundary")
+    lower_wall = DirichletBC(VP.sub(0), (0.0, 0.0), "near(x[1], 0.0) && on_boundary")
     
     # -------------- Boundary conditions for Poisson 
-    # Putting as boundary condition this one, I am applying Dirichlet boundary conditions up and down, but not on the walls,
-    # but like this I have movement of the mesh just on the walls, and not up and down ===> BIG MESS: the mesh deformates 
-    #poisson = DirichletBC(W, u0, "on_boundary")
     
+    up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")
+    down = DirichletBC(W, w_up, "near(x[1], 0.0) && on_boundary")
     
-  
-    #w_up = Expression(("0", "0.01-0.02*t"), t = 0.5)
-    up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")   
-    contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0) || near(x[1], 0.0 )) \
+    contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0)) \
                           || (near(x[0], 0.0) && near(x[1], 0.0)) \
                           || (near(x[0], 1.0) && near(x[1], 1.0) ) \
                           && on_boundary")
@@ -107,7 +131,7 @@ for n in N :
     # Neumann condition: sigma.n = 0        on the sides (I put in the variational form and the term on the sides is zero)
     
     bcu = [inflow, outflow, upper_wall, lower_wall]
-    bcw = [up, contour]
+    bcw = [up, down, contour]
     
     
     #-------- NAVIER-STOKES --------
@@ -119,6 +143,7 @@ for n in N :
     d = inner(grad(p), v) * dx  # this is fine because I set sigma.n = 0 in this case, be careful when I apply
                                 # some other Neumann BC
     L = inner(f_mid,v)*dx # linear form
+    #L = inner(f,v)*dx # linear form
     b = q * div(u) * dx   # from the continuity equation
     
     F = dudt + a + b + c + d - L
@@ -177,12 +202,18 @@ for n in N :
     while t <= T + 1E-9:
         
         w_up.t = t
+        u_e.t = t
+        
+        
+        du_exact = as_vector( -2*cos(4*pi*t)*x[0]*(x[0] - 1), 8*pi*sin(4*pi*t)*x[0]*(x[0] - 1))
+        f = - rho*nu*div(grad(u_exact)) + grad(p_exact) + rho*dot(grad(u_exact), u_exact - w0) + du_exact
+        
         #print float(sin(t))
         print "Solving for t = {}".format(t) 
         
         # ------- Solving the Navier-Stokes equations -------
         
-        print "Solving the Navier-Stokes equations"
+        #print "Solving the Navier-Stokes equations"
         # I need to reassemble the system
         A = assemble(a0)
         b = assemble(L0)
@@ -198,7 +229,7 @@ for n in N :
 
         # ------- Solving the Poisson problem -------
         
-        print "Solving the Poisson problem"
+        #print "Solving the Poisson problem"
         A1 = assemble(a1)
         b1 = assemble(L1)
         
@@ -235,17 +266,21 @@ for n in N :
         up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
         
-        u0, p0 = VP_.split()
+        u0, p0 = VP_.split(True)
+        L2_error_u = assemble((u_e-u0)**2 * dx)**.5
+        print L2_error_u
+        
         #plot(u0, interactive = True)
         
         
         t += dt
-        plot(mesh, interactive = True)
+        #plot(mesh, interactive = True)
         
         
-    exit()    
+       
     u0, p0 = VP_.split() 
-    plot(u0) 
+    plot(u0)
+    plot(u_exact)
     #plot(w0)    
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
