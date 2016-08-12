@@ -64,14 +64,22 @@ for n in N :
     #y1 = -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)
     
     #y_t = Expression(( "0", "y1" ))   # displacement
-    u_exact = as_vector( (x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) )*(x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) - 1), \
-                        -2*cos(4*pi*t)*x[0]*(x[0] - 1) )
-    p_exact = 0.5 - x[1] 
+        
+    #f1 = 2*x[0]*(x[0] - 1)*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + y)*cos(4*pi*t) + 2*x[0]*(x[0] - 1)*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1)*cos(4*pi*t) + (-w01 + (x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1])*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1))*((x[0]*sin(4*pi*t)/(2*pi) + (x[0] - 1)*sin(4*pi*t)/(2*pi))*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1]) + (x[0]*sin(4*pi*t)/(2*pi) + (x[0] - 1)*sin(4*pi*t)/(2*pi))*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1)) + (-w02 - 2*x[0]*(x[0] - 1)*cos(4*pi*t))*(x[0]*(x[0] - 1)*sin(4*pi*t)/pi + 2*x[1] - 1) + (2*x[0]*(x[0] - 1)*sin(4*pi*t)/pi + 4*x[1] + (2*x[0] - 1)**2*sin(4*pi*t)/pi - 2)*sin(4*pi*t)/(2*pi) + 2
+
+    #f2 = 8*pi*x[0]*(x[0] - 1)*sin(4*pi*t) + (-w01 + (x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1])*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1))*(-2*x[0]*cos(4*pi*t) - 2*(x[0] - 1)*cos(4*pi*t)) - 4*cos(4*pi*t) - 1
+
+    #f = Expression((" 2*x[0]*(x[0] - 1)*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + y)*cos(4*pi*t) + 2*x[0]*(x[0] - 1)*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1)*cos(4*pi*t) + (-w01 + (x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1])*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1))*((x[0]*sin(4*pi*t)/(2*pi) + (x[0] - 1)*sin(4*pi*t)/(2*pi))*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1]) + (x[0]*sin(4*pi*t)/(2*pi) + (x[0] - 1)*sin(4*pi*t)/(2*pi))*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1)) + (-w02 - 2*x[0]*(x[0] - 1)*cos(4*pi*t))*(x[0]*(x[0] - 1)*sin(4*pi*t)/pi + 2*x[1] - 1) + (2*x[0]*(x[0] - 1)*sin(4*pi*t)/pi + 4*x[1] + (2*x[0] - 1)**2*sin(4*pi*t)/pi - 2)*sin(4*pi*t)/(2*pi) + 2 ", " 8*pi*x[0]*(x[0] - 1)*sin(4*pi*t) + (-w01 + (x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1])*(x[0]*(x[0] - 1)*sin(4*pi*t)/(2*pi) + x[1] - 1))*(-2*x[0]*cos(4*pi*t) - 2*(x[0] - 1)*cos(4*pi*t)) - 4*cos(4*pi*t) - 1 "), t = 0.0)
     
-    u_exact_e = Expression((" (x[1] - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) )*(x[1]) - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) - 1) ", \
-                            " -2*cos(4*pi*t)*x[0]*(x[0] - 1) " ), t = 0.0, domain=mesh, degree=2)
+    #u_exact = as_vector( (x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) )*(x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) - 1), -2*cos(4*pi*t)*x[0]*(x[0] - 1) )
+    #p_exact = 0.5 - x[1] 
+    
+    u_exact_e = Expression(("(x[1] - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) )*(x[1]) - (-1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1)) - 1)", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), domain=mesh, degree=2)
     p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
         
+        
+    exit()   
+    #f = Express    
     u_e = interpolate(u_exact_e,Z)
     
     # MISSING
@@ -204,9 +212,16 @@ for n in N :
         w_up.t = t
         u_e.t = t
         
+        u_exact = as_vector( (x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) )*(x[1] - ( -1/(2*pi)*sin(4*pi*t)*x[0]*(x[0] - 1) ) - 1), \
+                        -2*cos(4*pi*t)*x[0]*(x[0] - 1) )
         
+        # time derivative d(u_exact)/dt 
         du_exact = as_vector( -2*cos(4*pi*t)*x[0]*(x[0] - 1), 8*pi*sin(4*pi*t)*x[0]*(x[0] - 1))
+        
+        # source term
         f = - rho*nu*div(grad(u_exact)) + grad(p_exact) + rho*dot(grad(u_exact), u_exact - w0) + du_exact
+        
+        exit()
         
         #print float(sin(t))
         print "Solving for t = {}".format(t) 
@@ -266,9 +281,9 @@ for n in N :
         up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
         
-        u0, p0 = VP_.split(True)
-        L2_error_u = assemble((u_e-u0)**2 * dx)**.5
-        print L2_error_u
+        #u0, p0 = VP_.split(True)
+        #L2_error_u = assemble((u_e-u0)**2 * dx)**.5
+        #print L2_error_u
         
         #plot(u0, interactive = True)
         
