@@ -27,8 +27,8 @@ u2xx = diff(u2, x, x)
 u1yy = diff(u1, y, y)
 u2yy = diff(u2, y, y)
 
-f1 = u1t + px + ( (u1 - w01)*u1x + (u2 - w02)*u1y ) + (u1xx + u1yy)
-f2 = u2t + py + ( (u1 - w01)*u2x + (u2 - w02)*u2y ) + (u2xx + u2yy)
+f1 = u1t + px + ( (u1 - w01)*u1x + (u2 - w02)*u1y ) - (u1xx + u1yy)
+f2 = u2t + py + ( (u1 - w01)*u2x + (u2 - w02)*u2y ) - (u2xx + u2yy)
 
 print "f1 = {}".format(f1)
 print "f2 = {}".format(f2)
