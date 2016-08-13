@@ -8,10 +8,10 @@ from dolfin import *
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
 #N = [2**3]
 
-dt = 0.05
+#dt = 0.05
 #dt = 0.025
 #dt = 0.01
-#dt = 0.0125
+dt = 0.0125
 #dt = 0.001
 
 for n in N :
@@ -64,11 +64,11 @@ for n in N :
     w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
     
     u_exact_e = Expression((" x[1]*(1-x[1]) ", "0" ), domain=mesh, degree=2)
-    p_exact_e = Expression("0.5-x[0]", domain=mesh, degree=1)
-    
+    p_exact_e = Expression("2-x[0]", domain=mesh, degree=1)
+     # the exact solution also has to satisfy the boundary conditions!!
     
     u_exact = as_vector((x[1]*(1-x[1]), 0))  
-    p_exact = 0.5 - x[0]
+    p_exact = 2 - x[0]
     #f = -rho*nu*div(grad(u_exact)) + grad(p_exact) + grad(u_exact)* (u_exact - w0)
     
     f_e = Expression(( "2*nu*rho + 2*rho*x[0]*(x[0] - 1)*(-2*x[1] + 1)*cos(4*pi*t) - 1", "0"), t = 0.0, rho=1.0, nu = 1.0/8.0)

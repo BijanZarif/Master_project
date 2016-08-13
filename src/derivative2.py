@@ -9,7 +9,7 @@ init_printing(use_unicode=True)
 
 #y1 = - 1/(2*pi)*sin(4*pi*t)*x*(x-1)
 #w1 = -2*cos(4*pi*t)*x*(x-1)
-p = 0.5 - x
+p = 2 - x
 
 u1 = y*(1-y)
 u2 = 0
