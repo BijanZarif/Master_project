@@ -5,13 +5,13 @@
 
 from dolfin import *
 
-N = [2**2, 2**3, 2**4, 2**5, 2**6]
-#N = [2**3]
+#N = [2**2, 2**3, 2**4, 2**5, 2**6]
+N = [2**3]
 
-#dt = 0.05
+dt = 0.05
 #dt = 0.025
 #dt = 0.01
-dt = 0.0125
+#dt = 0.0125
 #dt = 0.001
 
 for n in N :
@@ -47,38 +47,51 @@ for n in N :
     nu = 1.0/8.0
     rho = 1.0
     theta = 0.5 
-    #f0 = Constant((0.0, 0.0))
-    #f = Constant((0.0, 0.0))
+    f0 = Constant((0.0, 0.0))
+    f = Constant((0.0, 0.0))
     #g = Constant((0.0, 0.0))
     
-    p_in  = Constant(1.0)
-    p_out = Constant(0.0) 
+    p_out  = Constant(1.0)
+    
+    # I want to start from u0 = ((x[1]*(1-x[1]), 0)) as initial condition
+    #u0 = as_vector((x[1]*(1-x[1]), 0))
+    u0 = Constant((0., 0.)) #Expression((" x[1]*(1-x[1]) ", "0" ), domain=mesh, degree=2)
+    
+    w_exact = as_vector( (0,0) )
+    u_exact = as_vector((x[1]*(1-x[1]), 0))  
+    p_exact = 2 - x[0]
+    f0 = -rho*nu*div(grad(u_exact)) + grad(p_exact) + grad(u_exact)*(u_exact - w_exact)
     
     u_mid = (1.0-theta)*u0 + theta*u
-    #f_mid = (1.0-theta)*f0 + theta*f
+    f_mid = (1.0-theta)*f0 + theta*f
     #f_mid =  as_vector( (2*nu*rho + 2*rho*x[0]*(x[0] - 1)*(-2*x[1] + 1)*cos(4*pi*t) - 1 ,0) )
     p_mid = (1.0-theta)*p0 + theta*p
     
     # ------------- Boundary conditions for Navier-Stokes
     
-    w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
+    #w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
+    
+    w_up = Expression(("0", "0"))
     
     u_exact_e = Expression((" x[1]*(1-x[1]) ", "0" ), domain=mesh, degree=2)
     p_exact_e = Expression("2-x[0]", domain=mesh, degree=1)
      # the exact solution also has to satisfy the boundary conditions!!
     
-    u_exact = as_vector((x[1]*(1-x[1]), 0))  
-    p_exact = 2 - x[0]
-    #f = -rho*nu*div(grad(u_exact)) + grad(p_exact) + grad(u_exact)* (u_exact - w0)
+   
+    t = Constant(0.0)
+    #w_exact = as_vector( (0, -2*cos(4*pi*t)*x[0]*(x[0] - 1)) )
     
-    f_e = Expression(( "2*nu*rho + 2*rho*x[0]*(x[0] - 1)*(-2*x[1] + 1)*cos(4*pi*t) - 1", "0"), t = 0.0, rho=1.0, nu = 1.0/8.0)
+    
+    #f = -rho*nu*div(grad(u_exact)) + grad(p_exact) + grad(u_exact)*(u_exact - w_exact)
+    
+    #f_e = Expression(( "2*nu*rho + 2*rho*x[0]*(x[0] - 1)*(-2*x[1] + 1)*cos(4*pi*t) - 1", "0"), t = 0.0, rho=1.0, nu = 1.0/8.0)
     #f = as_vector( (2*nu*rho + 2*rho*x[0]*(x[0] - 1)*(-2*x[1] + 1)*cos(4*pi*t) - 1 ,0) )
     
     
     inflow = DirichletBC(VP.sub(0), u_exact_e, "near(x[0], 0.0) && on_boundary" )
-    outflow = DirichletBC(VP.sub(1), p_in,  "near(x[0], 1.0) && on_boundary" )
-    upper_wall =  DirichletBC(VP.sub(0), (0.0, 0.0), "near(x[1], 1.0) && on_boundary")
-    lower_wall = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[1], 0.0) && on_boundary")
+    outflow = DirichletBC(VP.sub(1), p_out,  "near(x[0], 1.0) && on_boundary" )
+    upper_wall =  DirichletBC(VP.sub(0), u_exact_e, "near(x[1], 1.0) && on_boundary")
+    lower_wall = DirichletBC(VP.sub(0), u_exact_e , "near(x[1], 0.0) && on_boundary")
     
     # -------------- Boundary conditions for Poisson 
 
@@ -96,7 +109,8 @@ for n in N :
     # # this applies BC to a vector, where U is a function
     # inflow.apply(U.vector())
     # outflow.apply(U.vector())
-    # walls.apply(U.vector()) 
+    # upper_wall.apply(U.vector())
+    # lower_wall.apply(U.vector())
     # uh, ph = U.split()
     # plot(uh)
     # plot(ph)
@@ -105,6 +119,7 @@ for n in N :
     
     # w = Function(W)
     # up.apply(w.vector())
+    # down.apply(w.vector())
     # contour.apply(w.vector())   
     # plot(w)
     # interactive()
@@ -125,7 +140,8 @@ for n in N :
     c = inner(grad(u_mid)* (u0 - w0), v) * dx    # term with the mesh velocity w
     d = inner(grad(p), v) * dx  # this is fine because I set sigma.n = 0 in this case, be careful when I apply
                                 # some other Neumann BC
-    L = inner(f_e,v)*dx # linear form
+    #L = inner(f_e,v)*dx # linear form
+    L = inner(f_mid,v)*dx # linear form
     b = q * div(u) * dx   # from the continuity equation
     
     F = dudt + a + b + c + d - L
@@ -137,7 +153,7 @@ for n in N :
     
     a1 = inner(grad(w), grad(z))*dx
     L1 = dot(Constant((0.0,0.0)),z)*dx  
-    #L1 = Expression("0.0")   
+
     # ----------------------
     
     
@@ -184,7 +200,7 @@ for n in N :
     while t <= T + 1E-9:
         
         w_up.t = t
-        f_e.t = t
+        #f_e.t = t
         #print float(sin(t))
         #print "Solving for t = {}".format(t) 
         
@@ -244,7 +260,8 @@ for n in N :
         w0.assign(W_)
         
         u0, p0 = VP_.split()
-        #plot(u0, interactive = True)
+        plot(u0, interactive = True, title = str(t))
+        #plot(u_exact, interactive = True)
         
         
         t += dt
@@ -253,6 +270,11 @@ for n in N :
         
         
     u0, p0 = VP_.split()
+    #plot(u0, title = "u_h")
+    #plot(u_exact, title = "exact", mesh = mesh)
+    #plot(p0)
+    #interactive()
+    #from IPython import embed; embed()
     L2_error_u = assemble((u_exact-u0)**2 * dx)**.5
     print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
 

@@ -236,11 +236,11 @@ for n in N :
         w0.assign(W_)
         
         u0, p0 = VP_.split()
-        #plot(u0, interactive = True)
+        plot(u0, interactive = True)
         
         
         t += dt
-        plot(mesh)
+       # plot(mesh)
         
         
     exit()    

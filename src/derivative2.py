@@ -1,10 +1,13 @@
 from sympy import *
 
 x, y, t = symbols('x y t')
-w01 = symbols('w01')
+
+#w01 = symbols('w01')
+w01 = 0
 rho, nu = symbols('rho nu')
 
-w02 = -2*cos(4*pi*t)*x*(x-1) 
+#w02 = -2*cos(4*pi*t)*x*(x-1) 
+w02 = 0
 init_printing(use_unicode=True)
 
 #y1 = - 1/(2*pi)*sin(4*pi*t)*x*(x-1)
@@ -29,6 +32,8 @@ u2yy = diff(u2, y, y)
 
 f1 = rho*u1t + px + rho*( (u1 - w01)*u1x + (u2 - w02)*u1y ) - rho*nu*(u1xx + u1yy)
 f2 = rho*u2t + py + rho*( (u1 - w01)*u2x + (u2 - w02)*u2y ) - rho*nu*(u2xx + u2yy)
+
+#x, y = var("x[0] x[1]")
 
 print "f1 = {}".format(f1)
 print "f2 = {}".format(f2)
