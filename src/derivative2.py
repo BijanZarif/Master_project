@@ -6,13 +6,13 @@ x, y, t = symbols('x y t')
 w01 = 0
 rho, nu = symbols('rho nu')
 
-#w02 = -2*cos(4*pi*t)*x*(x-1) 
-w02 = 0
+w02 = -2*cos(4*pi*t)*x*(x-1) 
+#w02 = 0
 init_printing(use_unicode=True)
 
 #y1 = - 1/(2*pi)*sin(4*pi*t)*x*(x-1)
 #w1 = -2*cos(4*pi*t)*x*(x-1)
-p = 2 - x
+p = 2*nu*rho*(1 - x)
 
 u1 = y*(1-y)
 u2 = 0

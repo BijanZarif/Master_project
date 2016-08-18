@@ -1,4 +1,4 @@
-## NAVIER-STOKES EQUATIONS ##
+## ALE + NAVIER-STOKES EQUATIONS ##
 
 # rho * du/dt + rho * (grad(u) . u) - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
@@ -39,6 +39,8 @@ for n in N :
     # The functions are initialized to zero
     up0 = Function(VP)
     u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
+                         # REMEMBER: In this way when I update the up0 also the u0 and p0 get updated
+                         # This is different from up0.split which I can use if I want to plot
     w0 = Function(W)
     
     

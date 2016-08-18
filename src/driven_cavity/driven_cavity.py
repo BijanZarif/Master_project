@@ -2,12 +2,12 @@
 
 from dolfin import *
 
-N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**6]
+#N = [2**2, 2**3, 2**4, 2**5, 2**6]
+N = [2**3]
 #dt = 0.1
-#dt = 0.05
+dt = 0.05
 #dt = 0.025
-dt = 0.0125
+#dt = 0.0125
 
 T = 2.5
 nu = 1.0/1000.0
@@ -140,6 +140,8 @@ for n in N:
         
         # I need to assign up0 because u0 and p0 are not "proper" functions
         up0.assign(U)   # the first part of U is u0, and the second part is p0
+        u0, p0 = U.split()
+        plot(u0, title = str(t))
         
         #ufile << up0.split()[0]
         
