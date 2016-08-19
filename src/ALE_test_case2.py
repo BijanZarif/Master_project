@@ -43,7 +43,7 @@ for n in N :
     nu = 1.0/8.0
     rho = 1.0
     #theta = 0.5     # Crank-Nicolson
-    theta = 1.0   # implicit
+    theta = 1.0   # backwards
     #C = 1.0     # I have w!= 0 ==> movement of the mesh
     #C = 0.0    # I have w = 0 ==> the mesh is not moving
     
