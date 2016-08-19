@@ -2,14 +2,13 @@ from dolfin import *
 set_log_level(ERROR)
 
 # parameters
-N = [2**2, 2**3, 2**4, 2**5, 2**6]
-#N = [2**3]
+#N = [2**2, 2**3, 2**4, 2**5, 2**6]
+N = [2**3]
 
-#dt = 0.1
 #dt = 0.05
 #dt = 0.025
 dt = 0.0125
-#dt = 0.00625
+#dt = 0.00001
 
 T   = 1.0 # final time
 rho = 1.0
@@ -17,9 +16,9 @@ nu  = 1.0/8.0 # kinematic viscosity
 theta   = 1 # 0.5 for crank-nicolson, 1.0 for backwards
 
 # exact_solution
-u_exact_e = Expression(("x[1]*(1-x[1])",  "0"), degree = 2)
-p_exact_e = Expression("2*nu*rho*(1-x[0])", nu = nu, rho = rho, degree = 1)
-v_mesh_e = Expression(("0", "-2*C*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.0, C = 1)  
+#u_exact_e = Expression(("x[1]*(1-x[1])",  "0"), degree = 2)
+#u_exact_e = Expression((" (x[1] + 1.0/(2*pi)*x[0]*(x[0]-1)*sin(4*pi*t)) * (1-x[1] - 1.0/(2*pi)*x[0]*(x[0]-1)*sin(4*pi*t)) " , "-2*C*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.0, degree = 2, C=1)
+
 
 
 for n in N :
@@ -27,6 +26,12 @@ for n in N :
     # defining functionspaces
     mesh = UnitSquareMesh(n, n)
     x = SpatialCoordinate(mesh)
+
+    y = Expression("-1.0/(2*pi)*x[0]*(x[0]-1)*sin(4*pi*t)", t=0.0)
+    u_exact_e = Expression(("(x[1]-y)*(1-x[1]+y)","0"), y=y, t=0.0, domain=mesh)
+    p_exact_e = Expression("2*nu*rho*(1-x[0])", nu = nu, rho = rho, degree = 1, domain=mesh)
+    v_mesh_e = Expression(("0", "-2*C*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.0, C = 1, domain=mesh)
+    
 
     V = VectorFunctionSpace(mesh, "CG", 2)
     P = FunctionSpace(mesh, "CG", 1)
@@ -45,13 +50,13 @@ for n in N :
     v, q = TestFunctions(VP)
     z = TestFunction(W)
     
-    t_ = Constant(0.0)
-    #w_exact = as_vector((0, -2*cos(4*pi*t_)*x[0]*(x[0]-1)  ))
-    u_exact = as_vector((x[1]*(1-x[1]), 0))
-    p_exact = 2*nu*rho*(1-x[0])
-    f = -rho*nu*div(grad(u_exact)) + grad(p_exact) + rho*grad(u_exact)*(u_exact - v_mesh_e)
+    # t_ = Constant(0.0)
+    # w_exact = as_vector((0, -2*cos(4*pi*t_)*x[0]*(x[0]-1)  ))
+    # u_exact = as_vector((x[1]*(1-x[1]), 0))
+    # p_exact = 2*nu*rho*(1-x[0])
+    
+    f = -rho*nu*div(grad(u_exact_e)) + grad(p_exact_e) + rho*grad(u_exact_e)*(u_exact_e - v_mesh_e) # time derivative missing
     #print assemble(inner(f,f)*dx)
-    #exit()
     
     # ------- Variat. form NS -----
     # The rho is missing
@@ -74,23 +79,23 @@ for n in N :
     #plot(fd, interactive())
     
     bcs = [DirichletBC(VP.sub(0), u_exact_e, fd, 1),
-           DirichletBC(VP.sub(0), u_exact_e, fd, 3),
-           DirichletBC(VP.sub(0), u_exact_e, fd, 4),
+           DirichletBC(VP.sub(0), (0., 0.), fd, 3),
+           DirichletBC(VP.sub(0), (0., 0.), fd, 4),
            DirichletBC(VP.sub(1), Constant(0.), fd, 2)]
     
     #bcw = [DirichletBC(W, Constant(0., 0.), fd, 1),
-    #       DirichletBC(W, v_mesh_e, fd, 3),
-    #       DirichletBC(W, v_mesh_e, fd, 4),
+    #       DirichletBC(W, w_up, fd, 3),
+    #       DirichletBC(W, w_up, fd, 4),
     #       DirichletBC(W, Constant(0., 0.), fd, 2)]
     
     bcw = DirichletBC(W, v_mesh_e, "on_boundary")
+    # I WANT TO PLOT THE BC SO I KNOW IF I DID THINGS OK
     
     # prepare for time loop
     u_assigner = FunctionAssigner(V, VP.sub(0))
     p_assigner = FunctionAssigner(P, VP.sub(1))
     u_x = Function(FunctionSpace(mesh, "DG", 0))
     u_x_ = TestFunction(FunctionSpace(mesh, "DG", 0))
-    
     # Y is the adding displacement (what we add in order to move the mesh)
     Y = Function(W)  # by default this is 0 in all the components
     X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
@@ -99,8 +104,11 @@ for n in N :
     t = 0
     while t < T + 1E-9:
         
-        t_.assign(t)
+        #t_.assign(t)
         v_mesh_e.t = t
+        u_exact_e.t = t
+        p_exact_e.t = t
+        
         
         # solve for mesh displacement
         solve(laplace == 0, v_mesh, bcw)
@@ -117,10 +125,8 @@ for n in N :
         
         # update
         u_assigner.assign(u0, up.sub(0))
-        
-        #solve((u_x-u0[0])*u_x_*dx == 0, u_x)
+        solve((u_x-u0[0])*u_x_*dx == 0, u_x)
         #plot(u_x, title = "x-component")
-        
         t += dt     
     
     # I don't need to update the pressure at each time step because the pressure at the next time step doesn't appear in my numerical scheme
@@ -128,8 +134,7 @@ for n in N :
     p_assigner.assign(p0, up.sub(1))
     
     # compute errors
-    print "N = {}".format(n)
     print "||u - uh|| = {0:1.4e}".format(errornorm(u_exact_e, u0, "L2"))
-    #print "||p - ph|| = {0:1.4e}".format(errornorm(p_exact_e, p0, "L2"))
+    print "||p - ph|| = {0:1.4e}".format(errornorm(p_exact_e, p0, "L2"))
     
     #plot(u0); plot(p0); interactive()
