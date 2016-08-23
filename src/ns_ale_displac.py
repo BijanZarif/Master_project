@@ -27,6 +27,7 @@ for n in N :
     mesh = UnitSquareMesh(n, n)
     x = SpatialCoordinate(mesh)
 
+    w1 = Expression("-2*cos(4*pi*t)*x[0]*(x[0] - 1)", t=0.0)
     y = Expression("-1.0/(2*pi)*x[0]*(x[0]-1)*sin(4*pi*t)", t=0.0)
     u_exact_e = Expression(("(x[1]-y)*(1-x[1]+y)","0"), y=y, t=0.0, domain=mesh)
     p_exact_e = Expression("2*nu*rho*(1-x[0])", nu = nu, rho = rho, degree = 1, domain=mesh)
@@ -55,8 +56,11 @@ for n in N :
     # u_exact = as_vector((x[1]*(1-x[1]), 0))
     # p_exact = 2*nu*rho*(1-x[0])
     
-    f = -rho*nu*div(grad(u_exact_e)) + grad(p_exact_e) + rho*grad(u_exact_e)*(u_exact_e - v_mesh_e) # time derivative missing
+    du_exact = Expression( ( "w1*(2*x[1] - 1 - 2*y)", "8*pi*sin(4*pi*t)*x[0]*(x[0]-1)"), t=0.0, y=y, w1=w1)
+    
+    f = -rho*nu*div(grad(u_exact_e)) + grad(p_exact_e) + rho*grad(u_exact_e)*(u_exact_e - v_mesh_e) + du_exact
     #print assemble(inner(f,f)*dx)
+    
     
     # ------- Variat. form NS -----
     # The rho is missing
@@ -83,19 +87,21 @@ for n in N :
            DirichletBC(VP.sub(0), (0., 0.), fd, 4),
            DirichletBC(VP.sub(1), Constant(0.), fd, 2)]
     
-    #bcw = [DirichletBC(W, Constant(0., 0.), fd, 1),
-    #       DirichletBC(W, w_up, fd, 3),
-    #       DirichletBC(W, w_up, fd, 4),
-    #       DirichletBC(W, Constant(0., 0.), fd, 2)]
+    bcw = [DirichletBC(W, (0., 0.), fd, 1),
+          DirichletBC(W, v_mesh_e, fd, 3),
+          DirichletBC(W, v_mesh_e, fd, 4),
+          DirichletBC(W, (0., 0.), fd, 2)]
     
-    bcw = DirichletBC(W, v_mesh_e, "on_boundary")
+    #bcw = DirichletBC(W, v_mesh_e, "on_boundary")
     # I WANT TO PLOT THE BC SO I KNOW IF I DID THINGS OK
     
     # prepare for time loop
     u_assigner = FunctionAssigner(V, VP.sub(0))
     p_assigner = FunctionAssigner(P, VP.sub(1))
-    u_x = Function(FunctionSpace(mesh, "DG", 0))
-    u_x_ = TestFunction(FunctionSpace(mesh, "DG", 0))
+    
+    #u_x = Function(FunctionSpace(mesh, "DG", 0))
+    #u_x_ = TestFunction(FunctionSpace(mesh, "DG", 0))
+    
     # Y is the adding displacement (what we add in order to move the mesh)
     Y = Function(W)  # by default this is 0 in all the components
     X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
@@ -108,6 +114,9 @@ for n in N :
         v_mesh_e.t = t
         u_exact_e.t = t
         p_exact_e.t = t
+        y.t = t
+        w1.t = t
+        du_exact.t = t
         
         
         # solve for mesh displacement
@@ -125,8 +134,10 @@ for n in N :
         
         # update
         u_assigner.assign(u0, up.sub(0))
-        solve((u_x-u0[0])*u_x_*dx == 0, u_x)
+        
+        #solve((u_x-u0[0])*u_x_*dx == 0, u_x)
         #plot(u_x, title = "x-component")
+        plot(mesh)
         t += dt     
     
     # I don't need to update the pressure at each time step because the pressure at the next time step doesn't appear in my numerical scheme

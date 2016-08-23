@@ -2,7 +2,8 @@ from dolfin import *
 set_log_level(ERROR)
 
 # parameters
-N = [2**2, 2**3, 2**4, 2**5, 2**6]
+#N = [2**3, 2**4, 2**5, 2**6, 2**7]
+N = [(2**n, 0.5**(2*(n-2))) for n in range(3, 8)]
 #N = [2**3]
 
 #dt = 0.1
@@ -19,10 +20,10 @@ theta   = 1 # 0.5 for crank-nicolson, 1.0 for backwards
 # exact_solution
 u_exact_e = Expression(("x[1]*(1-x[1])",  "0"), degree = 2)
 p_exact_e = Expression("2*nu*rho*(1-x[0])", nu = nu, rho = rho, degree = 1)
-v_mesh_e = Expression(("0", "-2*C*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.0, C = 1)  
+v_mesh_e = Expression(("0", "-2*C*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.0, C = 1, degree=3)  
 
 
-for n in N :
+for n, dt in N :
 
     # defining functionspaces
     mesh = UnitSquareMesh(n, n)
@@ -30,7 +31,8 @@ for n in N :
 
     V = VectorFunctionSpace(mesh, "CG", 2)
     P = FunctionSpace(mesh, "CG", 1)
-    W = VectorFunctionSpace(mesh, "Lagrange", 1)       # space for w (mesh velocity)
+    W = VectorFunctionSpace(mesh, "Lagrange", 2)       # space for w (mesh velocity)
+    Wp = VectorFunctionSpace(mesh, "Lagrange", 3)
     VP = V * P
     
     # define variational forms
@@ -50,6 +52,7 @@ for n in N :
     u_exact = as_vector((x[1]*(1-x[1]), 0))
     p_exact = 2*nu*rho*(1-x[0])
     f = -rho*nu*div(grad(u_exact)) + grad(p_exact) + rho*grad(u_exact)*(u_exact - v_mesh_e)
+    #f = Constant(0.0)
     #print assemble(inner(f,f)*dx)
     #exit()
     
@@ -133,3 +136,6 @@ for n in N :
     #print "||p - ph|| = {0:1.4e}".format(errornorm(p_exact_e, p0, "L2"))
     
     #plot(u0); plot(p0); interactive()
+    #u0, p0 = VP_.split()
+    #ufile = File("velocity_64_0.0125.pvd")
+    #ufile << u0
