@@ -48,7 +48,7 @@ v, q = TestFunctions(W)
 # MAGNE MODIFIED SOMETHING IN THE VARIATIONAL FORM AS WELL
 dudt = Constant(1./dt) * inner(u - u0, v) * dx
 a = (Constant(nu) * inner(grad(u1), grad(v)) 
-     - inner(grad(u1)*(u_mesh), v)
+     - inner(grad(u1)*(u_mesh), v)      # it's stokes, there's no non-linear term
      + p * div(v) + q * div(u) ) * dx
 f = Constant((0.,0.)) 
 
@@ -92,7 +92,7 @@ while t < T:
 
     # update velocity field
     u_assigner.assign(u0, w.sub(0))
-    plot(mesh)
+    #plot(mesh)
     #print "t = {0:1.3f} : max(u0) = {1:1.4f}".format(t, max(u0.vector()))
 
 p0 = Function(Q)

@@ -11,7 +11,7 @@ N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 #dt = 0.0125
 #dt = 0.00625
 
-T = 0.1 # final time
+T = 0.5 # final time
 
 # MER says: Rho is missing in the variational formulation, so make
 # sure it stays at 1 here or fix that...
@@ -124,7 +124,7 @@ for n, dt in N :
 
     # loop over time steps
     t = dt
-    while t <= (T + DOLFIN_EPS):
+    while t < (T - 1E-9):
 
         t_.assign(t)
         v_mesh_e.t = t

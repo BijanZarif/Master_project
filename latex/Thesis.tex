@@ -418,9 +418,83 @@ The problem reads: find $w \in$ [SOME SPACE TO SPECIFY] such that
 
 $\forall z \in $ [SPECIFY SPACE].
 
+\subsection{Weak formulation of ALE + elastic (Marie)}
+Let us start with Navier-Stokes encountering for the ALE term. The problem reads:
+
+\[
+\begin{aligned}
+\rho \frac{\partial u}{\partial t} + \rho \nabla u \cdot (u-w) - div(\nu \nabla u) + \nabla p = f  , & \text{ in } \Omega_F (t), \\
+div u = 0, & \text{ in } \Omega_F (t), \\
+\end{aligned}
+\]
+
+for give $\rho, \nu, f$ and mesh velocity $w$.
+
+As boundary conditions on the fluid domain we choose
+
+\[
+\begin{aligned}
+u = w, & \text{ on } \partial \Omega_C \cup \partial \Omega_T \\
+(\nu \nabla u - pI) \cdot n = p_0 n, & \text{ on } \partial \Omega_{TB}
+\end{aligned}
+\]
+
+We define the mesh velocity as $w = \dot{y}$, where $y$ is the mesh displacement. \\
+Smoothing of the mesh:
+
+\[
+\begin{aligned}
+- \Delta y = 0, & \text{ on } \partial \Omega_F (t), \\
+y = 0, & \text{ on } \partial \Omega_{TB}, \\
+\end{aligned}
+\]
+
+where the condition $y = 0$ is equivalent to no movement on the top and bottom of the boundary. \\
+We consider two different models:
+
+\begin{description}
+\item[option 1:] we allow the movement of the boundary in every direction by imposing the condition
+
+\[
+- \nabla y \cdot n = (\pm)ky \qquad \text{ on } \partial \Omega_C \cup \partial \Omega_T \\
+\]
+
+where $k = k(x)$ is the spring constant;
+
+\item[option 2:] we allow the movement of the boundary only in the normal direction, that means
+
+\[
+\begin{aligned}
+(- \nabla y \cdot n) \cdot n = (\pm)ky \cdot n & \qquad \text{normal direction} \\
+y \cdot t = 0 & \qquad \text{tangential direction}
+\end{aligned}
+\]
+
+where $n$ is the normal vector to the boundary, and $t$ is the tangent to the boundary. \\
+This can be done "weakly" using the Nitsche's method (check André Massing PhD thesis).
+
+\end{description}
+
+We are going to consider 3 different steps (or models):
+
+\begin{description}
+\item[Model 1:] we suppose
+
+\[
+\begin{aligned}
+y = 0 & \qquad \text{ on } \partial \Omega_{TB}, \partial \Omega_C \\
+k = fixed & \qquad \text{ on } \partial \Omega_{T (tissue)}
+\end{aligned}
+\]
+
+\item[Model 2:] as model 1, but $k$ varies with $x_1$
+\item[Model 3-4:] as model 1-2, but letting also $\partial \Omega_C$ have a $k$ (so the cord is elastic).
+
+\end{description}
 
 
-\subsection{Weak formulation of  ALE + elastic}
+
+\subsection{Weak formulation of  ALE + elastic (Eleonora)}
 
 From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We hence obtain:
 
