@@ -547,6 +547,33 @@ The variational formulation reads:
 \end{aligned}
 \]
 
+
+\subsection{Weak Formulation of ALE + elastic (Marie)}
+Weak formulation for the Poisson problem
+
+\[
+\left\{  
+\begin{aligned}
+-Delta y = 0, \quad in \Omega_F (t), \\
+y = y_0,  \quad on \partial \Omega_0 (t)
+- \nabla y \cdot n = \pm ky \quad on \partial \Omega_1 (t)
+\end{aligned}
+\right.
+\]
+
+Weak formulation: find $y \in H^1_{y_0, \partial \Omega_0}$ such that
+
+\[
+\int_\Omega -Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
+\]
+
+Integrating by parts, we obtain
+\[
+\int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
+\]
+
+Since $\partial$
+
 % -----------
 
 
