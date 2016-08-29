@@ -292,7 +292,7 @@ div(u) = 0, & \text{ in } \Omega_F(t)
 \right.
 \]
 
-for give $\rho, \nu, f$ and mesh velocity $w$.
+for given $\rho, \nu, f$ and mesh velocity $w$.
 Boundary conditions: if I set $\sigma = \nu \nabla u - pI $
 
 \[
@@ -319,10 +319,10 @@ w = u, & \qquad \text{ on } \partial \Omega_{Tissue}
 \end{aligned}.
 \]
 
-
+where $\Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}$.
 
 \section{Navier-Stokes + ALE with elastic walls (Marie)}
-Let us start with Navier-Stokes encountering for the ALE term. The problem reads:
+Let us start with Navier-Stokes encountering the ALE term. The problem reads:
 
 \[
 \begin{aligned}
@@ -539,7 +539,7 @@ $\forall z \in $ [SPECIFY SPACE].
 
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
 
-From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We hence obtain:
+From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We obtain:
 
 
 \[
@@ -559,22 +559,18 @@ As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \fr
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds.
 \]
 
-The boundary $\partial \Omega$ can be divided in three boundaries:
+The boundary $\partial \Omega$ can be divided in the four boundaries:
 
 \[
-\partial \Omega = \partial \Omega_{N} \cup \partial \Omega_{D} \cup \partial \Omega_{spring}
+\partial \Omega = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup  \partial \Omega_{Tissue}
 \]
 
-where $\partial \Omega_D$, $\partial \Omega_N$, and $\partial \Omega_{spring}$ are respectively the Dirichlet and Neumann boundaries. On $\partial \Omega_{spring}$, we apply the condition $(\sigma \cdot \hat{\mathbf{n}}) \cdot \mathbf{\hat{y}} = ky$, which is the equilibrium of stresses. \\
-Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and we set $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$. Hence, 
+On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$, I assume Dirichlet boundary conditions for the velocity $u$, hence the test function $v$ will be zero on these two boundaries. Moreover, I assumed $\sigma \cdot n = 0$ on $\partial \Omega_{Bottom}$, while $\sigma \cdot n = \pm k y $ on $\partial \Omega_{Tissue}$, hence the boundary term becomes
 
 \[
-\begin{aligned}
-- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, dx & =
-- \int_{\partial \Omega_{spring}} (\sigma \cdot \vec{\mathbf{n}}) \, \mathbf{v} \, dx \\
-& = - \int_{\partial \Omega_{spring}} ky \, \mathbf{v} \, dx 
-\end{aligned}
+- \int_{\partial \Omega_F (t)} (\nu \nabla u - \frac{1}{\rho} p I) \cdot n v dx = - \int_{\partial \Omega_{Tissue}} (\pm ky) v dx.
 \]
+
 
 The variational formulation reads:
 \[
@@ -582,7 +578,7 @@ The variational formulation reads:
 \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 &+ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
-& - \int_{\partial \Omega_{spring}} ky \, \mathbf{v} \, dx \\
+& - \int_{\partial \Omega_{Tissure}} (\pm ky) \, \mathbf{v} \, dx \\
 & =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
 \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , & & x \in \Omega_t, \, t>0
 \end{aligned}
@@ -595,8 +591,8 @@ Weak formulation for the Poisson problem
 \[
 \left\{  
 \begin{aligned}
--Delta y = 0, \quad in \Omega_F (t), \\
-y = y_0,  \quad on \partial \Omega_0 (t)
+-\Delta y = 0, \quad in \Omega_F (t), \\
+y = y_0,  \quad on \partial \Omega_0 (t) \\
 - \nabla y \cdot n = \pm ky \quad on \partial \Omega_1 (t)
 \end{aligned}
 \right.
@@ -605,7 +601,7 @@ y = y_0,  \quad on \partial \Omega_0 (t)
 Weak formulation: find $y \in H^1_{y_0, \partial \Omega_0}$ such that
 
 \[
-\int_\Omega -Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
+\int_\Omega -\Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
 \]
 
 Integrating by parts, we obtain
@@ -613,7 +609,12 @@ Integrating by parts, we obtain
 \int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
 \]
 
-Since $\partial$
+Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence, 
+
+\[
+\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z. 
+\]
+
 
 % -----------
 
@@ -753,6 +754,29 @@ The algorithm reads:
 
 \end{itemize}
 
+\section{Numerical scheme for Navier-Stokes + ALE + elastic}
+The variational formulation reads
+
+\[
+\rho \int_\Omega \frac{\partial u}{\partial t} v \, dx + \rho \int_\Omega \nabla u \cdot (u-w) v \, dx + \rho \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega_{Tissure}} (\pm ky) v \, ds.
+\]
+
+I approximate: $(\frac{\partial u}{\partial t})^{mid} = \frac{u^{k+1} - u^k}{\Delta t} + o(\Delta t^2)$, $u^{mid} = \frac{u^{k+1} + u^k}{2} + o(\Delta t^2)$, hence I obtain
+
+\[
+\begin{aligned}
+\rho \langle \frac{u^{k+1} - u^k}{\Delta t}, v \rangle + & \rho \langle \nabla u^{mid} \cdot (u^k - w^k), v \rangle \\
+																		+ & \nu \langle \nabla u^{mid} - p^{mid} I, \nabla v \rangle \\
+																		- & \langle \pm ky, v \rangle_{\partial \Omega_{Tissue}}. \\
+\langle div(u^{k+1}), q \rangle
+\end{aligned}
+\]
+
+where I linearized the convective term
+
+\[
+\Delta u^{mid} \cdot (u^{mid} - w^{mid}) \approx \Delta u^{mid} \cdot (u^k - w^k).
+\]
 
 \chapter{Verification}
 
