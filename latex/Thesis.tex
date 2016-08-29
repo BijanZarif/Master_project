@@ -260,27 +260,27 @@ Hence, the ALE formulation of the Navier-Stokes problem reads
 \right.
 \]
 
+%\section{Navier-Stokes + ALE with elastic walls (Eleonora)}
+%
+%Starting from the previous case, we introduce a new equation to the system 
+%
+%\[
+%\left\{  
+%\begin{aligned}
+%&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
+%& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0 \\
+%& \mathbf{u} = (0, -2cos(4 \pi t) x(x-1) )^T, & x \in \Omega_{up} \\
+%& \mathbf{u} = (0,0)^T, & x \in \Omega_{down} \\
+%& \mathbf{w} = \dot{\mathbf{y}} & \text{on } \partial \Omega_t \\
+%& (\sigma \cdot \hat{\mathbf{n}}) \cdot \hat{\mathbf{y}} = ky & \text{on } \partial \Omega_{spring} \\
+%& \mathbf{u} = \dot{\mathbf{y}} = \frac{\partial \mathbf{y}}{\partial t}  & \text{on } \partial \Omega_{t} \\
+%\end{aligned}
+%\right.
+%\]
+%
+%where $k$ is an elastic constant. 
+
 \section{Navier-Stokes + ALE with elastic walls (Eleonora)}
-
-Starting from the previous case, we introduce a new equation to the system 
-
-\[
-\left\{  
-\begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0 \\
-& \mathbf{u} = (0, -2cos(4 \pi t) x(x-1) )^T, & x \in \Omega_{up} \\
-& \mathbf{u} = (0,0)^T, & x \in \Omega_{down} \\
-& \mathbf{w} = \dot{\mathbf{y}} & \text{on } \partial \Omega_t \\
-& (\sigma \cdot \hat{\mathbf{n}}) \cdot \hat{\mathbf{y}} = ky & \text{on } \partial \Omega_{spring} \\
-& \mathbf{u} = \dot{\mathbf{y}} = \frac{\partial \mathbf{y}}{\partial t}  & \text{on } \partial \Omega_{t} \\
-\end{aligned}
-\right.
-\]
-
-where $k$ is an elastic constant. 
-
-\section{Navier-Stokes + ALE with elastic walls (Eleonora 2)}
 We start with Navier-Stokes equations + ALE
 
 \[
@@ -293,25 +293,32 @@ div(u) = 0, & \text{ in } \Omega_F(t)
 \]
 
 for give $\rho, \nu, f$ and mesh velocity $w$.
-Boundary conditions:
+Boundary conditions: if I set $\sigma = \nu \nabla u - pI $
 
 \[
 \begin{aligned}
-u = \tilde{u}, \qquad & \text{ in } \partial \Omega_{TB} \\
-(\nu \nabla u - pI)\cdot n = \pm ky \qquad & \text{ on } \partial \Omega_C \cup \partial \Omega_T
+u = \tilde{u}, & \qquad \text{ on } \partial \Omega_{Top} \\
+\sigma \cdot n = 0, & \qquad \text{ on } \partial \Omega_{Bottom} \\
+u = 0, & \qquad \text{ on } \partial \Omega_{Cord} \\
+\sigma \cdot n = \pm ky & \qquad \text{ on }  \partial \Omega_{Tissue}
 \end{aligned}.
 \]
 
 Mesh velocity: $w = \dot{y}$, where $y$ is the mesh displacement
 
 \[
-\left\{  
-\begin{aligned}
--\Delta w = 0, \qquad & \text{ on } \partial \Omega_F (t) \\
-w = u, \qquad & \text{ on } \partial \Omega_F (t)
-\end{aligned}
-\right.
+-\Delta w = 0, \qquad \text{ in } \Omega_F (t)
 \]
+
+and I use as boundary conditions
+
+\[
+\begin{aligned}
+w = 0, & \qquad \text{ on } \partial \Omega_F (t) \setminus \partial \Omega_{Tissue} \\
+w = u, & \qquad \text{ on } \partial \Omega_{Tissue}
+\end{aligned}.
+\]
+
 
 
 \section{Navier-Stokes + ALE with elastic walls (Marie)}
