@@ -5,7 +5,7 @@ set_log_level(ERROR)
 #N = [2**2, 2**3, 2**4]#, 2**5, 2**6]
 N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-#dt = 0.1
+dt = 0.1
 #dt = 0.05
 #dt = 0.025
 #dt = 0.0125
@@ -81,6 +81,9 @@ for n, dt in N :
     a = (Constant(nu) * inner(grad(u1), grad(v))
          + inner(grad(u1)*(u - v_mesh), v)
          + p * div(v) + q * div(u) - inner(f, v)) * dx
+    
+     # check the signs in the variational form, the term "p * div(v)" should have a minus, right? But if I change the sign, nothing changes, STRANGE
+     # if I plot the pressure, this is almost always zero, STRANGE
 
     # ----- Var. form Poisson problem -----
     laplace = inner(grad(v_mesh), grad(z))*dx
@@ -147,6 +150,8 @@ for n, dt in N :
 
         #solve((u_x-u0[0])*u_x_*dx == 0, u_x)
         #plot(u_x, title = "x-component")
+        
+        plot(p)
 
         t += dt
 
