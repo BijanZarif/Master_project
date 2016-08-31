@@ -293,13 +293,13 @@ div(u) = 0, & \text{ in } \Omega_F(t)
 \]
 
 for given $\rho, \nu, f$ and mesh velocity $w$. \\
-We want to solve these equations in a unit square domain $\Omega = [0,1] x [0,1]$. We divide the boundary $\partial \Omega$ in 4 boundaries, as follows:
+We want to solve these equations in a unit square domain $\Omega = [0,1] x [0,1]$. We divide the boundary $\partial \Omega_F$ in 4 boundaries, as follows:
 
 \[
-\Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
+\partial \Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
 \]
 
-On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that we assume that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector. Moreover, we set equilibrium of stresses, as follows $\sigma \cdot n = \pm k \vec{x}$, where $\sigma = \nu \nabla u - pI $.
+On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector. Moreover, we set equilibrium of stresses, as follows $\sigma \cdot n = \pm k \vec{x}$, where $\sigma = \nu \nabla u - pI $.
 
 Boundary conditions: 
 
@@ -327,7 +327,6 @@ w = u, & \qquad \text{ on } \partial \Omega_{Tissue}
 \end{aligned}.
 \]
 
-where $\Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}$.
 
 \section{Navier-Stokes + ALE with elastic walls (Marie)}
 Let us start with Navier-Stokes encountering the ALE term. The problem reads:
@@ -573,10 +572,10 @@ The boundary $\partial \Omega$ can be divided in the four boundaries:
 \partial \Omega = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup  \partial \Omega_{Tissue}
 \]
 
-On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$, I assume Dirichlet boundary conditions for the velocity $u$, hence the test function $v$ will be zero on these two boundaries. Moreover, I assumed $\sigma \cdot n = 0$ on $\partial \Omega_{Bottom}$, while $\sigma \cdot n = \pm k y $ on $\partial \Omega_{Tissue}$, hence the boundary term becomes
+On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$, I assume Dirichlet boundary conditions for the velocity $u$, hence the test function $v$ will be zero on these two boundaries. Moreover, I assumed $\sigma \cdot n = 0$ on $\partial \Omega_{Bottom}$, while $\sigma \cdot n = \pm k \vec{x} $ on $\partial \Omega_{Tissue}$, hence the boundary term becomes
 
 \[
-- \int_{\partial \Omega_F (t)} (\nu \nabla u - \frac{1}{\rho} p I) \cdot n v dx = - \int_{\partial \Omega_{Tissue}} (\pm ky) v dx.
+- \int_{\partial \Omega_F (t)} (\nu \nabla u - \frac{1}{\rho} p I) \cdot n v dx = - \int_{\partial \Omega_{Tissue}} (\pm k \vec{x}) v dx.
 \]
 
 
@@ -586,7 +585,7 @@ The variational formulation reads:
 \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 &+ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
-& - \int_{\partial \Omega_{Tissure}} (\pm ky) \, \mathbf{v} \, dx \\
+& - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
 & =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
 \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , & & x \in \Omega_t, \, t>0
 \end{aligned}
@@ -766,7 +765,7 @@ The algorithm reads:
 The variational formulation reads
 
 \[
-\rho \int_\Omega \frac{\partial u}{\partial t} v \, dx + \rho \int_\Omega \nabla u \cdot (u-w) v \, dx + \rho \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega_{Tissure}} (\pm ky) v \, ds.
+\rho \int_\Omega \frac{\partial u}{\partial t} v \, dx + \rho \int_\Omega \nabla u \cdot (u-w) v \, dx + \rho \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) v \, ds.
 \]
 
 I approximate: $(\frac{\partial u}{\partial t})^{mid} = \frac{u^{k+1} - u^k}{\Delta t} + o(\Delta t^2)$, $u^{mid} = \frac{u^{k+1} + u^k}{2} + o(\Delta t^2)$, hence I obtain
@@ -775,7 +774,7 @@ I approximate: $(\frac{\partial u}{\partial t})^{mid} = \frac{u^{k+1} - u^k}{\De
 \begin{aligned}
 \rho \langle \frac{u^{k+1} - u^k}{\Delta t}, v \rangle + & \rho \langle \nabla u^{mid} \cdot (u^k - w^k), v \rangle \\
 																		+ & \nu \langle \nabla u^{mid} - p^{mid} I, \nabla v \rangle \\
-																		- & \langle \pm ky, v \rangle_{\partial \Omega_{Tissue}}. \\
+																		- & \langle \pm k \vec{x}, v \rangle_{\partial \Omega_{Tissue}}. \\
 \langle div(u^{k+1}), q \rangle
 \end{aligned}
 \]
