@@ -765,7 +765,7 @@ The algorithm reads:
 The variational formulation reads
 
 \[
-\rho \int_\Omega \frac{\partial u}{\partial t} v \, dx + \rho \int_\Omega \nabla u \cdot (u-w) v \, dx + \rho \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) v \, ds.
+\rho \int_\Omega \frac{\partial u}{\partial t} v \, dx + \rho \int_\Omega \nabla u \cdot (u-w) v \, dx + \int_\Omega (\nu \nabla u - pI) \cdot \nabla v \, dx - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) v \, ds = \int_\Omega f v \, dx.
 \]
 
 I approximate: $(\frac{\partial u}{\partial t})^{mid} = \frac{u^{k+1} - u^k}{\Delta t} + o(\Delta t^2)$, $u^{mid} = \frac{u^{k+1} + u^k}{2} + o(\Delta t^2)$, hence I obtain
@@ -773,9 +773,10 @@ I approximate: $(\frac{\partial u}{\partial t})^{mid} = \frac{u^{k+1} - u^k}{\De
 \[
 \begin{aligned}
 \rho \langle \frac{u^{k+1} - u^k}{\Delta t}, v \rangle + & \rho \langle \nabla u^{mid} \cdot (u^k - w^k), v \rangle \\
-																		+ & \nu \langle \nabla u^{mid} - p^{mid} I, \nabla v \rangle \\
-																		- & \langle \pm k \vec{x}, v \rangle_{\partial \Omega_{Tissue}}. \\
-\langle div(u^{k+1}), q \rangle
+																		+ & \langle \nu \nabla u^{mid} - p^{mid} I, \nabla v \rangle \\
+																		- & \langle \pm k \vec{x}, v \rangle_{\partial \Omega_{Tissue}} \\
+																		= & \langle f^{mid}, v \rangle . \\
+\langle div(u^{k+1}), q \rangle = 0.
 \end{aligned}
 \]
 
