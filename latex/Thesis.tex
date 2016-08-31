@@ -121,7 +121,7 @@ The flow in the SAS and in the spinal cord can be described by the incompressibl
 \right.
 \]
 
-We are going to solve the problem for the velocity field $\mathbf{u}(x,y,t)$, and the pressure field $p(x,y,t)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
+We are going to solve the problem for the velocity field $\mathbf{u}(\mathbf{x},t)$, and the pressure field $p(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
 
 \[
 \sigma(\mathbf{u}, p) = 2 \mu \epsilon(\mathbf{u}) - p \mathbb{I},
@@ -138,8 +138,8 @@ The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a 
 \[
 \left\{  
 \begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
 \end{aligned}
 \right.
 \]
@@ -156,8 +156,8 @@ hence the system can be written in the equivalent form
 \[
 \left\{  
 \begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & x \in \Omega, \, t>0
+&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
 \end{aligned}
 \right.
 \]
@@ -236,29 +236,37 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 \section{Navier-Stokes on a moving domain}
 
+\subsection{The Arbitrary Lagrangian Eulerian description}
+Put a description of ALE as Vegard did (check Donea's paper).
 
 \subsection{The ALE formulation}
-Let us start with the system [PUT REFERENCE OF N-S EQUATIONS]. Our aim is now to allow a piece of the boundary to move. We are going to define the \textit{mesh velocity} $\mathbf{w}$ as $\mathbf{w} = \dot{\mathbf{y}}$, where $\mathbf{y}$ is the \textit{mesh displacement}. Moreover, the mesh velocity will have to satisfy 
+Our next step is to allow a piece of the boundary to move. We are going to denote with $\Omega_t$ the fluid domain, which will change with respect to time. In fluid-structure interaction, the fluid domain $\Omega_t$ consists of the same material particles at all times, and moves with the material points within the structure. This translates mathematically in the condition $\mathbf{w} = \dot{\mathbf{y}} = \mathbf{u}$, where $\mathbf{w}$ is the \textit{mesh velocity}, and $\mathbf{y}$ is the \textit{mesh displacement}. In fact, the fluid domain has to follow the changes on the fluid-structure interface. \\
+The mesh velocity can be chosen arbitrarily in principle, but this choice could effect the accuracy of the solver. In this scenario, we need to encounter the distortion of each element in the fluid domain. \\
+A way to avoid the squeezing of the elements in the mesh is to use a \textit{Laplacian smoothing} algorithm, which consists of solving a Laplace equation for the mesh displacement in the fluid. This is a mesh regularization method where the lines in the mesh have equal potential (See WINSLOW 1963 + PUT REFERENCE).\\
+Hence, the mesh velocity $\mathbf{w}$ will have to satisfy
 
 \[
 \left\{  
 \begin{aligned}
-& \Delta \mathbf{w} = 0 	& \text{in } \, \Omega_t \\
+& \Delta \mathbf{w} = 0 	& \text{in } \Omega_t \\
 & \mathbf{w} = \mathbf{u} 				& \text{on } \partial \Omega_t
 \end{aligned}
 \right.
 \]
 
-Hence, the ALE formulation of the Navier-Stokes problem reads
+
+The ALE formulation of the Navier-Stokes equations reads
 
 \[
 \left\{  
 \begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0
+&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega_t, \, t>0 \\
+& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega_t, \, t>0
 \end{aligned}
 \right.
 \]
+
+WHAT ABOUT THE PRESCRIBED MOVEMENT? SHOULD I PUT IT IN THE TEST CASE SECTION, OR SAY SOMETHING HERE AS WELL?
 
 %\section{Navier-Stokes + ALE with elastic walls (Eleonora)}
 %
@@ -281,52 +289,41 @@ Hence, the ALE formulation of the Navier-Stokes problem reads
 %where $k$ is an elastic constant. 
 
 \section{Navier-Stokes + ALE with elastic walls (Eleonora)}
-We start with Navier-Stokes equations + ALE
+In this section we introduce a further assumption to our model. The idea of this assumption comes from our aim to model the post operative effect of a portion of the spinal cord. As after craniovertebral decompression the increase of CSF flow might depend on the compliance of a region of the spine, we assume that part of the boundary of our unit square (which ideally reproduces a segment of the spine) moves according to some elastic force. In order to do so,  we divide the boundary $\partial \Omega_t$ in 4 boundaries, as follows (PUT PICTURE):
 
 \[
-\left\{  
+\partial \Omega_t = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
+\]
+
+On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}, or in alternative a pressure gradient). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector (MAYBE GIVE ANOTHER NAME? I CALLED $\mathbf{x}$ A GENERIC POINT), and we set equilibrium of stresses as follows: $\sigma \cdot \mathbf{n} = \pm k \vec{x}$, where $\sigma = \nu \nabla u - \frac{1}{\rho} p I$ (I DEFINED $\sigma$ DIFFERENTLY EARLIER, I NEED TO CORRECT THAT OR THIS).
+
+The boundary conditions will be:
+
+\[
 \begin{aligned}
-\rho \frac{\partial u}{\partial t} + \rho \nabla u \cdot (u-w) - div(\nu \nabla u) + \nabla p = f, & \text{ in } \Omega_F (t) \\
-div(u) = 0, & \text{ in } \Omega_F(t)
+\mathbf{u} = \tilde{\mathbf{u}}, & \qquad \text{ on } \partial \Omega_{Top} \\
+\sigma \cdot \mathbf{n} = \vec{0}, & \qquad \text{ on } \partial \Omega_{Bottom} \\
+\mathbf{u} =\vec{0}, & \qquad \text{ on } \partial \Omega_{Cord} \\
+\sigma \cdot \mathbf{n} = \pm k\vec{x} & \qquad \text{ on }  \partial \Omega_{Tissue}
+\end{aligned}.
+\]
+
+As before, the mesh velocity satisfies $\mathbf{w} = \dot{\mathbf{y}}$, where $\mathbf{y}$ is the mesh displacement. We choose a Laplacian smoothing of the mesh:
+
+\[
+-\Delta \mathbf{w} = 0, \qquad \text{ in } \Omega_t
+\]
+
+Since we are considering the simplest case where only $\partial \Omega_{Tissue}$ is subject to the elastic force, we impose
+
+\[
+\begin{aligned}
+\mathbf{w} = \vec{0}, & \qquad \text{ on } \partial \Omega_t \setminus \partial \Omega_{Tissue} \\
+\mathbf{w} = \mathbf{u}, & \qquad \text{ on } \partial \Omega_{Tissue}.
 \end{aligned}
-\right.
 \]
 
-for given $\rho, \nu, f$ and mesh velocity $w$. \\
-We want to solve these equations in a unit square domain $\Omega = [0,1] x [0,1]$. We divide the boundary $\partial \Omega_F$ in 4 boundaries, as follows:
-
-\[
-\partial \Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
-\]
-
-On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector. Moreover, we set equilibrium of stresses, as follows $\sigma \cdot n = \pm k \vec{x}$, where $\sigma = \nu \nabla u - pI $.
-
-Boundary conditions: 
-
-\[
-\begin{aligned}
-u = \tilde{u}, & \qquad \text{ on } \partial \Omega_{Top} \\
-\sigma \cdot n = 0, & \qquad \text{ on } \partial \Omega_{Bottom} \\
-u = 0, & \qquad \text{ on } \partial \Omega_{Cord} \\
-\sigma \cdot n = \pm k\vec{x} & \qquad \text{ on }  \partial \Omega_{Tissue}
-\end{aligned}.
-\]
-
-Mesh velocity: $w = \dot{y}$, where $y$ is the mesh displacement
-
-\[
--\Delta w = 0, \qquad \text{ in } \Omega_F (t)
-\]
-
-and I use as boundary conditions
-
-\[
-\begin{aligned}
-w = 0, & \qquad \text{ on } \partial \Omega_F (t) \setminus \partial \Omega_{Tissue} \\
-w = u, & \qquad \text{ on } \partial \Omega_{Tissue}
-\end{aligned}.
-\]
-
+Note that $\partial \Omega_{Cord}$ and $\partial \Omega_{Tissue}$ are \textit{physical} boundaries, i.e. they correspond to actual portions of the spinal cord. This means that $\mathbf{u}$ and $\mathbf{w}$ should have the same value on these boundaries, since the fluid follows the movement (if any) of the walls.
 
 \section{Navier-Stokes + ALE with elastic walls (Marie)}
 Let us start with Navier-Stokes encountering the ALE term. The problem reads:
@@ -412,7 +409,7 @@ k = fixed & \qquad \text{ on } \partial \Omega_{T (tissue)}
 
 \subsection{Weak formulation of Stokes equations}
 
-In order to find a numerical solution to this problem, we write its variational formulation. Let $v$ be a test function in the space $\hat{V} = \set{\mathbf{u} \in H^1(\Omega) | \mathbf{u}_{|_{\partial \Omega}} = 0} $. Our aim is to find $(\mathbf{u}(x,y),p(x,y)) \in V \times Q$ such that
+In order to find a numerical solution to this problem, we write its variational formulation. Let $\mathbf{v}$ be a test function in the space $\hat{V} = \set{\mathbf{u} \in H^1(\Omega) | \mathbf{u}_{|_{\partial \Omega}} = 0} $. Our aim is to find $(\mathbf{u}(x,y),p(x,y)) \in V \times Q$ such that
 
 \begin{align}
 \int_\Omega -\nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \,dx &= \int_\Omega f \mathbf{v} \,dx, \\
