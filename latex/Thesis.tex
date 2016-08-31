@@ -292,15 +292,23 @@ div(u) = 0, & \text{ in } \Omega_F(t)
 \right.
 \]
 
-for given $\rho, \nu, f$ and mesh velocity $w$.
-Boundary conditions: if I set $\sigma = \nu \nabla u - pI $
+for given $\rho, \nu, f$ and mesh velocity $w$. \\
+We want to solve these equations in a unit square domain $\Omega = [0,1] x [0,1]$. We divide the boundary $\partial \Omega$ in 4 boundaries, as follows:
+
+\[
+\Omega_F = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
+\]
+
+On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that we assume that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector. Moreover, we set equilibrium of stresses, as follows $\sigma \cdot n = \pm k \vec{x}$, where $\sigma = \nu \nabla u - pI $.
+
+Boundary conditions: 
 
 \[
 \begin{aligned}
 u = \tilde{u}, & \qquad \text{ on } \partial \Omega_{Top} \\
 \sigma \cdot n = 0, & \qquad \text{ on } \partial \Omega_{Bottom} \\
 u = 0, & \qquad \text{ on } \partial \Omega_{Cord} \\
-\sigma \cdot n = \pm ky & \qquad \text{ on }  \partial \Omega_{Tissue}
+\sigma \cdot n = \pm k\vec{x} & \qquad \text{ on }  \partial \Omega_{Tissue}
 \end{aligned}.
 \]
 
