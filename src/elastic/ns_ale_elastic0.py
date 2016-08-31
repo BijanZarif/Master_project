@@ -1,4 +1,5 @@
 ## ALE + NAVIER-STOKES EQUATIONS ##
+# This file is to "prepare" for the elastic version, for now it's just ALE
 
 # rho * du/dt + rho * (grad(u) . u - w) - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
@@ -18,8 +19,7 @@ dt = 0.01
 #dt = 0.025
 #dt = 0.0125
 
-for n in N :
-    
+for n in N : 
    
     mesh = UnitSquareMesh(n, n)  
     x = SpatialCoordinate(mesh)
@@ -43,7 +43,6 @@ for n in N :
                          # This is different from up0.split which I can use if I want to plot
     w0 = Function(W)
     
-    
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
@@ -55,7 +54,6 @@ for n in N :
     p_mid = (1.0-theta)*p0 + theta*p
     
     # ------- Boundary conditions for Navier-Stokes --------
-    
     w_up = Expression(("0", "-2*cos(4*pi*t)*x[0]*(x[0] - 1)"), t = 0.5)  # I need the 4*pi so it does multiply cycles
     
     inflow = DirichletBC(VP.sub(1), p_in, "near(x[0], 0.0) && on_boundary" )
@@ -64,10 +62,6 @@ for n in N :
     lower_wall = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[1], 0.0) && on_boundary")
     
     # ------- Boundary conditions for Poisson -------
-    # Putting as boundary condition this one, I am applying Dirichlet boundary conditions up and down, but not on the walls,
-    # but like this I have movement of the mesh just on the walls, and not up and down ===> BIG MESS: the mesh deformates 
-
-
     up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")   
     contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0) || near(x[1], 0.0 )) \
                           || (near(x[0], 0.0) && near(x[1], 0.0)) \
@@ -96,32 +90,27 @@ for n in N :
     # interactive()
     # exit()
     
-    
     #-------- NAVIER-STOKES --------
-    
     # Weak formulation
-    dudt = Constant(dt**-1) * inner(u-u0, v) * dx
-    a = Constant(nu) * inner(grad(u_mid), grad(v)) * dx
-    c = inner(grad(u_mid)* (u0 - w0), v) * dx    # term with the mesh velocity w
-    d = inner(grad(p), v) * dx  # this is fine because I set sigma.n = 0 in this case, be careful when I apply
-                                # some other Neumann BC
-    L = inner(f_mid,v)*dx # linear form
-    b = q * div(u) * dx   # from the continuity equation
-    
-    F = dudt + a + b + c + d - L
+    dudt = Constant(1./dt) * inner(u - u0, v) * dx
+    a = ( Constant(rho) * inner(grad(u_mid)*(u0 - w0), v)   # ALE term
+         + Constant(nu) * inner(grad(u_mid), grad(v))
+         - p * div(v)                               # CHECK THIS TERM
+         + q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
+         - inner(f,v) ) * dx
+
     
     # Bilinear and linear forms
+    F = dudt + a
     a0, L0 = lhs(F), rhs(F)    
     
     # -------- POISSON PROBLEM FOR w:  div( grad(w) ) = 0 --------
-    
     a1 = inner(grad(w), grad(z))*dx
-    L1 = dot(Constant((0.0,0.0)),z)*dx  
-    #L1 = Expression("0.0")   
+    L1 = dot(Constant((0.0,0.0)),z)*dx   
     # ----------------------
     
-    
-    VP_ = Function(VP)   # I want to store my solution here
+    # I want to store my solutions here
+    VP_ = Function(VP)   
     W_ = Function(W)
     
     # Y is the adding displacement (what we add in order to move the mesh)
@@ -135,8 +124,7 @@ for n in N :
         w_up.t = t
         print "Solving for t = {}".format(t) 
         
-        # ------- Solving the Navier-Stokes equations -------
-        print "Solving the Navier-Stokes equations"
+        # Solving the Navier-Stokes equations
         # I need to reassemble the system
         A = assemble(a0)
         b = assemble(L0)
@@ -148,8 +136,7 @@ for n in N :
         # Ax = b, where U is the x vector    
         solver.solve(A, VP_.vector(), b)
         
-        # ------- Solving the Poisson problem -------
-        print "Solving the Poisson problem"
+        # Solving the Poisson problem
         A1 = assemble(a1)
         b1 = assemble(L1)
         
@@ -158,18 +145,11 @@ for n in N :
         
         solve(A1, W_.vector(), b1)
         
-        
-        # ------ Compute the mesh displacement -------
+        # Compute the mesh displacement
         Y.vector()[:] = w0.vector()[:]*dt
         X.vector()[:] += Y.vector()[:]
         
-        #plot(Y, title="added displacement")
-        #plot(X, title = "total displacement" )
-        #plot(w0, title="mesh velocity")
-        #interactive()
-        
-        # ------- Move the mesh ------
-        
+        # Move the mesh
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
         
@@ -178,18 +158,8 @@ for n in N :
         up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
         
-        u0, p0 = VP_.split()
-        plot(u0)
+        #u0, p0 = VP_.split()
+        #plot(u0)
+        plot(mesh)
         
         t += dt
-        #plot(mesh)
-        
-        
-    exit()    
-    u0, p0 = VP_.split() 
-    plot(u0) 
-    #plot(w0)    
-    print "t_final = {}".format(t - dt)    
-    print "dt = {}".format(dt)   
-    #print "T = {}".format(t)
-    print("------")    

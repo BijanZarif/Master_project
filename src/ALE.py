@@ -120,6 +120,8 @@ for n in N :
     c = inner(grad(u_mid)* (u0 - w0), v) * dx    # term with the mesh velocity w
     d = inner(grad(p), v) * dx  # this is fine because I set sigma.n = 0 in this case, be careful when I apply
                                 # some other Neumann BC
+    # check the term "d", it might be "p * div(v)" and NOT "inner(grad(p), v)"
+    
     L = inner(f_mid,v)*dx # linear form
     b = q * div(u) * dx   # from the continuity equation
     
