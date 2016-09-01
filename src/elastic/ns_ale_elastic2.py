@@ -13,7 +13,7 @@ rho = 1.0
 k = 1000.0         # elastic constant
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 
-dt = 0.01
+dt = 0.0005
 
 for n in N : 
    
@@ -80,6 +80,7 @@ for n in N :
     # plot(w)
     # interactive()
     # exit()
+    X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
     
     #-------- NAVIER-STOKES --------
     # Weak formulation
@@ -89,7 +90,9 @@ for n in N :
          - p * div(v)                               # CHECK THIS TERM
          + q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
          - inner(f,v) ) * dx
-    b = - inner(Constant(k) * y0, v) * ds
+    # b = - inner(Constant(k) * y0, v) * ds
+
+    b = - inner(Constant(k) * X, v) * ds
         
     # Bilinear and linear forms
     F = dudt + a + b
@@ -106,7 +109,6 @@ for n in N :
     
     # Y is the adding displacement (what we add in order to move the mesh)
     Y = Function(W)  # by default this is 0 in all the components
-    X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
 
     solver = PETScLUSolver()
     t = 0.0
