@@ -239,12 +239,12 @@ for n in N :
         up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
         
-        #u0, p0 = VP_.split()
-        #plot(u0, interactive = True)
+        u0, p0 = VP_.split()
+        plot(u0)
         
         
         t += dt
-        plot(mesh)
+        #plot(mesh)
         
         
     exit()    

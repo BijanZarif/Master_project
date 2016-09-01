@@ -1,7 +1,7 @@
 ## ALE + NAVIER-STOKES EQUATIONS ##
 # This file is to "prepare" for the elastic version, for now it's just ALE
 
-# rho * du/dt + rho * (grad(u) . u - w) - div( nu * grad(u) - pI ) = f
+# rho * du/dt + rho * (grad(u) . u - w) - div( mu * grad(u) - pI ) = f
 # div( u ) = 0
 
 from dolfin import *
@@ -9,7 +9,7 @@ from dolfin import *
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [2**3]
 T = 1.5
-nu = 1.0
+mu = 1.0
 rho = 1.0
 k = 1.0         # elastic constant
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
@@ -64,7 +64,7 @@ for n in N :
     # ------- Boundary conditions for Poisson -------
     up = DirichletBC(W, w_up, "near(x[1], 1.0) && on_boundary")   
     contour = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[0], 1.0) || near(x[1], 0.0 )) \
-                          || (near(x[0], 0.0) && near(x[1], 0.0)) \
+                          || (near(x[0], 0.0) && near(x[1], 1.0)) \
                           || (near(x[0], 1.0) && near(x[1], 1.0) ) \
                           && on_boundary")
     
@@ -94,7 +94,7 @@ for n in N :
     # Weak formulation
     dudt = Constant(1./dt) * inner(u - u0, v) * dx
     a = ( Constant(rho) * inner(grad(u_mid)*(u0 - w0), v)   # ALE term
-         + Constant(nu) * inner(grad(u_mid), grad(v))
+         + Constant(mu) * inner(grad(u_mid), grad(v))
          - p * div(v)                               # CHECK THIS TERM
          + q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
          - inner(f,v) ) * dx
