@@ -6,17 +6,14 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**3]
+N = [2**5]
 T = 1.5
 mu = 1.0
 rho = 1.0
-k = 0.0         # elastic constant
+k = 1000.0         # elastic constant
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 
 dt = 0.01
-#dt = 0.05
-#dt = 0.025
-#dt = 0.0125
 
 for n in N : 
    
@@ -57,14 +54,14 @@ for n in N :
     cord = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[0], 0.0) && on_boundary" )
     
     # ------- Boundary conditions for Poisson -------
-    tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0) && on_boundary")   
+    # tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0) && on_boundary")   
     fixed = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[1], 0.0) || near(x[1], 1.0 )) \
                           || (near(x[0], 1.0) && near(x[1], 0.0)) \
                           || (near(x[0], 1.0) && near(x[1], 1.0) ) \
                           && on_boundary")
     
     bcu = [top, cord]
-    bcw = [tissue, fixed]
+    # bcw = [tissue, fixed]
     
     # #this is to verify that I am actually applying some BC
     # U = Function(VP)
@@ -116,7 +113,8 @@ for n in N :
     while t <= T + 1E-9:
     
         print "Solving for t = {}".format(t) 
-        
+        tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0, 0.1) && on_boundary")   
+        bcw = [tissue, fixed]
         # Solving the Navier-Stokes equations
         # I need to reassemble the system
         A = assemble(a0)
@@ -137,6 +135,12 @@ for n in N :
            bc.apply(A1, b1)
         
         solve(A1, W_.vector(), b1)
+
+        up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
+        w0.assign(W_)
+        y0.assign(Y)
+        
+        u0, p0 = VP_.split()
         
         # Compute the mesh displacement
         Y.vector()[:] = w0.vector()[:]*dt
@@ -148,13 +152,7 @@ for n in N :
         
         # -------- Update of solutions so the cycle can start again --------
         # I need to assign up0 because u0 and p0 are not "proper" functions
-        up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
-        w0.assign(W_)
-        y0.assign(Y)
-        plot(w0)
-        
-        u0, p0 = VP_.split()
-        #plot(u0)
-        #plot(mesh)
+        # plot(u0)
+        plot(mesh)
         
         t += dt
