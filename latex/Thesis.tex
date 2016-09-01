@@ -515,31 +515,40 @@ The variational formulation reads:
 \end{aligned}
 \]
 
-We now want to write the variational formulation form for Poisson: let $z$ be a test function in [SPECIFY THE SPACE]. Integrating by parts equation [PUT REFERENCE], we obtain
+We now want to write the variational formulation for the Poisson problem: let $\mathbf{z}$ be a test function in [SPECIFY THE SPACE]. Integrating by parts equation [PUT REFERENCE], we obtain
 
 \[
-\int_{\Omega} \nabla^2 w \, z \, dx = - \int_{\Omega} \nabla w \cdot \nabla z + \int_{\partial \Omega} \frac{\partial w}{\partial n} z \, ds.
+\int_{\Omega} \nabla^2 \mathbf{w} \, \mathbf{z} \, dx = - \int_{\Omega} \nabla \mathbf{w} \cdot \nabla \mathbf{z} \, dx + \int_{\partial \Omega} \frac{\partial \mathbf{w}}{\partial n} \mathbf{z} \, ds.
 \]
 
-Since we are assuming Dirichlet boundary condition on the entire boundary, I choose $z = 0$ everywhere, hence the term $\int_{\partial \Omega} \frac{\partial w}{\partial n} \, z \, dx  = 0 $ (we should notice as well that $w = u$ on the boundary, so the boundary it is divided in a part where $w = 0$, and another part where $w = $ some value of the velocity given in the Navier-Stokes boundary conditions). 
-
-Finally,
+Since we are assuming Dirichlet boundary conditions on the entire boundary, we choose $\mathbf{z = 0}$ everywhere, hence the term $\int_{\partial \Omega} \frac{\partial \mathbf{w}}{\partial \mathbf{n}} \, \mathbf{z} \, dx  = 0 $. Typically, the boundary $\partial \Omega_t$ will be divided into a physical and a fictitious boundary. We note as well that on the physical boundary, the values of $\mathbf{w}$ and $\mathbf{u}$ should be the same.
+Finally, we obtain
 
 \[
-\int_{\Omega} \nabla^2 w \, z \, dx = - \int_{\Omega} \nabla w \cdot \nabla z \, dx = 0.
+\int_{\Omega} \nabla^2 \mathbf{w} \, \mathbf{z} \, dx = - \int_{\Omega} \nabla \mathbf{w} \cdot \nabla \mathbf{z} \, dx = 0.
 \]
 
-The problem reads: find $w \in$ [SOME SPACE TO SPECIFY] such that
+The problem reads: find $\mathbf{w} \in$ [SOME SPACE TO SPECIFY] such that
 
 \[
 \begin{aligned}
--  \int_{\Omega_t} \nabla w & \cdot \nabla z \, dx = 0, & \text{in } \Omega_t, \\
-& w = u, & \text{on } \partial \Omega_t
+-  \int_{\Omega_t} \nabla \mathbf{w} & \cdot \nabla \mathbf{z} \, dx = 0, & \text{in } \Omega_t, \\
+& \mathbf{w} = \mathbf{u}, & \text{on } \partial \Omega_t
 \end{aligned}
 \]
 
-$\forall z \in $ [SPECIFY SPACE].
+$\forall \mathbf{z} \in $ [SPECIFY SPACE].
 
+\textbf{Reminder:} in our case, we choose
+
+\[
+\begin{aligned}
+\mathbf{w = u} \, & \text{ on } \partial \Omega_{Tissue}, \\
+\mathbf{w = 0} \, & \text{ on } \partial \Omega_t \setminus \partial \Omega_{Tissue}.
+\end{aligned}
+\]
+
+so we are allowing just the part of the boundary $\partial \Omega_{Tissue}$ to move.
 
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
 
@@ -548,11 +557,11 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf
 
 \[
 \begin{aligned}
-& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, v \, dx 
-+ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, v \, dx
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
-=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
-& \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0 , & x \in \Omega_t, \, t>0
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  & \mathbf{x} \in \Omega_t, \, t>0 \\
+& \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0 , & \mathbf{x} \in \Omega_t, \, t>0
 \end{aligned}
 \]
 
@@ -563,16 +572,16 @@ As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \fr
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds.
 \]
 
-The boundary $\partial \Omega$ can be divided in the four boundaries:
+The boundary $\partial \Omega_t$ can be divided in the four boundaries:
 
 \[
-\partial \Omega = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup  \partial \Omega_{Tissue}
+\partial \Omega_t= \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup  \partial \Omega_{Tissue}.
 \]
 
-On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$, I assume Dirichlet boundary conditions for the velocity $u$, hence the test function $v$ will be zero on these two boundaries. Moreover, I assumed $\sigma \cdot n = 0$ on $\partial \Omega_{Bottom}$, while $\sigma \cdot n = \pm k \vec{x} $ on $\partial \Omega_{Tissue}$, hence the boundary term becomes
+On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$ we assume Dirichlet boundary conditions for the velocity $\mathbf{u}$, hence the test function $\mathbf{v}$ will be zero on these two boundaries. Moreover, I assumed $\sigma \cdot \mathbf{n} = 0$ on $\partial \Omega_{Bottom}$, while $\sigma \cdot \mathbf{n} = \pm k \vec{x} $ on $\partial \Omega_{Tissue}$, hence the boundary term becomes
 
 \[
-- \int_{\partial \Omega_F (t)} (\nu \nabla u - \frac{1}{\rho} p I) \cdot n v dx = - \int_{\partial \Omega_{Tissue}} (\pm k \vec{x}) v dx.
+- \int_{\partial \Omega_t} (\nu \nabla \mathbf{u} - \frac{1}{\rho} p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx = - \int_{\partial \Omega_{Tissue}} (\pm k \vec{x}) \, \mathbf{v} \, dx.
 \]
 
 
@@ -581,10 +590,10 @@ The variational formulation reads:
 \begin{aligned}
 \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-&+ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
+& + \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
 & - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
-& =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
-\int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , & & x \in \Omega_t, \, t>0
+& =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  & \qquad \mathbf{x} \in \Omega_t, \, t>0 \\
+& \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , \qquad & \mathbf{x} \in \Omega_t, \, t>0
 \end{aligned}
 \]
 
