@@ -13,8 +13,9 @@
 \usepackage{graphicx}
 \usepackage{indentfirst}
 \usepackage{microtype}
-\usepackage{lmodern} 
+\usepackage{lmodern}
 \usepackage{braket}
+\usepackage{todonotes}
 
 \usepackage[font=small,labelfont=bf]{caption}  %per la didascalia delle immagini
 \usepackage{mathrsfs}  %per fare le lettere calligrafiche
@@ -26,11 +27,12 @@
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
-
-\setlength\parindent{0pt}  % toglie identazione ovunque
+% MER says: You can have no-indent later if you want to, but not while
+% I'm reading this.
+%\setlength\parindent{0pt} % toglie identazione ovunque
 \usepackage[sc]{mathpazo}
 
-
+\newcommand{\mesh}{\mathcal{T}_t}
 
 % -----------------
 
@@ -84,12 +86,12 @@ Student: \\
 \thispagestyle{empty}
 \phantom{}
 \end{titlepage}
-\newpage 
+\newpage
 \thispagestyle{empty}
 
 %--------------------------
 
-\tableofcontents 
+\tableofcontents
 \pagenumbering{roman}
 
 \newpage
@@ -102,8 +104,10 @@ Student: \\
 
 \chapter{Mathematical models}
 
+\section{The Navier-Stokes equations}
 
-\section{The Navier-Stokes Equations on a fixed domain}
+\subsection{The Navier-Stokes equations on a fixed domain}
+
 % References:
 % - Quarteroni
 % - Vegard
@@ -113,7 +117,7 @@ The flow in the SAS and in the spinal cord can be described by the incompressibl
 
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 &\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (\mathbf{u} \cdot \nabla)\mathbf{u} - \nabla \cdot \sigma(\mathbf{u},p) = \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
 & \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
@@ -136,7 +140,7 @@ where $\epsilon(\mathbf{u})$ is the symmetric strain rate tensor
 The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a forcing term per unit of mass. Setting $\nu = \frac{\mu}{\rho}$ the kinematic viscosity, and dividing the first equation by $\rho$, the system can be rewritten as
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 &\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
 & \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
@@ -154,7 +158,7 @@ Since $\nu$ is constant, from the continuity equation we obtain
 hence the system can be written in the equivalent form
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 &\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
 & \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
@@ -162,7 +166,7 @@ hence the system can be written in the equivalent form
 \right.
 \]
 
-In order for the problem to be well posed, it is necessary to assign an initial condition 
+In order for the problem to be well posed, it is necessary to assign an initial condition
 
 \[
 \mathbf{u} (\mathbf{x}, 0) = \mathbf{u}_0(\mathbf{x}) \quad \forall \mathbf{x} \in \Omega,
@@ -171,7 +175,7 @@ In order for the problem to be well posed, it is necessary to assign an initial 
 where $\mathbf{u}_0$ is a given divergence-free vector field, together with suitable boundary conditions, such as
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 & \mathbf{u}(\mathbf{x},t) = \phi (\mathbf{x}, t) & \forall \mathbf{x} \in \Gamma_D \\
 & \left( \nu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n} \right) (\mathbf{x},t) = \psi(\mathbf{x},t) & \forall \mathbf{x} \in \Gamma_N
@@ -189,7 +193,7 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 \normalfont{In our notation, if $\mathbf{u} = (u_x, u_y)^T$ and $\mathbf{x} = (x, y)^T$, then $\nabla \mathbf{u}$ is defined as
 
 \[
-\nabla \mathbf{u} = 
+\nabla \mathbf{u} =
 \begin{pmatrix}
 \frac{\partial u_x}{\partial x} & \frac{\partial u_x}{\partial y} \\
 \frac{\partial u_y}{\partial x} & \frac{\partial u_y}{\partial y}
@@ -231,49 +235,78 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 %--------
 
-\subsection{Derivation of the Navier-Stokes equations}
+%\subsection{Derivation of the Navier-Stokes equations}
 
+\subsection{Navier-Stokes on a moving domain}% -- ALE formulation}
 
-\section{Navier-Stokes on a moving domain}
+%\subsection{The Arbitrary Lagrangian Eulerian description}
 
-\subsection{The Arbitrary Lagrangian Eulerian description}
-Put a description of ALE as Vegard did (check Donea's paper).
+%\subsection{ALE formulation of Navier-Stokes equations}
 
-\subsection{The ALE formulation}
-Our next step is to allow a piece of the boundary to move. We are going to denote with $\Omega_t$ the fluid domain, which will change with respect to time. In fluid-structure interaction, the fluid domain $\Omega_t$ consists of the same material particles at all times, and moves with the material points within the structure. This translates mathematically in the condition $\mathbf{w} = \dot{\mathbf{y}} = \mathbf{u}$, where $\mathbf{w}$ is the \textit{mesh velocity}, and $\mathbf{y}$ is the \textit{mesh displacement}. In fact, the fluid domain has to follow the changes on the fluid-structure interface. \\
-The mesh velocity can be chosen arbitrarily in principle, but this choice could effect the accuracy of the solver. In this scenario, we need to encounter the distortion of each element in the fluid domain. \\
-A way to avoid the squeezing of the elements in the mesh is to use a \textit{Laplacian smoothing} algorithm, which consists of solving a Laplace equation for the mesh displacement in the fluid. This is a mesh regularization method where the lines in the mesh have equal potential (See WINSLOW 1963 + PUT REFERENCE).\\
-Hence, the mesh velocity $\mathbf{w}$ will have to satisfy
+Our next step is to allow the domain and its boundary to move, and
+solve the Navier-Stokes equations on this deforming domain. Let
+$\Omega_t$ denote the fluid domain which depends on time $t$. Let
+$\Omega_0$ denote the fixed fluid domain at $t = 0$. In
+fluid-structure interaction, the fluid domain $\Omega_t$ consists of
+the same material particles at all times, and moves with the material
+points within the structure. Also assume that we have a mesh $\mesh$
+of the domain $\Omega_t$. Let $\mathbf{w}$ denote the \emph{mesh
+  velocity}, and $\mathbf{y}$ the \emph{mesh displacement} with
+respect to the reference domain $\Omega_0$, and thus by definition
+$\dot{\mathbf{y}} = \mathbf{w}$ where the superposed dot denotes the
+time derivative. The mesh velocity can be chosen arbitrarily in
+principle, but this choice could effect the accuracy of the
+solution~\cite{}.
 
-\[
-\left\{  
+The movement of the domain $\Omega_t$ is governed by the mesh
+displacement, i.e.~for all $x(t) \in \Omega_t$, each corresponding to
+a point $x_0 \in \Omega_0$, we have that
+\begin{equation}
+  x(t) = x_0 + \mathbf{y}(t)(x_0).
+\end{equation}
+%\todo[inline]{Check the precise formulation carefully in Donea
+%  reference e.g.}
+
+An ALE formulation of the Navier-Stokes equations on the deforming
+domain $\Omega_t$ reads: find the velocity $\mathbf{u}$ and the
+pressure $p$ such that
+\begin{align}
+  \label{eq:ns:1}
+  \rho \dot{\mathbf{u}}
+  + \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u}
+  - \mu \Delta \mathbf{u} + \nabla p
+  &= \mathbf{f},  & \text{in } \Omega_t, \\
+  \label{eq:ns:2}
+  \nabla \cdot \mathbf{u} &= 0, & \text{in } \Omega_t,
+\end{align}
+for $t \in (0, T]$ where $\mathbf{f}$ is a given body force, $\rho$ is
+  the fluid density, $\mu$ is the fluid viscosity. The
+  system~\eqref{eq:ns:1}--\eqref{eq:ns:2} must be closed by
+  appropriate boundary and initial conditions.
+
+We will let the fluid domain boundary follow the changes on the
+fluid-structure interface. Moreover, to move the entire domain, we
+will use a \emph{Laplacian smoothing}
+algorithm~\cite{Winslow1963}. More precisely, our mesh smoothing
+equation reads: given a boundary velocity $\mathbf{u}_0$, find
+$\mathbf{w}$ that satisfies
+\begin{equation}
+%\left\{
 \begin{aligned}
-& \Delta \mathbf{w} = 0 	& \text{in } \Omega_t \\
-& \mathbf{w} = \mathbf{u} 				& \text{on } \partial \Omega_t
+- \Delta \mathbf{w} &= 0 	&& \text{in } \Omega_t, \\
+\mathbf{w} &= \mathbf{u}_0 && \text{on } \partial \Omega_t .
 \end{aligned}
-\right.
-\]
+%\right.
+\end{equation}
+for each $t \in [0, T]$
 
-
-The ALE formulation of the Navier-Stokes equations reads
-
-\[
-\left\{  
-\begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega_t, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega_t, \, t>0
-\end{aligned}
-\right.
-\]
-
-WHAT ABOUT THE PRESCRIBED MOVEMENT? SHOULD I PUT IT IN THE TEST CASE SECTION, OR SAY SOMETHING HERE AS WELL?
 
 %\section{Navier-Stokes + ALE with elastic walls (Eleonora)}
 %
-%Starting from the previous case, we introduce a new equation to the system 
+%Starting from the previous case, we introduce a new equation to the system
 %
 %\[
-%\left\{  
+%\left\{
 %\begin{aligned}
 %&\frac{\partial \mathbf{u}}{\partial t} + [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & x \in \Omega_t, \, t>0 \\
 %& \nabla \cdot \mathbf{u} = 0, & x \in \Omega_t, \, t>0 \\
@@ -286,44 +319,82 @@ WHAT ABOUT THE PRESCRIBED MOVEMENT? SHOULD I PUT IT IN THE TEST CASE SECTION, OR
 %\right.
 %\]
 %
-%where $k$ is an elastic constant. 
+%where $k$ is an elastic constant.
 
-\section{Navier-Stokes + ALE with elastic walls (Eleonora)}
-In this section we introduce a further assumption to our model. The idea of this assumption comes from our aim to model the post operative effect of a portion of the spinal cord. As after craniovertebral decompression the increase of CSF flow might depend on the compliance of a region of the spine, we assume that part of the boundary of our unit square (which ideally reproduces a segment of the spine) moves according to some elastic force. In order to do so,  we divide the boundary $\partial \Omega_t$ in 4 boundaries, as follows (PUT PICTURE):
+\section{Modelling the SAS with elastic surroundings}
 
-\[
-\partial \Omega_t = \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup \partial \Omega_{Tissue}
-\]
+\begin{figure}
+  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
+    of computational domain}
+\end{figure}
 
-On the top boundary we assume an inlet velocity $\tilde{u}$, while on the bottom boundary we assume the condition $\sigma \cdot n = 0$ (\textit{do nothing condition?}, or in alternative a pressure gradient). On the left boundary, that corresponds to the spinal cord, we assume for now a no-slip boundary condition, so that the cord is rigid. Regarding the right boundary, in order to simulate an elastic property of the wall/tissue, we assume that a spring is acting on the wall. We assume that $k$ is the elastic constant, and $\vec{x}$ is the position vector (MAYBE GIVE ANOTHER NAME? I CALLED $\mathbf{x}$ A GENERIC POINT), and we set equilibrium of stresses as follows: $\sigma \cdot \mathbf{n} = \pm k \vec{x}$, where $\sigma = \nu \nabla u - \frac{1}{\rho} p I$ (I DEFINED $\sigma$ DIFFERENTLY EARLIER, I NEED TO CORRECT THAT OR THIS).
+We will consider a fluid domain $\Omega_t$ representing a section of
+the subarachnoid space between the spinal cord and the surrounding
+tissue.
 
-The boundary conditions will be:
+Assuming axial symmetry along the spinal cord length axes, we consider
+a two-dimensional rectangular reference domain $\Omega_0 = [0, L_x]
+\times [0, L_y]$. We define the
+\begin{itemize}
+\item
+  top boundary: $\partial \Omega_{\rm top}^0 = \{ (x_0, x_1) | x_1 = L_y\}$;
+\item
+  bottom boundary: $\partial \Omega_{\rm bottom}^0 = \{ (x_0, x_1) | x_1 = 0\}$;
+\item
+  tissue boundary: $\partial \Omega_{\rm tissue}^0 = \{ (x_0, x_1) | x_0 = L_x\}$;
+\item
+  cord boundary: $\partial \Omega_{\rm cord}^0 = \{ (x_0, x_1) | x_0 = 0\}$;
+\end{itemize}
+and thus $\partial \Omega^0 = \partial \Omega_{\rm top}^0 \cup
+\partial \Omega_{\rm bottom}^0 \cup \partial \Omega_{\rm cord}^0 \cup
+\partial \Omega_{tissue}^0$. Further,
+\begin{equation}
+  \partial \Omega^t_{\rm i} = \partial \Omega^0_{\rm i} + \mathbf{y}(t)(\partial \Omega^0_{\rm i}),
+\end{equation}
+for each $i$.
 
-\[
-\begin{aligned}
-\mathbf{u} = \tilde{\mathbf{u}}, & \qquad \text{ on } \partial \Omega_{Top} \\
-\sigma \cdot \mathbf{n} = \vec{0}, & \qquad \text{ on } \partial \Omega_{Bottom} \\
-\mathbf{u} =\vec{0}, & \qquad \text{ on } \partial \Omega_{Cord} \\
-\sigma \cdot \mathbf{n} = \pm k\vec{x} & \qquad \text{ on }  \partial \Omega_{Tissue}
-\end{aligned}.
-\]
+We are interested in studying the effect of craniovertebral
+decompression on the fluid flow and pressure dynamics in the
+subarachnoid space. In particular, we assume that craniovertebral
+decompression induces a change in the compliance of the tissue
+surrounding the spinal canal~\cite{}. For simplicity, we aim to model
+the compliance of the surrounding tissue via a boundary condition for
+the fluid flow. We will assume that the tissue boundary $\partial
+\Omega_{\rm tissue}$ is elastic with stiffness $k$ and in particular
+allowed to move. To this end, we introduce the boundary condition
+\begin{equation}
+  \left ( \mu \nabla \mathbf{u} - p I
+  \right ) \cdot \mathbf{n} = \pm k \mathbf{y}
+  \qquad \text{ on }  \partial \Omega_{\rm tissue},
+\end{equation}
+where $\mathbf{n}$ is the outward pointing boundary normal and
+$\mathbf{y}$ still denotes the mesh displacement. For simplicity, on
+the spinal cord side, we assume that the cord is rigid and fixed,
+i.e.:
+\begin{equation}
+  \mathbf{u} = \mathbf{0} \quad \text { on } \partial \Omega_{\rm cord}.
+\end{equation}
+% MER: Hmmm... This means that if y = 0, the wall is free to move.
 
-As before, the mesh velocity satisfies $\mathbf{w} = \dot{\mathbf{y}}$, where $\mathbf{y}$ is the mesh displacement. We choose a Laplacian smoothing of the mesh:
+To induce a fluid flow in the subarachnoid space, we prescribe an
+inlet velocity $\tilde{u}$ on the top boundary, while on the bottom
+boundary we assume that $ \left ( \mu \nabla \mathbf{u} - p I \right )
+\cdot \mathbf{n} = 0$.
 
-\[
--\Delta \mathbf{w} = 0, \qquad \text{ in } \Omega_t
-\]
+For the mesh equation, we let the mesh velocity follow the fluid
+velocity on the tissue boundary, while the mesh velocity is assumed to
+be zero (i.e.~the mesh boundary is fixed) on the remaining boundary:
+\begin{align}
+\mathbf{w} &= \mathbf{u}  \qquad \text{ on } \partial \Omega_{\rm tissue},\\
+\mathbf{w} &= \mathbf{0}  \qquad \text{ on } \partial \Omega^t \setminus \partial \Omega_{\rm tissue}
+\end{align}
 
-Since we are considering the simplest case where only $\partial \Omega_{Tissue}$ is subject to the elastic force, we impose
-
-\[
-\begin{aligned}
-\mathbf{w} = \vec{0}, & \qquad \text{ on } \partial \Omega_t \setminus \partial \Omega_{Tissue} \\
-\mathbf{w} = \mathbf{u}, & \qquad \text{ on } \partial \Omega_{Tissue}.
-\end{aligned}
-\]
-
-Note that $\partial \Omega_{Cord}$ and $\partial \Omega_{Tissue}$ are \textit{physical} boundaries, i.e. they correspond to actual portions of the spinal cord. This means that $\mathbf{u}$ and $\mathbf{w}$ should have the same value on these boundaries, since the fluid follows the movement (if any) of the walls.
+Note that $\partial \Omega_{\rm cord}$ and $\partial \Omega_{\rm
+  tissue}$ are \textit{physical} boundaries, i.e.~they model portions
+of the spinal cord and surrounding tissue. This means that
+$\mathbf{u}$ and $\mathbf{w}$ should have the same value on these
+boundaries, since the fluid follows the movement (if any) of the
+walls.
 
 \section{Navier-Stokes + ALE with elastic walls (Marie)}
 Let us start with Navier-Stokes encountering the ALE term. The problem reads:
@@ -433,13 +504,13 @@ Since we set Dirichlet boundary conditions on the entire boundary and $\mathbf{v
 Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
 
 
-Since the pressure is defined up to some constant, we add the constraint 
+Since the pressure is defined up to some constant, we add the constraint
 
 \[
 \frac{1}{|\Omega |} \int_{\Omega} p = 0,
 \]
 
-so we can compare an exact solution with mean value zero with the approximate solution. 
+so we can compare an exact solution with mean value zero with the approximate solution.
 
 \subsection{Weak formulation of Navier-Stokes equations}
 
@@ -483,7 +554,7 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $v$ the 
 
 \[
 \begin{aligned}
-& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
 =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
@@ -498,7 +569,7 @@ As before, the term $- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -   \fr
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho} pI)\mathbf{v} \, dx =  \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
 \]
 
-The boundary $\partial \Omega$ can be divided in two boundaries $ \partial \Omega = \partial \Omega_D \cup \partial \Omega_N $, where $\partial \Omega_D$ and $\partial \Omega_N$ are respectively the Dirichlet boundary and the Neumann boundary. 
+The boundary $\partial \Omega$ can be divided in two boundaries $ \partial \Omega = \partial \Omega_D \cup \partial \Omega_N $, where $\partial \Omega_D$ and $\partial \Omega_N$ are respectively the Dirichlet boundary and the Neumann boundary.
 Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{D}$ is zero. The term on $\partial \Omega_{D}$ is also zero: since $\sigma = \nu \nabla \mathbf{u} -  \frac{1}{\rho} pI$ and $\sigma \cdot \vec{\mathbf{n}} = 0$ on $\partial \Omega_{D}$, the remaining term on the boundary is also zero. Hence,
 
 \[- \int_{\partial \Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \mathbf{n} \, \mathbf{v} \, dx = 0.\]
@@ -507,7 +578,7 @@ The variational formulation reads:
 
 \[
 \begin{aligned}
-& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
 =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \, dx,  & x \in \Omega_t, \, t>0 \\
@@ -557,7 +628,7 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf
 
 \[
 \begin{aligned}
-& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
+& \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 - \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
 =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  & \mathbf{x} \in \Omega_t, \, t>0 \\
@@ -588,7 +659,7 @@ On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$ we assume Dirichlet boun
 The variational formulation reads:
 \[
 \begin{aligned}
-\int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx 
+\int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 & + \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
 & - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
@@ -602,7 +673,7 @@ The variational formulation reads:
 Weak formulation for the Poisson problem
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 -\Delta y = 0, \quad in \Omega_F (t), \\
 y = y_0,  \quad on \partial \Omega_0 (t) \\
@@ -622,10 +693,10 @@ Integrating by parts, we obtain
 \int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
 \]
 
-Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence, 
+Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence,
 
 \[
-\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z. 
+\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z.
 \]
 
 
@@ -644,7 +715,7 @@ Let $u^i$ be an approximation of $u(t_i)$. We want to compute $u^{i+1}$ and $p^{
 The Crank-Nicolson discretization reads:
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 & \rho \frac{u^{i+1} - u^i}{\Delta t} + \rho (\nabla u^{mid} \cdot u^i) - \nabla \cdot (\nu \Delta u^{mid} - p^{mid}I) = f^{mid} \\
 & \nabla u^{i+1} = 0
@@ -656,10 +727,10 @@ where we set $u^{mid} = \frac{u^i + u^{i+1}}{2}$.
 
 \subsection{Spatial discretization}
 We multiply the Navier-Stokes equations, respectively, by the test functions $v$ and $q$. We choose $v \in \hat{V} = \set{v \in [H^1(\Omega)]^2 | v_|{_{\partial \Omega_{top} \cup \Omega_{bottom}}} = 0}$, and $q \in \hat{Q}$ (SPECIFY $\hat{Q}$). \\
-Problem: find $(u^{i+1}, p^{i+1}) \in \hat{V} \times \hat{Q}$ such that 
+Problem: find $(u^{i+1}, p^{i+1}) \in \hat{V} \times \hat{Q}$ such that
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 & \langle \rho \frac{u^{i+1} - u^i}{\Delta t},v \rangle_\Omega
 + \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
@@ -677,7 +748,7 @@ Since the boundary term in (PUT REFERENCE) is always zero, the following holds:
 \[
 \begin{aligned}
 \langle \nabla \cdot (\nu \nabla u - pI) ,v \rangle_\Omega & = \langle \nu \nabla u - pI ,\nabla v \rangle_\Omega \\
-														& = \langle \nu \nabla u  ,\nabla v \rangle  - \langle p ,\nabla \cdot v \rangle_\Omega										
+														& = \langle \nu \nabla u  ,\nabla v \rangle  - \langle p ,\nabla \cdot v \rangle_\Omega
 \end{aligned}
 \]
 
@@ -690,7 +761,7 @@ Hence we obtain:
 So the numerical scheme reads:
 
 \[
-\left\{  
+\left\{
 \begin{aligned}
 & \langle \rho \frac{u^{i+1} - u^i}{\Delta t},v \rangle_\Omega
 + \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
@@ -752,7 +823,7 @@ The algorithm reads:
 -for each time step $t_0, t_1, ..., t_n$
 \begin{itemize}
 \item solve N-S on $\Omega_i$ adding the mesh velocity term $w^i$ (from here find $u^{i+1}, p^{i+1}$;
-\item solve Poisson problem for $w^{i+1}$, where 
+\item solve Poisson problem for $w^{i+1}$, where
 
 \[
 \begin{aligned}
@@ -795,12 +866,12 @@ where I linearized the convective term
 \chapter{Verification}
 
 \section{Method of manifactured solutions (MMS)}
-% References: 
+% References:
 % Haga
 % FEniCS book page 390
 % http://prod.sandia.gov/techlib/access-control.cgi/2000/001444.pdf
 
-A test problem for which we can easily check the answer is performed using the \textit{manufactured solutions}. The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form 
+A test problem for which we can easily check the answer is performed using the \textit{manufactured solutions}. The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form
 
 \[
 Du = g,
@@ -808,7 +879,7 @@ Du = g,
 
 where $D$ is the differential operator, $u$ is the solution, and $g$ is a source term. In the method of exact solution (MES), one chooses the function $g$ and then inverts the operator in order to solve for $u$. In MMS, one first manufactures a solution $u$, and then applies $D$ to $u$ to find $g$. \\
 
-We want to apply the manufactured solution technique to solve the Stokes equation. Let $\Omega$ be the unit square $\Omega = [0,1]^2$, and 
+We want to apply the manufactured solution technique to solve the Stokes equation. Let $\Omega$ be the unit square $\Omega = [0,1]^2$, and
 
 \vspace{0.2cm}
 \[
@@ -819,7 +890,7 @@ We want to apply the manufactured solution technique to solve the Stokes equatio
 \]
 \vspace{0.2cm}
 
-where kinematic viscosity $\nu = 1/8$. Let 
+where kinematic viscosity $\nu = 1/8$. Let
 
 \[
 \partial \Omega = \partial \Omega_{inflow} \cup \partial \Omega_{outflow} \cup \partial \Omega_{sides}
@@ -840,7 +911,7 @@ where $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, and $\partial \Om
 As a first example, we use the following manufactured solution:
 
 \[
-\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad 
+\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad
 p_{exact} = \frac{1}{2}-y.
 \]
 
@@ -879,7 +950,7 @@ $ 64$ & $6.3504 \times 10^{-13}$ & $9.5275 \times 10^{-11}$ &  $ 6.3504 \times 1
 A difference exact solution that could be used is:
 
 \[
-\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad 
+\mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ sin(\pi x) \end{array} \right], \quad
 p_{exact} = \frac{1}{2}-y.
 \]
 
@@ -996,7 +1067,7 @@ where $\omega$ is the vorticity given by
 \]
 
 
-As a reference value, we use the one reported on the FEniCS book [REFERENCE], where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$. 
+As a reference value, we use the one reported on the FEniCS book [REFERENCE], where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$.
 
 \begin{figure}[ht]
 \centering
