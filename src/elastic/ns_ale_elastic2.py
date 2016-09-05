@@ -10,10 +10,10 @@ N = [2**5]
 T = 1.5
 mu = 1.0
 rho = 1.0
-k = 1000.0         # elastic constant
+k = 10.0         # elastic constant
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 
-dt = 0.0005
+dt = 0.05
 
 for n in N : 
    
@@ -55,10 +55,13 @@ for n in N :
     
     # ------- Boundary conditions for Poisson -------
     # tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0) && on_boundary")   
+    fixed = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[1], 0.0) || near(x[1], 1.0 )) && on_boundary")
+    
+    
     fixed = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[1], 0.0) || near(x[1], 1.0 )) \
-                          || (near(x[0], 1.0) && near(x[1], 0.0)) \
-                          || (near(x[0], 1.0) && near(x[1], 1.0) ) \
-                          && on_boundary")
+                      || (near(x[0], 1.0) && near(x[1], 0.0)) \
+                      || (near(x[0], 1.0) && near(x[1], 1.0) ) \
+                      && on_boundary")
     
     bcu = [top, cord]
     # bcw = [tissue, fixed]
