@@ -10,15 +10,18 @@ N = [2**5]
 T = 1.5
 mu = 1.0
 rho = 1.0
-k = 10.0         # elastic constant
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
-
-dt = 0.05
+#k = 0.00100
+# k = 1000000
+k = 0.001
+dt = 0.01
 
 for n in N : 
    
     mesh = UnitSquareMesh(n, n)  
     x = SpatialCoordinate(mesh)
+    normal = FacetNormal(mesh)
+    unit = Expression(("1.0", "0.0"))
     
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
@@ -38,64 +41,62 @@ for n in N :
                          # REMEMBER: In this way when I update the up0 also the u0 and p0 get updated
                          # This is different from up0.split which I can use if I want to plot
     w0 = Function(W)
-    y0 = Function(W)   #displacement
+    
+    X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+    Y = Function(W)  # by default this is 0 in all the components, Y is the adding displacement (what we add in order to move the mesh)
     
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
+    u_inlet = Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))"), degree = 2)
     
     u_mid = (1.0-theta)*u0 + theta*u
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
     
-    # ------- Boundary conditions for Navier-Stokes --------
-    u_inlet = Expression(("0.0", "x[0]*(x[0] - 1)"), degree = 2)
+        
+    # Define boundary conditions
+    fd = FacetFunction("size_t", mesh)
+    CompiledSubDomain("near(x[0], 0.0)").mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
+    CompiledSubDomain("near(x[0], 1.0)").mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
+    CompiledSubDomain("near(x[1], 1.0)").mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], 0.0)").mark(fd, 4) # bottom wall (outlet)
+    ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
-    top = DirichletBC(VP.sub(0), u_inlet , "near(x[1], 1.0) && on_boundary" )
-    cord = DirichletBC(VP.sub(0), (0.0, 0.0) , "near(x[0], 0.0) && on_boundary" )
+    #plot(fd)
+    #interactive()
     
-    # ------- Boundary conditions for Poisson -------
-    # tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0) && on_boundary")   
-    fixed = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[1], 0.0) || near(x[1], 1.0 )) && on_boundary")
+    # Here I need to impose just the Dirichlet conditions. The ones regarding the stresses were already encountered in the
+    # weak formulation
+    bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the topo wall
+           DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
+    bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
+                DirichletBC(W, Constant((0.0,0.0)), fd, 3),
+                DirichletBC(W, Constant((0.0,0.0)), fd, 4),
+                DirichletBC(W, dot(u0,unit)*unit, fd, 2)]
+           # PHYSICAL BOUNDARY --> here the values of w and u have to be the same
+#                DirichletBC(W, dot(u0,unit) * unit, fd, 2),                       # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+                       # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+
     
+    # check the BC are correct
+    #U = Function(VP)
+    #for bc in bcu: bc.apply(U.vector())
+    #plot(U.sub(0))
+    #interactive()
     
-    fixed = DirichletBC(W, (0.0, 0.0), " ( near(x[0], 0.0) || near(x[1], 0.0) || near(x[1], 1.0 )) \
-                      || (near(x[0], 1.0) && near(x[1], 0.0)) \
-                      || (near(x[0], 1.0) && near(x[1], 1.0) ) \
-                      && on_boundary")
-    
-    bcu = [top, cord]
-    # bcw = [tissue, fixed]
-    
-    # #this is to verify that I am actually applying some BC
-    # U = Function(VP)
-    # # this applies BC to a vector, where U is a function
-    # top.apply(U.vector())
-    # cord.apply(U.vector())
-    # uh, ph = U.split()
-    # plot(uh)
-    # #plot(ph)
-    # interactive()
-    # exit()
-    
-    # w = Function(W)
-    # tissue.apply(w.vector())
-    # fixed.apply(w.vector())   
-    # plot(w)
-    # interactive()
-    # exit()
-    X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
-    
+
     #-------- NAVIER-STOKES --------
     # Weak formulation
     dudt = Constant(1./dt) * inner(u - u0, v) * dx
     a = ( Constant(rho) * inner(grad(u_mid)*(u0 - w0), v)   # ALE term
          + Constant(mu) * inner(grad(u_mid), grad(v))
          - p * div(v)                               # CHECK THIS TERM
-         + q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
+         - q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
          - inner(f,v) ) * dx
-    # b = - inner(Constant(k) * y0, v) * ds
-
-    b = - inner(Constant(k) * X, v) * ds
+    
+    #b = Constant(k) * inner(X+Constant(dt)*u, v) * ds(2)    # what should I use here as displacement?
+    b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
+    # b = inner(Constant(k) * X+Constant(dt)*u, v) * ds(2)    # what should I use here as displacement?
         
     # Bilinear and linear forms
     F = dudt + a + b
@@ -110,16 +111,15 @@ for n in N :
     VP_ = Function(VP)   
     W_ = Function(W)
     
-    # Y is the adding displacement (what we add in order to move the mesh)
-    Y = Function(W)  # by default this is 0 in all the components
 
     solver = PETScLUSolver()
     t = 0.0
     while t <= T + 1E-9:
     
         print "Solving for t = {}".format(t) 
-        tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0, 0.1) && on_boundary")   
-        bcw = [tissue, fixed]
+        #tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0, 0.1) && on_boundary")   
+        #bcw = [tissue, fixed]
+        
         # Solving the Navier-Stokes equations
         # I need to reassemble the system
         A = assemble(a0)
@@ -135,6 +135,10 @@ for n in N :
         # Solving the Poisson problem
         A1 = assemble(a1)
         b1 = assemble(L1)
+         
+        bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
+        #bcw[1] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
+        
         
         for bc in bcw:
            bc.apply(A1, b1)
@@ -143,9 +147,8 @@ for n in N :
 
         up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
         w0.assign(W_)
-        y0.assign(Y)
         
-        u0, p0 = VP_.split()
+        #u0, p0 = VP_.split()
         
         # Compute the mesh displacement
         Y.vector()[:] = w0.vector()[:]*dt
@@ -155,9 +158,13 @@ for n in N :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
         
-        # -------- Update of solutions so the cycle can start again --------
         # I need to assign up0 because u0 and p0 are not "proper" functions
         # plot(u0)
         plot(mesh)
+        # plot(u0)
+        normal = FacetNormal(mesh)
         
         t += dt
+        #break
+# plot(u0)
+# interactive()
