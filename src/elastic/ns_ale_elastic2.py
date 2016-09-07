@@ -13,7 +13,7 @@ rho = 1.0
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 #k = 0.00100
 # k = 1000000
-k = 0.001
+k = 1e7
 dt = 0.01
 
 for n in N : 
