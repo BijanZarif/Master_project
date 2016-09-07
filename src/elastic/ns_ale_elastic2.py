@@ -73,9 +73,9 @@ for n in N :
                 DirichletBC(W, Constant((0.0,0.0)), fd, 3),
                 DirichletBC(W, Constant((0.0,0.0)), fd, 4),
                 DirichletBC(W, dot(u0,unit)*unit, fd, 2)]
-           # PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-#                DirichletBC(W, dot(u0,unit) * unit, fd, 2),                       # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
-                       # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+
+#                DirichletBC(W, dot(u0,unit) * unit, fd, 2),  # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+
 
     
     # check the BC are correct
