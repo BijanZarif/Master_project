@@ -738,12 +738,67 @@ The variational formulation reads:
 \begin{align*}
 \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-+ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
-- \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
++ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega_{tissue}} (\pm k \vec{x}) \, \mathbf{v} \, dx
 =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  \qquad \mathbf{x} \in \Omega_t, \, t>0 \\
 \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , \qquad \mathbf{x} \in \Omega_t, \, t>0
 \end{align*}
 
+The problem with the previous "version" of the variational formulation is on the boundary term. We would like to set the tangential component of the velocity to $0$, in order to allow the mesh to move just in the normal direction of the $\partial \Omega_{tissue}$ boundary [We also need another condition for the normal direction, WHICH ONE? TO WRITE PRECISELY].
+
+We start from 
+
+\[
+ \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
+- \int_{\Omega} \nabla \cdot (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI)\mathbf{v} \, dx
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+\]
+
+I integrate by parts and obtain 
+
+\begin{align*}
+ \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} (\nu \nabla \mathbf{u}
+-  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
+- \int_{\partial \Omega} (\nu \nabla \mathbf{u}
+-  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds \\
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+\end{align*}
+
+According to the boundary conditions, in the boundary term $\partial \Omega_{tissue}$ is the only one that survives, hence
+
+\begin{align*}
+ \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
++ \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} (\nu \nabla \mathbf{u}
+-  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
+- \int_{\partial \Omega_{tissue}} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot n \, \mathbf{v} \, ds \\
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+\end{align*}
+
+Let us consider the boundary term $- \int_{\partial \Omega_{tissue}} (\mu \nabla \mathbf{u} -  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds$. I can rewrite as $- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds$. Since $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$, I can rewrite the previous term:
+
+\begin{align*}
+& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial (\mathbf{u}^n + \mathbf{u}^t)}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial (\mathbf{u}^n + \mathbf{u}^t)  }{\partial \mathbf{n}} \mathbf{v} \,ds - \int_{\partial \Omega_{tissue}} p \mathbf{n} \, \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v} \, ds
++ \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v} \, ds
+- \int_{\partial \Omega_{tissue}} p \mathbf{n} \, \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v} \, ds 
++ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} (\mathbf{v}^n + \mathbf{v}^t) \, ds 
++ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
+& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
++ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
+\end{align*}
+
+[where the last equality is due to the fact that the spaces are in direct sum? VERIFY]
+On the first term I can apply Nietsche method, as shown before.
+
+\todo[inline]{My problem is: what about the second term? I should substitute it with the term $k \mathbf{y}$, but what is the right condition that we use?}
 
 %\subsection{Weak Formulation of ALE + elastic (Marie)}
 %Weak formulation for the Poisson problem
