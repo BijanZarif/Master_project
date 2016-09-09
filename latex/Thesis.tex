@@ -264,8 +264,8 @@ a point $x_0 \in \Omega_0$, we have that
 \begin{equation}
   x(t) = x_0 + \mathbf{y}(t)(x_0).
 \end{equation}
-%\todo[inline]{Check the precise formulation carefully in Donea
-%  reference e.g.}
+\todo[inline]{Check the precise formulation carefully in Donea
+  reference e.g.}
 
 An ALE formulation of the Navier-Stokes equations on the deforming
 domain $\Omega_t$ reads: find the velocity $\mathbf{u}$ and the
@@ -621,6 +621,83 @@ $\forall \mathbf{z} \in $ [SPECIFY SPACE].
 
 so we are allowing just the part of the boundary $\partial \Omega_{Tissue}$ to move.
 
+\subsection{The Nitsche method}
+I want to solve
+
+\begin{align}
+- \Delta \mathbf{u} &= \mathbf{f},  & \text{in } \Omega, \\
+\mathbf{u} &= \mathbf{g}, & \text{on } \partial \Omega,
+\end{align}
+
+I write the variational formulation:
+
+\[
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx - \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds = \int_\Omega \mathbf{fv} \, dx
+\]
+
+I add terms on both sides so the form becomes symmetric and positive definite:
+
+\[
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
+- \int_{\partial \Omega} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{u} \, ds
++ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{u} \mathbf{v} \, ds
+= \int_\Omega \mathbf{fv} \, dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{g} \, ds
++ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{g} \mathbf{v} \, ds
+\]
+
+where $\gamma$ is a stabilization parameter, while $h = CellSize(mesh)$. The form is positive definite if $\gamma$ is large enough.
+
+Now I want to solve
+
+\begin{align}
+- \Delta \mathbf{u} &= \mathbf{f},  && \text{in } \Omega, \\
+\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} && \text{on } \partial \Omega, \\
+\mathbf{u}^t &= \mathbf{g}, && \text{on } \partial \Omega,
+\end{align}
+
+where $\mathbf{u}^n$ and $\mathbf{u}^t$ are, respectively, the normal and the tangential components of the velocity $\mathbf{u}$ (and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$). Let $\mathbf{v}$be a test function (and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$).
+
+Substituting $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in
+
+\[
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds = \int_\Omega \mathbf{fv} \, dx
+\]
+
+I get
+
+\[
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v}^n \, ds
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+= \int_\Omega \mathbf{fv} \, dx
+\]
+
+From the boundary conditions, I know that $\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} = \mathbf{l} $ on $\partial \Omega$, I can substitute it in the variational formulation. We get
+
+\[
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+=  \int_{\partial \Omega} \mathbf{l} \mathbf{v}^n \, ds
+ \int_\Omega \mathbf{fv} \, dx
+\]
+
+Now we want to apply the Nitsche method on the boundary term in the left hand side. We get
+
+\begin{align*}
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+- \int_{\partial \Omega} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds
++ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds \\
+=  \int_{\partial \Omega} \mathbf{l} \mathbf{v}^n \, ds
+ \int_\Omega \mathbf{fv} \, dx
+ - \int_{\partial \Omega} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds
++ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
+\end{align*}
+
+
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
 
 From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We obtain:
@@ -657,47 +734,46 @@ On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$ we assume Dirichlet boun
 
 
 The variational formulation reads:
-\[
-\begin{aligned}
+
+\begin{align*}
 \int_{\Omega} \frac{\partial \mathbf{u}}{\partial t} \, \mathbf{v} \, dx
 + \int_{\Omega} [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-& + \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx \\
-& - \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
-& =  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  & \qquad \mathbf{x} \in \Omega_t, \, t>0 \\
-& \int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , \qquad & \mathbf{x} \in \Omega_t, \, t>0
-\end{aligned}
-\]
++ \int_{\Omega} (\nu \nabla \mathbf{u} -  \frac{1}{\rho}  pI) \cdot \nabla \mathbf{v} \, dx
+- \int_{\partial \Omega_{Tissure}} (\pm k \vec{x}) \, \mathbf{v} \, dx \\
+=  \frac{1}{\rho} \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,  \qquad \mathbf{x} \in \Omega_t, \, t>0 \\
+\int_{\Omega} ( \nabla \cdot \mathbf{u} ) q \, dx = 0 , \qquad \mathbf{x} \in \Omega_t, \, t>0
+\end{align*}
 
 
-\subsection{Weak Formulation of ALE + elastic (Marie)}
-Weak formulation for the Poisson problem
-
-\[
-\left\{
-\begin{aligned}
--\Delta y = 0, \quad in \Omega_F (t), \\
-y = y_0,  \quad on \partial \Omega_0 (t) \\
-- \nabla y \cdot n = \pm ky \quad on \partial \Omega_1 (t)
-\end{aligned}
-\right.
-\]
-
-Weak formulation: find $y \in H^1_{y_0, \partial \Omega_0}$ such that
-
-\[
-\int_\Omega -\Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
-\]
-
-Integrating by parts, we obtain
-\[
-\int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
-\]
-
-Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence,
-
-\[
-\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z.
-\]
+%\subsection{Weak Formulation of ALE + elastic (Marie)}
+%Weak formulation for the Poisson problem
+%
+%\[
+%\left\{
+%\begin{aligned}
+%-\Delta y = 0, \quad in \Omega_F (t), \\
+%y = y_0,  \quad on \partial \Omega_0 (t) \\
+%- \nabla y \cdot n = \pm ky \quad on \partial \Omega_1 (t)
+%\end{aligned}
+%\right.
+%\]
+%
+%Weak formulation: find $y \in H^1_{y_0, \partial \Omega_0}$ such that
+%
+%\[
+%\int_\Omega -\Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
+%\]
+%
+%Integrating by parts, we obtain
+%\[
+%\int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
+%\]
+%
+%Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence,
+%
+%\[
+%\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z.
+%\]
 
 
 % -----------
@@ -707,6 +783,8 @@ Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence,
 
 
 \section{FEniCS}
+\todo[inline]{Something about FEniCS}
+
 \section{Numerical scheme for Navier-Stokes}
 
 \subsection{Time discretization}
