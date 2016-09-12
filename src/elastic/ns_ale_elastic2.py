@@ -13,7 +13,7 @@ rho = 1.0
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 #k = 0.00100
 # k = 1000000
-k = 1e-7
+k = 1e8
 dt = 0.01
 
 for n in N : 
@@ -72,8 +72,8 @@ for n in N :
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
                 DirichletBC(W, Constant((0.0,0.0)), fd, 3),
                 DirichletBC(W, Constant((0.0,0.0)), fd, 4),
-            #    DirichletBC(W, dot(u0,unit)*unit, fd, 2)]
-                DirichletBC(W, u0, fd, 2)]  # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+                DirichletBC(W, dot(u0,unit)*unit, fd, 2)]
+            #    DirichletBC(W, u0, fd, 2)]  # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
 
 
     
@@ -93,8 +93,8 @@ for n in N :
          - q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
          - inner(f,v) ) * dx
     
-    b = Constant(k) * inner(X+Constant(dt)*u, v) * ds(2)    # what should I use here as displacement?
-    #b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
+    #b = Constant(k) * inner(X+Constant(dt)*u, v) * ds(2)    # what should I use here as displacement?
+    b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
 
         
     # Bilinear and linear forms
@@ -135,8 +135,8 @@ for n in N :
         A1 = assemble(a1)
         b1 = assemble(L1)
          
-        #bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
-        bcw[3] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
+        bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
+        #bcw[3] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
         
         
         for bc in bcw:

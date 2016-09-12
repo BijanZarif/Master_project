@@ -7,7 +7,7 @@ from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [2**5]
-#T = 1.5
+T = 1.5
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
@@ -95,15 +95,15 @@ for n in N :
 
     #-------- NAVIER-STOKES --------
     # Weak formulation
-    dudt = Constant(1./dt) * inner(u - u0, v) * dx
+    dudt = Constant(1./dt) * Constant(rho) * inner(u - u0, v) * dx
     a = ( Constant(rho) * inner(grad(u_mid)*(u0 - w0), v)   # ALE term
          + Constant(mu) * inner(grad(u_mid), grad(v))
          - p * div(v)                               # CHECK THIS TERM
          - q * div(u)                               # from the continuity equation, maybe put a - q*div(u) to make the system symmetric
          - inner(f,v) ) * dx
     
-    # Boundary term
-    b = Constant(k) * inner(dot(X+Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
+    # Boundary term with elastic constant
+    b = Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
     
     # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
     c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
@@ -111,7 +111,8 @@ for n in N :
                                                                                                 
         
     # Bilinear and linear forms
-    F = dudt + a - b + c
+    # THE SIGNS NOW SHOULD BE CORRECT!! it's +b and not -b
+    F = dudt + a + b + c
     a0, L0 = lhs(F), rhs(F)    
     
     # -------- POISSON PROBLEM FOR w:  div( grad(w) ) = 0 --------
