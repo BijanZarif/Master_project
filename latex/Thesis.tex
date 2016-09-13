@@ -115,15 +115,10 @@ Student: \\
 
 The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. They describe the motion of a fluid with constant density $\rho$ in a domain $\Omega \subset \mathbb{R}^d$ (where $d=2,3$). They read
 
-
-\[
-\left\{
-\begin{aligned}
-&\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (\mathbf{u} \cdot \nabla)\mathbf{u} - \nabla \cdot \sigma(\mathbf{u},p) = \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
-\end{aligned}
-\right.
-\]
+\begin{align}
+\rho \dot{\mathbf{u}} + \rho (\mathbf{u} \cdot \nabla)\mathbf{u} - \nabla \cdot \sigma(\mathbf{u},p) &= \mathbf{f},  && \mathbf{x} \in \Omega, \, t>0 \\
+\nabla \cdot \mathbf{u} &= 0, && \mathbf{x} \in \Omega, \, t>0
+\end{align}
 
 We are going to solve the problem for the velocity field $\mathbf{u}(\mathbf{x},t)$, and the pressure field $p(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
 
@@ -137,34 +132,26 @@ where $\epsilon(\mathbf{u})$ is the symmetric strain rate tensor
 \epsilon(\mathbf{u}) = \frac{1}{2} (\nabla \mathbf{u} + (\nabla \mathbf{u})^T).
 \]
 
-The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a forcing term per unit of mass. Setting $\nu = \frac{\mu}{\rho}$ the kinematic viscosity, and dividing the first equation by $\rho$, the system can be rewritten as
+The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a forcing term per unit of mass. Substituting $\sigma$ in \eqref{} we obtain
+
+\begin{align}
+\rho \dot{\mathbf{u}} + \rho ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] +  \nabla p &= \mathbf{f},  \\
+\nabla \cdot \mathbf{u} &= 0,
+\end{align}
+
+The term $(\mathbf{u} \cdot \nabla)\mathbf{u}$ describes the process of convective transport, while $- \nabla \cdot [ \mu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] $ describes the process of molecular diffusion~\cite{}.\\
+Since $\mu$ is constant, from the continuity equation we obtain
 
 \[
-\left\{
-\begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
-\end{aligned}
-\right.
-\]
-
-The term $(\mathbf{u} \cdot \nabla)\mathbf{u}$ describes the process of convective transport, while $- \nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] $ describes the process of molecular diffusion.\\
-Since $\nu$ is constant, from the continuity equation we obtain
-
-\[
-\nabla \cdot [ \nu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] = \nu [\Delta \mathbf{u} + \nabla(\nabla \cdot \mathbf{u})] = \nu \Delta \mathbf{u},
+\nabla \cdot [ \mu (\nabla \mathbf{u} + (\nabla  \mathbf{u})^T)] = \mu [\Delta \mathbf{u} + \nabla(\nabla \cdot \mathbf{u})] = \mu \Delta \mathbf{u},
 \]
 
 hence the system can be written in the equivalent form
 
-\[
-\left\{
-\begin{aligned}
-&\frac{\partial \mathbf{u}}{\partial t} + ( \mathbf{u} \cdot \nabla) \mathbf{u} - \nu \Delta \mathbf{u} + \frac{1}{\rho} \nabla p = \frac{1}{\rho} \mathbf{f},  & \mathbf{x} \in \Omega, \, t>0 \\
-& \nabla \cdot \mathbf{u} = 0, & \mathbf{x} \in \Omega, \, t>0
-\end{aligned}
-\right.
-\]
+\begin{align}
+\rho \dot{\mathbf{u}} + \rho ( \mathbf{u} \cdot \nabla) \mathbf{u} - \mu \Delta \mathbf{u} +  \nabla p &= \mathbf{f}, \\
+\nabla \cdot \mathbf{u} &= 0.
+\end{align}
 
 In order for the problem to be well posed, it is necessary to assign an initial condition
 
@@ -178,7 +165,7 @@ where $\mathbf{u}_0$ is a given divergence-free vector field, together with suit
 \left\{
 \begin{aligned}
 & \mathbf{u}(\mathbf{x},t) = \phi (\mathbf{x}, t) & \forall \mathbf{x} \in \Gamma_D \\
-& \left( \nu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n} \right) (\mathbf{x},t) = \psi(\mathbf{x},t) & \forall \mathbf{x} \in \Gamma_N
+& \left( \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n} \right) (\mathbf{x},t) = \psi(\mathbf{x},t) & \forall \mathbf{x} \in \Gamma_N
 \end{aligned}
 \right.
 \]
