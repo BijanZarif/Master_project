@@ -12,10 +12,10 @@ mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2    # constant for Nitsche method
-k = 1e4      # elastic constant
+k = -1e4      # elastic constant
 dt = 0.01
 g = Constant((0.0,0.0))
-T = dt
+#T = dt
 
 for n in N : 
    
@@ -103,7 +103,9 @@ for n in N :
          - inner(f,v) ) * dx
     
     # Boundary term with elastic constant
-    b = Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
+    # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
+    # so I put a negative value of the [k]
+    b = - Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
     
     # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
     c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
@@ -111,7 +113,7 @@ for n in N :
                                                                                                 
         
     # Bilinear and linear forms
-    # THE SIGNS NOW SHOULD BE CORRECT!! it's +b and not -b
+    # From the computations of the variational form, the 'b' term should be negative (which I already put in the term 'b')
     F = dudt + a + b + c
     a0, L0 = lhs(F), rhs(F)    
     
@@ -170,9 +172,7 @@ for n in N :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
         
-        # I need to assign up0 because u0 and p0 are not "proper" functions
-        # plot(u0)
-        #plot(mesh)
+        plot(mesh)
         
         #u0, p0 = VP_.split()
         #plot(u0)
@@ -181,5 +181,5 @@ for n in N :
         
         t += dt
         #break
-plot(u0)
-interactive()
+#plot(u0)
+#interactive()
