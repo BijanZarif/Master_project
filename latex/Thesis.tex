@@ -614,84 +614,9 @@ $\forall \mathbf{z} \in $ [SPECIFY SPACE].
 
 so we are allowing just the part of the boundary $\partial \Omega_{Tissue}$ to move.
 
-\subsection{The Nitsche's method}
-I want to solve
-
-\begin{align}
-- \Delta \mathbf{u} &= \mathbf{f},  && \text{in } \Omega, \\
-\mathbf{u} &= \mathbf{g}, && \text{on } \partial \Omega,
-\end{align}
-
-I write the variational formulation:
-
-\[
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx - \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds = \int_\Omega \mathbf{fv} \, dx
-\]
-
-I add terms on both sides so the form becomes symmetric and positive definite:
-
-\begin{align*}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
-- \int_{\partial \Omega} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{u} \, ds
-+ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{u} \mathbf{v} \, ds \\
-= \int_\Omega \mathbf{fv} \, dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{g} \, ds
-+ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{g} \mathbf{v} \, ds
-\end{align*}
-
-
-where $\gamma$ is a stabilization parameter, while $h = \mathsf{CellSize(mesh)}$ (in FEniCS). The form is positive definite if $\gamma$ is large enough (for $P^2$ elements should be big enough) \cite{}.
-
-Now I want to solve
-\begin{align}
-- \Delta \mathbf{u} &= \mathbf{f},  && \text{in } \Omega, \\
-\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} && \text{on } \partial \Omega, \\
-\mathbf{u}^t &= \mathbf{g}, && \text{on } \partial \Omega,
-\end{align}
-
-where $\mathbf{u}^n$ and $\mathbf{u}^t$ are, respectively, the normal and the tangential components of the velocity $\mathbf{u}$ (and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$). Let $\mathbf{v}$ be a test function (and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$).
-
-Substituting $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in
-
-\[
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds = \int_\Omega \mathbf{fv} \, dx
-\]
-
-I get
-
-\[
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v}^n \, ds
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-= \int_\Omega \mathbf{fv} \, dx
-\]
-
-From the boundary conditions, I know that $\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} = \mathbf{l} $ on $\partial \Omega$, I can substitute it in the variational formulation. We get
-
-\[
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-=  \int_{\partial \Omega} \mathbf{l} \mathbf{v}^n \, ds
-+ \int_\Omega \mathbf{fv} \, dx
-\]
-
-Now we want to apply the Nitsche method on the boundary term in the left hand side. We get
-
-\begin{align*}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\partial \Omega} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-- \int_{\partial \Omega} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds
-+ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds \\
-=  \int_{\partial \Omega} \mathbf{l} \mathbf{v}^n \, ds
-+ \int_\Omega \mathbf{fv} \, dx
- - \int_{\partial \Omega} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds
-+ \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
-\end{align*}
 
 \subsection{Nitsche's method}
-Nitsche's method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domanin $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
+Nitsche's method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domain $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
 
 \begin{equation}
 - \Delta \mathbf{u} = \mathbf{f} \qquad \text{ in } \Omega,
@@ -738,19 +663,41 @@ where $\gamma > 0$ is a penalty parameter and $\mu$ is a weight to adjust the pe
 What we would like to do now is using the previous method to weakly set boundary conditions on the normal and the tangential components of the velocity field $\mathbf{u}$. The problem is to find $\mathbf{u}$ such that
 \begin{align}
 - \Delta \mathbf{u} &= \mathbf{f} \quad \text{ in } \Omega, \\
-\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} \quad \text{ on } \Gamma, \\
+\label{eq:nitsche:4}
+\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} \quad \text{ on } \Gamma, \\ 
 \mathbf{u}^t &= \mathbf{g} \quad \text{ on } \Gamma.
 \end{align}
 
-where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We then multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ in~\eqref{eq:nitsche:3}, obtaining
+where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We then multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in~\eqref{eq:nitsche:3}, obtaining
 
 \begin{equation}
-\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
-- \int_{\Gamma} \frac{\partial (\mathbf{u}^n +\mathbf{u}^t)}{\partial \mathbf{n}} \, \mathbf{v} \, ds
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx. 
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v}^n \, ds
+- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+= \int_\Omega \mathbf{fv} \, dx.
 \end{equation}
 
-Since we suppose that the normal and the tangential components are orthogonal 
+From the boundary condition~\eqref{eq:nitsche:4}, I obtain
+
+\begin{equation}
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+=  \int_{\Gamma} \mathbf{l} \mathbf{v}^n \, ds
++ \int_\Omega \mathbf{fv} \, dx
+\end{equation}
+
+Applying the Nitsche method on the boundary term in the left hand side, we get
+
+\begin{align}
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
+- \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds
+&+ \int_{\Gamma} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds = \\
+	 \int_{\Gamma} \mathbf{l} \mathbf{v}^n \, ds
++ \int_\Omega \mathbf{fv} \, dx
+ - \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds
+&+ \int_{\Gamma} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
+\end{align}
 
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
 From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We obtain:
