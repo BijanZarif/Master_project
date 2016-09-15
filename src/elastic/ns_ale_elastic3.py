@@ -12,7 +12,7 @@ mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2    # constant for Nitsche method
-k = -1e4      # elastic constant
+k = -1e-4      # elastic constant
 dt = 0.01
 g = Constant((0.0,0.0))
 #T = dt
@@ -79,10 +79,10 @@ for n in N :
     bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the topo wall
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
-                DirichletBC(W, Constant((0.0,0.0)), fd, 3),
-                DirichletBC(W, Constant((0.0,0.0)), fd, 4),
-            #    DirichletBC(W, dot(u0,unit)*unit, fd, 2)]
-                DirichletBC(W, u0, fd, 2)]  # PHYSICAL BOUNDARY --> here the values of w^(k+1) and u^(k+1) have to be the same
+            DirichletBC(W, u0, fd, 2),
+           DirichletBC(W.sub(1), Constant(0.), fd, 4),
+           DirichletBC(W, Constant((0.,0.)), fd, 3)]
+                           # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
 
 
     
@@ -152,7 +152,7 @@ for n in N :
         b1 = assemble(L1)
          
         #bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
-        bcw[3] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
+        bcw[1] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
         
         
         for bc in bcw:

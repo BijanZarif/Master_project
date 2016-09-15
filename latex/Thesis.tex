@@ -614,7 +614,7 @@ $\forall \mathbf{z} \in $ [SPECIFY SPACE].
 
 so we are allowing just the part of the boundary $\partial \Omega_{Tissue}$ to move.
 
-\subsection{The Nitsche method}
+\subsection{The Nitsche's method}
 I want to solve
 
 \begin{align}
@@ -690,9 +690,69 @@ Now we want to apply the Nitsche method on the boundary term in the left hand si
 + \int_{\partial \Omega} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
 \end{align*}
 
+\subsection{Nitsche's method}
+Nitsche's method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domanin $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
+
+\begin{equation}
+- \Delta \mathbf{u} = \mathbf{f} \qquad \text{ in } \Omega,
+\label{eq:nitsche:1}
+\end{equation}
+
+subject to the boundary condition
+
+\begin{equation}
+\mathbf{u} = \mathbf{g} \qquad \text{ on } \Gamma.
+\label{eq:nitsche:2}
+\end{equation}
+
+Generally, Dirichlet boundary conditions as~\eqref{eq:nitsche:2} are strongly imposed by seeking the solution $\mathbf{u}$ in some function space $V_g$, consisting of functions that already satisfy ~\eqref{eq:nitsche:2}. The idea of Nitsche's method~\cite{Nitsche1977} is to introduce a function space $V$ that does not satisfy that requirement, while 'weakly' enforcing the boundary condition. In order to derive the weak formulation, let us multiply equation~\eqref{eq:nitsche:1} by a test function $\mathbf{v}$ and integrate by parts. We obtain 
+
+\begin{equation}
+\label{eq:nitsche:3}
+\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, ds
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx. 
+\end{equation}
+
+We now want to enforce the boundary condition~\eqref{eq:nitsche:2} by adding a new term 
+
+\begin{equation}
+\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, dx 
++ \gamma \int_{\Gamma} \mu (\mathbf{u} - \mathbf{g}) \mathbf{v} \, ds
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx,
+\end{equation}
+
+where $\gamma > 0$ is a penalty parameter and $\mu$ is a weight to adjust the penalty of the jump. Nitsche in ~\cite{Nitsche1977} proved that the choice $\mu = \gamma h^{-1}$, with $h$ being the local mesh size, gives an optimally convergent method. In order to make the variational form symmetric, we can add the term $\int_{\Gamma} \nabla \mathbf{u} \cdot \mathbf{n} (\mathbf{u}-\mathbf{g}) \, ds$ to recover symmetry. Hence, the final Nitsche method reads:
+
+\begin{align}
+\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, ds
+& - \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}}\, \mathbf{u} \, ds 
++ \gamma \int_{\Gamma} h^{-1} \mathbf{u} \mathbf{v} \, ds = \\
+	\int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+&- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{g} \, ds
++ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \mathbf{v} \, ds.
+\end{align}
+
+What we would like to do now is using the previous method to weakly set boundary conditions on the normal and the tangential components of the velocity field $\mathbf{u}$. The problem is to find $\mathbf{u}$ such that
+\begin{align}
+- \Delta \mathbf{u} &= \mathbf{f} \quad \text{ in } \Omega, \\
+\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} \quad \text{ on } \Gamma, \\
+\mathbf{u}^t &= \mathbf{g} \quad \text{ on } \Gamma.
+\end{align}
+
+where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We then multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ in~\eqref{eq:nitsche:3}, obtaining
+
+\begin{equation}
+\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+- \int_{\Gamma} \frac{\partial (\mathbf{u}^n +\mathbf{u}^t)}{\partial \mathbf{n}} \, \mathbf{v} \, ds
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx. 
+\end{equation}
+
+Since we suppose that the normal and the tangential components are orthogonal 
 
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
-
 From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We obtain:
 \begin{align*}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
