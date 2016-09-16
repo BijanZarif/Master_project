@@ -383,165 +383,13 @@ $\mathbf{u}$ and $\mathbf{w}$ should have the same value on these
 boundaries, since the fluid follows the movement (if any) of the
 walls.
 
-\section{Navier-Stokes + ALE with elastic walls (Marie)}
-Let us start with Navier-Stokes encountering the ALE term. The problem reads:
-
-\[
-\begin{aligned}
-\rho \frac{\partial u}{\partial t} + \rho \nabla u \cdot (u-w) - div(\nu \nabla u) + \nabla p = f  , & \text{ in } \Omega_F (t), \\
-div u = 0, & \text{ in } \Omega_F (t), \\
-\end{aligned}
-\]
-
-for give $\rho, \nu, f$ and mesh velocity $w$.
-
-As boundary conditions on the fluid domain we choose
-
-\[
-\begin{aligned}
-u = w, & \text{ on } \partial \Omega_C \cup \partial \Omega_T \\
-(\nu \nabla u - pI) \cdot n = p_0 n, & \text{ on } \partial \Omega_{TB}
-\end{aligned}
-\]
-
-We define the mesh velocity as $w = \dot{y}$, where $y$ is the mesh displacement. \\
-Smoothing of the mesh:
-
-\[
-\begin{aligned}
-- \Delta y = 0, & \text{ on } \partial \Omega_F (t), \\
-y = 0, & \text{ on } \partial \Omega_{TB}, \\
-\end{aligned}
-\]
-
-where the condition $y = 0$ is equivalent to no movement on the top and bottom of the boundary. \\
-We consider two different models:
-
-\begin{description}
-\item[option 1:] we allow the movement of the boundary in every direction by imposing the condition
-
-\[
-- \nabla y \cdot n = (\pm)ky \qquad \text{ on } \partial \Omega_C \cup \partial \Omega_T \\
-\]
-
-where $k = k(x)$ is the spring constant;
-
-\item[option 2:] we allow the movement of the boundary only in the normal direction, that means
-
-\[
-\begin{aligned}
-(- \nabla y \cdot n) \cdot n = (\pm)ky \cdot n & \qquad \text{normal direction} \\
-y \cdot t = 0 & \qquad \text{tangential direction}
-\end{aligned}
-\]
-
-where $n$ is the normal vector to the boundary, and $t$ is the tangent to the boundary. \\
-This can be done "weakly" using the Nitsche's method (check André Massing PhD thesis).
-
-\end{description}
-
-We are going to consider 3 different steps (or models):
-
-\begin{description}
-\item[Model 1:] we suppose
-
-\[
-\begin{aligned}
-y = 0 & \qquad \text{ on } \partial \Omega_{TB}, \partial \Omega_C \\
-k = fixed & \qquad \text{ on } \partial \Omega_{T (tissue)}
-\end{aligned}
-\]
-
-\item[Model 2:] as model 1, but $k$ varies with $x_1$
-\item[Model 3-4:] as model 1-2, but letting also $\partial \Omega_C$ have a $k$ (so the cord is elastic).
-
-\end{description}
-
-
-
-
 
 \chapter{Numerical methods}
 
 \section{Finite element formulation}
 
-\subsection{Weak formulation of Stokes equations}
-
-\todo[inline]{Do I need to keep this subsection?}
-
-In order to find a numerical solution to this problem, we write its variational formulation. Let $\mathbf{v}$ be a test function in the space $\hat{V} = \set{\mathbf{u} \in H^1(\Omega) | \mathbf{u}_{|_{\partial \Omega}} = 0} $. Our aim is to find $(\mathbf{u}(x,y),p(x,y)) \in V \times Q$ such that
-
-\begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \,dx &= \int_\Omega f \mathbf{v} \,dx, \\
-\int_\Omega (\nabla \cdot \mathbf{u})q \,dx &= 0
-\end{align}
-
-Differentiating by part the right hand side of the first equation we obtain:
-
-\begin{align}
-\int_\Omega -\nabla \cdot (\nu \nabla \mathbf{u} - pI)\mathbf{v} \,dx &= \int_\Omega (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \,dx, \\
-&- \int_{\partial \Omega} (\nu \nabla \mathbf{u} - pI) \cdot n \mathbf{v} \,ds.
-\end{align}
-
-Since we set Dirichlet boundary conditions on the entire boundary and $\mathbf{v}_{|_{\partial \Omega}} = 0$, the boundary integral is zero. Hence, our weak formulation reads
-
-\begin{align}
-\int_\Omega (\nu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \,dx &= \int_\Omega f\mathbf{v} \,dx, \\
-\int_\Omega (\nabla \cdot \mathbf{u}) q \,dx &= 0.
-\end{align}
-
-Instead of using the space $V \times Q$, we use $V_h \times Q_h$, where $V_h$ and $Q_h$ are spaces defined with respect to a mesh $J_h$. We hence seek $(u_h, p_h) \in V_h \times Q_h$, where $V_h = \mathcal{P}^{cont,d}_{k+1} (J_h)$ and $Q_h = \mathcal{P}^{cont}_{k} (J_h)$ (typically we choose $k=1$). \\
-
-
-Since the pressure is defined up to some constant, we add the constraint
-
-\[
-\frac{1}{|\Omega |} \int_{\Omega} p = 0,
-\]
-
-so we can compare an exact solution with mean value zero with the approximate solution.
-
-\subsection{Weak formulation of Navier-Stokes equations}
-
-
-In order to solve this problem numerically using finite element method, we write its variational form. Let $v$ be a test function in
-
-\[
-\hat{V} = \set{\mathbf{v} \in H^1(\Omega) | v_{|_{\partial \Omega_{top} \, \cup \, \partial \Omega_{bottom}}} = 0}
-\]
-
-and $q \in \hat{Q}$. Let us multiply the N-S equations by $\mathbf{v}$ and $q$ and integrate on $\Omega$:
-
-\begin{align}
-&\int_{\Omega} \rho \, \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho (\nabla \mathbf{u} \cdot \mathbf{u} )\mathbf{v} \, dx
-- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx
-= \int_{\Omega} f\mathbf{v} \, dx \\
-&\int_{\Omega} (\nabla \cdot \mathbf{u}) q \, dx = 0.
-\end{align}
-
-I take the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and integrate by parts:
-
-\[
-- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx
-= \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx
-- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, dx.
-\]
-
-The boundary term can actually be divided in three different terms (one for each part of the boundary), as $\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{sides}$. Since we chose $\mathbf{v} \in \hat{V}$, the term on $\partial \Omega_{top} \cup \partial \Omega_{bottom}$ is zero. The term on $\partial \Omega_{sides}$ is also zero: since $\sigma = \mu \nabla \mathbf{u} - pI$ and $\sigma \cdot \mathbf{n} = 0$ on $\partial \Omega_{sides}$, the remaining term on the boundary is also zero. Hence, $- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, dx = 0$.
-
-The variational form becomes
-
-\begin{align}
-\int_{\Omega} \rho \, \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho (\nabla \mathbf{u} \cdot \mathbf{u})\mathbf{v} \, dx
-- \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx
-&= \int_{\Omega} f\mathbf{v} \, dx \\
-\int_{\Omega} (\nabla \cdot \mathbf{u}) q \, dx &= 0.
-\end{align}
-
-
-\subsection{Weak formulation of Navier-Stokes and ALE}
+\section{Weak formulation of Navier-Stokes with ALE term}
+\todo[inline]{I don't think I really need this section, I can say everything in the entire model with the elastic constant}
 
 % variational form for N-S
 % variational form for Poisson problem for w
@@ -614,15 +462,17 @@ $\forall \mathbf{z} \in $ [SPECIFY SPACE].
 
 so we are allowing just the part of the boundary $\partial \Omega_{Tissue}$ to move.
 
+\section{Weak formulation of N-S on moving domain}
+We now want to give a brief introduction of a tool that allows us to impose boundary conditions in a weak way. This formulation of the problem seems necessary as we want to allow a movement of the mesh just in the normal direction, and assume zero tangential velocity. This can be done using the following method.
 
-\subsection{Nitsche's method}
+
+\subsection{The Nitsche's method}
 Nitsche's method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domain $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
 
 \begin{equation}
 - \Delta \mathbf{u} = \mathbf{f} \qquad \text{ in } \Omega,
 \label{eq:nitsche:1}
 \end{equation}
-
 subject to the boundary condition
 
 \begin{equation}
@@ -668,7 +518,7 @@ What we would like to do now is using the previous method to weakly set boundary
 \mathbf{u}^t &= \mathbf{g} \quad \text{ on } \Gamma.
 \end{align}
 
-where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We then multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in~\eqref{eq:nitsche:3}, obtaining
+where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in~\eqref{eq:nitsche:3}. Integrating over the domain $\Omega$, we obtain
 
 \begin{equation}
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
@@ -677,7 +527,7 @@ where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangenti
 = \int_\Omega \mathbf{fv} \, dx.
 \end{equation}
 
-From the boundary condition~\eqref{eq:nitsche:4}, I obtain
+From the boundary condition~\eqref{eq:nitsche:4}, we have
 
 \begin{equation}
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
@@ -699,8 +549,8 @@ Applying the Nitsche method on the boundary term in the left hand side, we get
 &+ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \mathbf{v}^t \, ds
 \end{align}
 
-\subsection{Weak formulation of  ALE + elastic (Eleonora)}
-From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf{v}$ the first equation and by the test function $q$ the second equation, and integrate over $\Omega$. We obtain:
+\subsection{Applying Nitsche's method to Navier-Stokes}
+We start from equations~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, and multiply the first one by a test function $\mathbf{v}$, and by a test function $q$ the second equation, and integrate over $\Omega$. We obtain:
 \begin{align*}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
@@ -708,13 +558,13 @@ From [PUT REFERENCE TO EQUATION WITH w], we multiply by a test function $\mathbf
 &= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx, \\
 \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx &= 0.
 \end{align*}
-
-As before, the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$ can be integrated by parts:
+\\
+Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and applying Green formula, we have
 
 \[
 - \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
 \]
-
+\\
 The boundary $\partial \Omega_t$ can be divided in the four boundaries:
 
 \[
@@ -846,47 +696,12 @@ where $k < 0$ (that term should be positive otherwise I have problems). Hence
 + \int_{\partial \Omega_{tissure}} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
 \end{align*}
 
-%\subsection{Weak Formulation of ALE + elastic (Marie)}
-%Weak formulation for the Poisson problem
-%
-%\[
-%\left\{
-%\begin{aligned}
-%-\Delta y = 0, \quad in \Omega_F (t), \\
-%y = y_0,  \quad on \partial \Omega_0 (t) \\
-%- \nabla y \cdot n = \pm ky \quad on \partial \Omega_1 (t)
-%\end{aligned}
-%\right.
-%\]
-%
-%Weak formulation: find $y \in H^1_{y_0, \partial \Omega_0}$ such that
-%
-%\[
-%\int_\Omega -\Delta y \cdot z = 0 \qquad \forall z \in H^1_{0, \partial \Omega_0}
-%\]
-%
-%Integrating by parts, we obtain
-%\[
-%\int_\Omega \nabla y \cdot \nabla z \,  dx - \int_{\partial \Omega} \nabla y \cdot n \, z ds = 0, \qquad \forall z
-%\]
-%
-%Since we chose $z = 0$ on the entire boundary, the boundary term is 0. Hence,
-%
-%\[
-%\int_\Omega \nabla y \cdot \nabla z  \,  dx = 0 \qquad \forall z.
-%\]
-
-
-% -----------
-
-
-
-
+\todo[inline]{add here the part about the mesh velocity weak form?}
 
 \section{FEniCS}
 \todo[inline]{Something about FEniCS}
 
-\section{Numerical scheme for Navier-Stokes}
+\section{Numerical scheme}
 
 \subsection{Time discretization}
 We now want to use a Crank-Nicolson discretization (second order in time) of the N-S equations: let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t$ the time step. \\
