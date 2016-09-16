@@ -692,11 +692,11 @@ Applying the Nitsche method on the boundary term in the left hand side, we get
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
 - \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
 - \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds
-&+ \int_{\Gamma} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds = \\
+&+ \gamma \int_{\Gamma} h^{-1} \mathbf{u}^t \mathbf{v}^t \, ds = \\
 	 \int_{\Gamma} \mathbf{l} \mathbf{v}^n \, ds
 + \int_\Omega \mathbf{fv} \, dx
  - \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds
-&+ \int_{\Gamma} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
+&+ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \mathbf{v}^t \, ds
 \end{align}
 
 \subsection{Weak formulation of  ALE + elastic (Eleonora)}
@@ -791,7 +791,7 @@ We can see the vector field $\mathbf{u}$ as the sum of its normal and tangential
 & \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} (\mathbf{v}^n + \mathbf{v}^t) \, ds 
 + \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
 & \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
-+ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
++ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds. \\
 \end{align*}
 
 \todo[inline]{where the last equality is due to the fact that the spaces are in direct sum? Tangential component multiplied by normal derivative is 0, VERIFY}
