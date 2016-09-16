@@ -1,0 +1,31 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Introduction}{1}
+\contentsline {chapter}{\numberline {2}Medical background}{2}
+\contentsline {chapter}{\numberline {3}Mathematical models}{3}
+\contentsline {section}{\numberline {3.1}The Navier-Stokes equations}{3}
+\contentsline {subsection}{\numberline {3.1.1}The Navier-Stokes equations on a fixed domain}{3}
+\contentsline {subsection}{\numberline {3.1.2}Navier-Stokes on a moving domain}{4}
+\contentsline {section}{\numberline {3.2}Modelling the SAS with elastic surroundings}{5}
+\contentsline {section}{\numberline {3.3}Navier-Stokes + ALE with elastic walls (Marie)}{6}
+\contentsline {chapter}{\numberline {4}Numerical methods}{8}
+\contentsline {section}{\numberline {4.1}Finite element formulation}{8}
+\contentsline {subsection}{\numberline {4.1.1}Weak formulation of Stokes equations}{8}
+\contentsline {subsection}{\numberline {4.1.2}Weak formulation of Navier-Stokes equations}{9}
+\contentsline {subsection}{\numberline {4.1.3}Weak formulation of Navier-Stokes and ALE}{10}
+\contentsline {subsection}{\numberline {4.1.4}Nitsche's method}{11}
+\contentsline {subsection}{\numberline {4.1.5}Weak formulation of ALE + elastic (Eleonora)}{12}
+\contentsline {section}{\numberline {4.2}FEniCS}{15}
+\contentsline {section}{\numberline {4.3}Numerical scheme for Navier-Stokes}{15}
+\contentsline {subsection}{\numberline {4.3.1}Time discretization}{15}
+\contentsline {subsection}{\numberline {4.3.2}Spatial discretization}{16}
+\contentsline {section}{\numberline {4.4}Numerical scheme for Navier-Stokes + ALE}{17}
+\contentsline {section}{\numberline {4.5}Numerical scheme for Navier-Stokes + ALE + elastic}{18}
+\contentsline {chapter}{\numberline {5}Verification}{19}
+\contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{19}
+\contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{21}
+\contentsline {section}{\numberline {5.3}Driven cavity}{22}
+\contentsline {section}{\numberline {5.4}ALE test case}{24}
+\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{24}
+\contentsline {chapter}{\numberline {6}Numerical results}{26}
+\contentsline {chapter}{\numberline {7}Discussion}{27}
+\contentsline {chapter}{\numberline {8}Conclusions}{28}
