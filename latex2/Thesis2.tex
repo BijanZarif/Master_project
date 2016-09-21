@@ -347,13 +347,19 @@ decompression induces a change in the compliance of the tissue
 surrounding the spinal canal~\cite{}. For simplicity, we aim to model
 the compliance of the surrounding tissue via a boundary condition for
 the fluid flow. We will assume that the tissue boundary $\partial
-\Omega_{\rm tissue}$ is elastic with stiffness $k$ and in particular
-allowed to move. To this end, we introduce the boundary condition
-\begin{equation}
-  \left ( \mu \nabla \mathbf{u} - p I
-  \right ) \cdot \mathbf{n} = \pm k \mathbf{y}
-  \qquad \text{ on }  \partial \Omega_{\rm tissue},
-\end{equation}
+\Omega_{\rm tissue}$ is elastic with stiffness $k > 0$ and in particular
+allowed to move. To this end, we introduce the boundary conditions
+\begin{align}
+\mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} = - k \mathbf{y} \cdot \mathbf{n} \qquad \text{ on } \partial \Omega_{\rm tissue},\\
+\mathbf{u}^t = \mathbf{0} \qquad \text{ on } \partial \Omega_{\rm tissue},
+\end{align}
+
+%\begin{equation}
+%  \left ( \mu \nabla \mathbf{u} - p I
+%  \right ) \cdot \mathbf{n} = \pm k \mathbf{y}
+%  \qquad \text{ on }  \partial \Omega_{\rm tissue},
+%\end{equation}
+
 where $\mathbf{n}$ is the outward pointing boundary normal and
 $\mathbf{y}$ still denotes the mesh displacement. For simplicity, on
 the spinal cord side, we assume that the cord is rigid and fixed,
@@ -681,7 +687,7 @@ Then I substitute:
 = - \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} ds 
 \]
 
-where $k < 0$ (that term should be positive otherwise I have problems). Hence
+where $k < 0$ (that term should be positive otherwise I have problems, or better put $-k$ with $k>0$). Hence
 
 \begin{align*}
 & \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
