@@ -12,7 +12,9 @@ mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2    # constant for Nitsche method
-k = -1e-4      # elastic constant
+#k = -1e-4      # elastic constant
+k = Constant(1.0/10.3)    # post-surgery value  (I should check the unit measure)
+#k = Constant(1.0/5.9)     # pre-surgery value
 dt = 0.01
 g = Constant((0.0,0.0))
 #T = dt
@@ -79,12 +81,15 @@ for n in N :
     bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the topo wall
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
-            DirichletBC(W, u0, fd, 2),
+            DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
            DirichletBC(W.sub(1), Constant(0.), fd, 4),
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
-                           # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
+                           
 
-
+    # bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
+    #         DirichletBC(W, u0, fd, 2),
+    #        DirichletBC(W, Constant((0.,0.)), fd, 4),
+    #        DirichletBC(W, Constant((0.,0.)), fd, 3)]
     
     # check the BC are correct
     #U = Function(VP)
