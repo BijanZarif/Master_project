@@ -7,7 +7,7 @@ from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [2**4]
-T = 1.5
+T = 40
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
@@ -15,16 +15,17 @@ gamma = 1e2    # constant for Nitsche method
 #k = -1e-4      # elastic constant
 k = Constant(1.0/10.3)    # post-surgery value  (I should check the unit measure)
 #k = Constant(1.0/5.9)     # pre-surgery value
-dt = 0.01
+dt = 0.1
 g = Constant((0.0,0.0))
 #T = dt
 
 x0, x1 = 0.0, 1.0
-y0, y1 = 0.0, 1.0
+y0, y1 = 0.0, 4.0
+
 
 for n in N : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), n, 1 * n)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), n, 4 * n)  
     x = SpatialCoordinate(mesh)
     normal = FacetNormal(mesh)
     
@@ -64,7 +65,7 @@ for n in N :
     f = Constant((0.0, 0.0))
     u_inlet = Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))"), degree = 2)
     
-    # this is to put a parabolic initial flow
+    # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
     #plot(u0, interactive = True)
     
@@ -164,6 +165,7 @@ for n in N :
         A1 = assemble(a1)
         b1 = assemble(L1)
          
+        #bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
         bcw[1] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
         
         
@@ -195,3 +197,8 @@ for n in N :
         #break
 #plot(u0)
 #interactive()
+
+if __name__ == "__main__":
+    # insert cdoe to be executed when module is callled
+    pass
+ 
