@@ -15,15 +15,13 @@
 \contentsline {section}{\numberline {4.4}FEniCS}{13}
 \contentsline {section}{\numberline {4.5}Numerical scheme}{13}
 \contentsline {subsection}{\numberline {4.5.1}Time discretization}{13}
-\contentsline {subsection}{\numberline {4.5.2}Spatial discretization}{14}
-\contentsline {section}{\numberline {4.6}Numerical scheme for Navier-Stokes + ALE}{15}
-\contentsline {section}{\numberline {4.7}Numerical scheme for Navier-Stokes + ALE + elastic}{16}
-\contentsline {chapter}{\numberline {5}Verification}{17}
-\contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{17}
-\contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{19}
-\contentsline {section}{\numberline {5.3}Driven cavity}{20}
-\contentsline {section}{\numberline {5.4}ALE test case}{22}
-\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{22}
-\contentsline {chapter}{\numberline {6}Numerical results}{24}
-\contentsline {chapter}{\numberline {7}Discussion}{25}
-\contentsline {chapter}{\numberline {8}Conclusions}{26}
+\contentsline {subsection}{\numberline {4.5.2}Spatial discretization}{15}
+\contentsline {chapter}{\numberline {5}Verification}{16}
+\contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{16}
+\contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{18}
+\contentsline {section}{\numberline {5.3}Driven cavity}{19}
+\contentsline {section}{\numberline {5.4}ALE test case}{21}
+\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{21}
+\contentsline {chapter}{\numberline {6}Numerical results}{23}
+\contentsline {chapter}{\numberline {7}Discussion}{24}
+\contentsline {chapter}{\numberline {8}Conclusions}{25}
