@@ -8,13 +8,23 @@ from dolfin import *
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 N = [2**4]
 T = 40
+#T = 1.5
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2    # constant for Nitsche method
-#k = -1e-4      # elastic constant
-k = Constant(1.0/10.3)    # post-surgery value  (I should check the unit measure)
-#k = Constant(1.0/5.9)     # pre-surgery value
+
+# VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
+# k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
+k = - Constant(1e1)      # elastic
+#k = - Constant(1e6)       # stiff
+k_bottom = -1e8
+k_top = -1e8
+k_middle = -1e0
+#k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
+
+# -------
+
 dt = 0.1
 g = Constant((0.0,0.0))
 #T = dt
@@ -119,7 +129,7 @@ for n in N :
     # Boundary term with elastic constant
     # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
     # so I put a negative value of the [k]
-    b = - Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
+    b = - k * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
     
     # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
     c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)

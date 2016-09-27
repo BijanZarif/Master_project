@@ -12,9 +12,9 @@ mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2    # constant for Nitsche method
-#k = -1e-4      # elastic constant
-k = Constant(1.0/10.3)    # post-surgery value  (I should check the unit measure)
-#k = Constant(1.0/5.9)     # pre-surgery value
+
+k = -1e-4      # elastic constant
+
 dt = 0.01
 g = Constant((0.0,0.0))
 #T = dt
