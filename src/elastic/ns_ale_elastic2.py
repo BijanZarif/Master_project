@@ -6,15 +6,15 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**5]
-T = 1.5
+N = [2**4]
+T = 40
 mu = 1.0
 rho = 1.0
 theta = 0.5     # 0.5 for Crank-Nicolson, 1.0 for backwards
 #k = 0.00100
 # k = 1000000
-k = 1e8
-dt = 0.01
+k = 1e-3
+dt = 0.1
 
 for n in N : 
    

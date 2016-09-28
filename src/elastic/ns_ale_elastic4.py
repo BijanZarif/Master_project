@@ -6,7 +6,7 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**4]
+NN = [2**4]
 T = 40
 #T = 1.5
 mu = 1.0
@@ -16,7 +16,7 @@ gamma = 1e2    # constant for Nitsche method
 
 # VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
-k = - Constant(1e1)      # elastic
+k = - Constant(1e-2)      # elastic
 #k = - Constant(1e6)       # stiff
 k_bottom = -1e8
 k_top = -1e8
@@ -33,14 +33,13 @@ x0, x1 = 0.0, 1.0
 y0, y1 = 0.0, 4.0
 
 
-for n in N : 
+for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), n, 4 * n)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 4 * N)  
     x = SpatialCoordinate(mesh)
     normal = FacetNormal(mesh)
     
     h = CellSize(mesh)
-    n = FacetNormal(mesh)
     
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
@@ -55,8 +54,8 @@ for n in N :
     z = TestFunction(W)
     
     # Defining the normal and tangential components    
-    un = dot(u,n) * n
-    vn = dot(v,n) * n
+    un = dot(u,normal) * normal
+    vn = dot(v,normal) * normal
     ut = u - un
     vt = v - vn
     
@@ -129,11 +128,11 @@ for n in N :
     # Boundary term with elastic constant
     # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
     # so I put a negative value of the [k]
-    b = - k * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
+    b = - k * inner(dot(X + Constant(dt)*u_mid, normal ) * normal, v) * ds(2)    # what should I use here as displacement?
     
     # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
-    c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
-            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) ) * ds(2)
+    c = ( -inner(dot(grad(ut), normal), vt) - inner(dot(grad(vt), normal), ut) + Constant(gamma)/h * inner(ut,vt)
+            - inner(dot(grad(vt),normal), g) + Constant(gamma)/h * inner(g,vt) ) * ds(2)
                                                                                                 
         
     # Bilinear and linear forms
@@ -155,9 +154,7 @@ for n in N :
     t = 0.0
     while t <= T + 1E-9:
     
-        print "Solving for t = {}".format(t) 
-        #tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0, 0.1) && on_boundary")   
-        #bcw = [tissue, fixed]
+        print "Solving for t = {}".format(t)  
         
         # Solving the Navier-Stokes equations
         # I need to reassemble the system
