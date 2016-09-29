@@ -2,34 +2,51 @@
 
 # rho * du/dt + rho * (grad(u) . u - w) - div( mu * grad(u) - pI ) = f
 # div( u ) = 0
-
+import sys
+sys.path.append("~/Repositories/Master_project/src/magne")
 from dolfin import *
+from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**4]
-T = 40.0
+NN = [2**4]
+T = 40
+#T = 1.5
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e2    # constant for Nitsche method
+gamma = 1e3    # constant for Nitsche method
 
-k = -1e-4      # elastic constant
+# VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
+# k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
+k = Constant(1e-2)      # elastic
+#k = - Constant(1e6)       # stiff
+k_bottom = -1e8
+k_top = -1e8
+k_middle = -1e0
+#k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 
-dt = 0.01
-g = Constant((0.0,0.0))
+# -------
+
+dt = 0.1
+# g = Constant((0.0,0.0))
+g = Constant(0.0)
+
 #T = dt
 
 x0, x1 = 0.0, 1.0
 y0, y1 = 0.0, 1.0
 
-for n in N : 
+
+for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), n, 1 * n)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N)  
     x = SpatialCoordinate(mesh)
+
     normal = FacetNormal(mesh)
+    tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
+    tangent = as_vector((tangent[0], tangent[1]))
     
     h = CellSize(mesh)
-    n = FacetNormal(mesh)
     
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
@@ -44,10 +61,10 @@ for n in N :
     z = TestFunction(W)
     
     # Defining the normal and tangential components    
-    un = dot(u,n) * n
-    vn = dot(v,n) * n
-    ut = u - un
-    vt = v - vn
+    un = dot(u, normal)
+    vn = dot(v, normal)
+    ut = dot(u, tangent)
+    vt = dot(v, tangent)
     
     # The functions are initialized to zero
     up0 = Function(VP)
@@ -64,7 +81,7 @@ for n in N :
     f = Constant((0.0, 0.0))
     u_inlet = Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))"), degree = 2)
     
-    # this is to put a parabolic initial flow
+    # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
     #plot(u0, interactive = True)
     
@@ -106,7 +123,7 @@ for n in N :
     #interactive()
     
 
-    #-------- NAVIER-STOKES --------
+    # -------- NAVIER-STOKES --------
     # Weak formulation
     dudt = Constant(1./dt) * Constant(rho) * inner(u - u0, v) * dx
     a = ( Constant(rho) * inner(grad(u_mid)*(u0 - w0), v)   # ALE term
@@ -118,18 +135,15 @@ for n in N :
     # Boundary term with elastic constant
     # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
     # so I put a negative value of the [k]
-    b = - Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
+ 
+    b = k * inner(dot(X + Constant(dt)*u_mid, normal ) * normal, v) * ds(2)    # what should I use here as displacement?
+                                                                                                
+    c = ( - dot(grad(u)*normal, tangent) * vt - dot(grad(v)*normal, tangent) * ut
+          + Constant(gamma)/h * ut*vt + dot(grad(v)*normal, tangent) * g - Constant(gamma)/h * g*vt ) * ds(2)
     
-    #c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
-    #        - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) ) * ds(2)
-    
-    # INCLUDING THE MIXED TERM WITH BOTH TANGENTIAL AND NORMAL COMPONENTS     
-    c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
-            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) - inner(dot(grad(ut), n), vn) ) * ds(2)                                                                                       
-        
     # Bilinear and linear forms
-    # From the computations of the variational form, the 'b' term should be negative (which I already put in the term 'b')
     F = dudt + a + b + c
+    
     a0, L0 = lhs(F), rhs(F)    
     
     # -------- POISSON PROBLEM FOR w:  div( grad(w) ) = 0 --------
@@ -144,11 +158,11 @@ for n in N :
 
     solver = PETScLUSolver()
     t = 0.0
+    file = File("poisson.pvd")
+
     while t <= T + 1E-9:
-    
-        print "Solving for t = {}".format(t) 
-        #tissue = DirichletBC(W, up0.sub(0), "near(x[0], 1.0, 0.1) && on_boundary")   
-        #bcw = [tissue, fixed]
+            
+        print "Solving for t = {}".format(t)  
         
         # Solving the Navier-Stokes equations
         # I need to reassemble the system
@@ -166,6 +180,7 @@ for n in N :
         A1 = assemble(a1)
         b1 = assemble(L1)
          
+        #bcw[3] = DirichletBC(W, dot(u0, unit) * unit, fd, 2)   # updating the boundary value u0
         bcw[1] = DirichletBC(W, u0, fd, 2)   # updating the boundary value u0
         
         
@@ -188,12 +203,18 @@ for n in N :
         
         plot(mesh)
         
-        #u0, p0 = VP_.split()
-        #plot(u0)
-        
-        normal = FacetNormal(mesh)
-        
+        u0, p0 = VP_.split()
+        file << u0
+        un = dot(u,normal)
+        vn = dot(v,normal)
+        ut = dot(u, tangent)
+        vt = dot(v, tangent)
         t += dt
         #break
 #plot(u0)
 #interactive()
+
+if __name__ == "__main__":
+    # insert cdoe to be executed when module is callled
+    pass
+ 
