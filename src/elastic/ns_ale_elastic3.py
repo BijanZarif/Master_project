@@ -120,10 +120,12 @@ for n in N :
     # so I put a negative value of the [k]
     b = - Constant(k) * inner(dot(X + Constant(dt)*u_mid, n ) * n, v) * ds(2)    # what should I use here as displacement?
     
-    # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
+    #c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
+    #        - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) ) * ds(2)
+    
+    # INCLUDING THE MIXED TERM WITH BOTH TANGENTIAL AND NORMAL COMPONENTS     
     c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
-            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) - inner(dot(grad(ut), n), vn) ) * ds(2)
-                                                                                                
+            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) - inner(dot(grad(ut), n), vn) ) * ds(2)                                                                                       
         
     # Bilinear and linear forms
     # From the computations of the variational form, the 'b' term should be negative (which I already put in the term 'b')
