@@ -122,7 +122,7 @@ for n in N :
     
     # b = inner(Constant(k) * dot(X+Constant(dt)*u, normal) * normal, v) * ds(2)    # what should I use here as displacement?
     c = ( -inner(dot(grad(ut), n), vt) - inner(dot(grad(vt), n), ut) + Constant(gamma)/h * inner(ut,vt)
-            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) ) * ds(2)
+            - inner(dot(grad(vt),n), g) + Constant(gamma)/h * inner(g,vt) - inner(dot(grad(ut), n), vn) ) * ds(2)
                                                                                                 
         
     # Bilinear and linear forms
