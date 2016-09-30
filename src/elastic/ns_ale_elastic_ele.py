@@ -14,7 +14,7 @@ T = 40
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e2   # constant for Nitsche method
+gamma = 20   # constant for Nitsche method
 
 use_projected_normal = True
 
@@ -22,18 +22,21 @@ use_projected_normal = True
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
 k = Constant(1e-1)      # elastic
 #k = - Constant(1e6)       # stiff
-k_bottom = 1e8
-k_top = 1e8
+k_bottom = 1e1
+k_top = 1e1
 k_middle = 1e-1
-#k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
+
+# k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
+k = Expression( "(x[1]<0.1)*k_bottom + (x[1]>0.9)*k_top + (x[1]>0.1 || x[1]<0.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 
 # -------
 
-dt = 0.5
+dt = 0.05
 g = Constant(0.0)
 
+
 x0, x1 = 0.0, 1.0
-y0, y1 = 0.0, 2.0
+y0, y1 = 0.0, 1.0
 
 
 for N in NN : 
@@ -42,8 +45,9 @@ for N in NN :
     x = SpatialCoordinate(mesh)
     
 
-    h = CellSize(mesh)
+    # h = CellSize(mesh)
     
+    h = mesh.hmax()
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
     P = FunctionSpace(mesh, "CG", 1)        # space for p, q
@@ -88,8 +92,8 @@ for N in NN :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     t = 0.0
-    #u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
-    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))"), t=t, degree = 2)
+    # u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
+    u_inlet = Expression(("0.0", "0.1*(-1*fabs(x[0]*(x[0] - 1)))"), t=t, degree = 2)
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -104,8 +108,11 @@ for N in NN :
     fd = FacetFunction("size_t", mesh)
     CompiledSubDomain("near(x[0], x0) && on_boundary", x0 = x0).mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
     CompiledSubDomain("near(x[0], x1) && on_boundary", x1 = x1).mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-    CompiledSubDomain("near(x[1], y1) && on_boundary", y1 = y1).mark(fd, 3) # top wall (inlet)
-    CompiledSubDomain("near(x[1], y0) && on_boundary", y0 = y0).mark(fd, 4) # bottom wall (outlet)
+    CompiledSubDomain("near(x[1], y1) && (x[0] != x1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], y0) && (x[0] != x1) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
+    # CompiledSubDomain("near(x[1], y1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
+    # CompiledSubDomain("near(x[1], y0) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
+
     ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
     #plot(fd)
@@ -117,7 +124,8 @@ for N in NN :
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
-           DirichletBC(W.sub(1), Constant(0.), fd, 4),
+           # DirichletBC(W.sub(1), Constant(0.), fd, 4),
+           DirichletBC(W, Constant((0.,0.)), fd, 4),
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
                            
 
@@ -222,10 +230,14 @@ for N in NN :
         if use_projected_normal == True:
            normal.assign(nodal_normal(V))
            tangent.assign(nodal_tangent(V))
-
+    
+        un = dot(u, normal)
+        vn = dot(v, normal)
+        ut = dot(u, tangent)
+        vt = dot(v, tangent)
         
-        #u0, p0 = VP_.split()
-        #plot(u0, key="u0")
+        u0, p0 = VP_.split()
+        plot(u0, key="u0")
         #file << u0
 
         t += dt
