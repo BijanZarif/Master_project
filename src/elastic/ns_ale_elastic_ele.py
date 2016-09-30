@@ -38,7 +38,7 @@ y0, y1 = 0.0, 2.0
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), 2*N, 4*N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 2*N)  
     x = SpatialCoordinate(mesh)
     
 
@@ -219,9 +219,9 @@ for N in NN :
         plot(mesh)
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
-        #if use_projected_normal == True:
-         #  normal.assign(nodal_normal(V))
-         #  tangent.assign(nodal_tangent(V))
+        if use_projected_normal == True:
+           normal.assign(nodal_normal(V))
+           tangent.assign(nodal_tangent(V))
 
         
         #u0, p0 = VP_.split()
