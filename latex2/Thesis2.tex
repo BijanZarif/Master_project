@@ -628,82 +628,25 @@ According to the boundary conditions, the boundary term $\partial \Omega_{tissue
 
 Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, I can rewrite the boundary term:
 
-\[
-\int_{\partial \Omega_{tissue}} (\mu \nabla \mathbf{u} -  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds = \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds.
-\]
-
-
-We can see the vector field $\mathbf{u}$ as the sum of its normal and tangential components, i.e. $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. The same can be said for the test function $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$. We then substitute $\mathbf{u}$ and $\mathbf{v}$ in the boundary term:
-
-\begin{align*}
-& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial (\mathbf{u}^n + \mathbf{u}^t)}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} (\mu \frac{\partial (\mathbf{u}^n + \mathbf{u}^t)  }{\partial \mathbf{n}} \mathbf{v} \,ds - \int_{\partial \Omega_{tissue}} p \mathbf{n} \, \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v} \, ds
-+ \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v} \, ds
-- \int_{\partial \Omega_{tissue}} p \mathbf{n} \, \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v} \, ds 
-+ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} (\mathbf{v}^n + \mathbf{v}^t) \, ds 
-+ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds = \\
-& \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
-+ \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds. \\
-\end{align*}
-
-\todo[inline]{where the last equality is due to the fact that the spaces are in direct sum? Tangential component multiplied by normal derivative is 0, VERIFY}
-
-The variational form of Navier-Stokes becomes
-
-\begin{align*}
- \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
-- \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
-\end{align*}
-
-then I apply the Nitsche method on the first boundary term: 
-
-\begin{align*}
-& \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-& - \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds 
-+ \int_{\partial \Omega_{tissure}} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds \\
-& - \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds \\
-& =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds 
-+ \int_{\partial \Omega_{tissure}} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
-\end{align*}
-
-\todo[inline]{My problem is: what about the second term? I should substitute it with the term $k \mathbf{y}$, but what is the right condition that we use?}
-
-Then I substitute:
-
-\[
-- \int_{\partial \Omega_{tissue}} ( \mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} ) \mathbf{v} \, ds
-= - \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} ds 
-\]
-
-where $k < 0$ (that term should be positive otherwise I have problems, or better put $-k$ with $k>0$). Hence
-
 \begin{align}
 \label{eq:nitsche:5}
-& \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-& - \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds 
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds 
-+ \int_{\partial \Omega_{tissure}} \frac{\gamma}{h} \mathbf{u}^t \mathbf{v}^t \, ds \\
-& - \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} ds  \\
-& = \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds 
-+ \int_{\partial \Omega_{tissure}} \frac{\gamma}{h} \mathbf{g} \mathbf{v}^t \, ds
+\int_{\partial \Omega_{tissue}} (\mu \nabla \mathbf{u} -  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds 
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds \\
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} -  p \mathbf{n} \cdot \mathbf{v}) \, ds \\
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot (v_n \mathbf{n} + v_t \mathbf{t}) -  p \, v_n) \, ds \\
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} v_n -  p \, v_n) \, ds \\
+& + \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds \\
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} -  p) v_n \, ds \\
+& + \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds \\
+&= \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \cdot \mathbf{n} v_n \, ds \\
+& + \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds \\
+&= \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} v_n \, ds \\
+& + \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds \\
 \end{align}
 
-\todo[inline]{add here the part about the mesh velocity weak form?}
+The vector $\mathbf{v}$ can be split in its normal and tangential components, as follows: $\mathbf{v} = v_n \mathbf{n} + v_t \mathbf{t}$. Substituting the $\mathbf{v}$ in \eqref{eq:nitsche:5} and simplifying we have
+
+
 
 \section{FEniCS}
 \todo[inline]{Something about FEniCS}
