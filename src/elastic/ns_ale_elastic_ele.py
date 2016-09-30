@@ -8,26 +8,28 @@ from dolfin import *
 from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**5]
+NN = [2**4]
 T = 40
 #T = 1.5
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e3   # constant for Nitsche method
+gamma = 1e2   # constant for Nitsche method
+
+use_projected_normal = True
 
 # VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
 k = Constant(1e-1)      # elastic
 #k = - Constant(1e6)       # stiff
-k_bottom = -1e8
-k_top = -1e8
-k_middle = -1e0
+k_bottom = 1e8
+k_top = 1e8
+k_middle = 1e-1
 #k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 
 # -------
 
-dt = 0.05
+dt = 0.5
 g = Constant(0.0)
 
 x0, x1 = 0.0, 1.0
@@ -36,7 +38,7 @@ y0, y1 = 0.0, 2.0
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), 2*N, 4*N)  
     x = SpatialCoordinate(mesh)
     
 
@@ -57,13 +59,14 @@ for N in NN :
 
     # normal = FacetNormal(mesh)
     normal = FacetNormal(V.mesh())
-    normal = boundary_projection(normal, V)
     tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
     tangent = as_vector((tangent[0], tangent[1]))
 
-    # tangent = nodal_tangent(V)
-    tangent = boundary_projection(tangent, V)
-
+    if use_projected_normal == True:
+        tangent = nodal_tangent(V)
+        normal = nodal_normal(V)
+        #tangent = boundary_projection(tangent, V)
+        #normal = boundary_projection(normal, V)
     
     # Defining the normal and tangential components    
     un = dot(u, normal)
@@ -85,7 +88,8 @@ for N in NN :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     t = 0.0
-    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
+    #u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
+    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))"), t=t, degree = 2)
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -142,7 +146,7 @@ for N in NN :
     # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
     # so I put a negative value of the [k]
  
-    b = k * inner(dot(X + Constant(dt)*u_mid, normal ) * normal, v) * ds(2)    # what should I use here as displacement?
+    b = k * inner(dot(X + dt * u, normal), vn) * ds(2)    # what should I use here as displacement?
                                                                                                 
     c = ( - dot(grad(u)*normal, tangent) * vt - dot(grad(v)*normal, tangent) * ut
           + Constant(gamma)/h * ut*vt + dot(grad(v)*normal, tangent) * g - Constant(gamma)/h * g*vt ) * ds(2)
@@ -164,7 +168,7 @@ for N in NN :
 
     solver = PETScLUSolver()
 
-    file = File("u.pvd")
+    #file = File("u.pvd")
 
     while t <= T + 1E-9:
             
@@ -202,16 +206,27 @@ for N in NN :
         # Compute the mesh displacement
         Y.vector()[:] = w0.vector()[:]*dt
         X.vector()[:] += Y.vector()[:]
+
+        
+        aa, bb = assemble(inner(u0,normal)**2 * ds(2))**.5, assemble(inner(u0, tangent)**2 * ds(2))**.5
+        
+        print "{0:1.4e} {1:1.4e}".format(aa, bb)
         
         # Move the mesh
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
-        
+
         plot(mesh)
         
-        u0, p0 = VP_.split()
-        plot(u0, key="u0")
-        file << u0
+        # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
+        #if use_projected_normal == True:
+         #  normal.assign(nodal_normal(V))
+         #  tangent.assign(nodal_tangent(V))
+
+        
+        #u0, p0 = VP_.split()
+        #plot(u0, key="u0")
+        #file << u0
 
         t += dt
         
