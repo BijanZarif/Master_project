@@ -8,7 +8,7 @@ from dolfin import *
 from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**4]
+NN = [2**5]
 T = 40
 #T = 1.5
 mu = 1.0
@@ -18,7 +18,7 @@ gamma = 1e3    # constant for Nitsche method
 
 # VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
-k = Constant(1e-2)      # elastic
+k = Constant(1e10)      # elastic
 #k = - Constant(1e6)       # stiff
 k_bottom = -1e8
 k_top = -1e8
@@ -28,24 +28,18 @@ k_middle = -1e0
 # -------
 
 dt = 0.1
-# g = Constant((0.0,0.0))
 g = Constant(0.0)
 
-#T = dt
-
 x0, x1 = 0.0, 1.0
-y0, y1 = 0.0, 1.0
+y0, y1 = 0.0, 2.0
 
 
 for N in NN : 
    
     mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N)  
     x = SpatialCoordinate(mesh)
-
-    normal = FacetNormal(mesh)
-    tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
-    tangent = as_vector((tangent[0], tangent[1]))
     
+
     h = CellSize(mesh)
     
     # Taylor-Hood elements
@@ -59,6 +53,15 @@ for N in NN :
     
     v, q = TestFunctions(VP)
     z = TestFunction(W)
+
+    # normal = FacetNormal(mesh)
+    normal = FacetNormal(V.mesh())
+    normal = boundary_projection(normal, V)
+    tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
+    tangent = as_vector((tangent[0], tangent[1]))
+    tangent = boundary_projection(tangent, V)
+
+    # tangent = nodal_tangent(V)
     
     # Defining the normal and tangential components    
     un = dot(u, normal)
@@ -79,7 +82,8 @@ for N in NN :
     
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
-    u_inlet = Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))"), degree = 2)
+    t = 0.0
+    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t)"), t=t, degree = 2)
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -92,10 +96,10 @@ for N in NN :
         
     # Define boundary conditions
     fd = FacetFunction("size_t", mesh)
-    CompiledSubDomain("near(x[0], x0)", x0 = x0).mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-    CompiledSubDomain("near(x[0], x1)", x1 = x1).mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-    CompiledSubDomain("near(x[1], y1)", y1 = y1).mark(fd, 3) # top wall (inlet)
-    CompiledSubDomain("near(x[1], y0)", y0 = y0).mark(fd, 4) # bottom wall (outlet)
+    CompiledSubDomain("near(x[0], x0) && on_boundary", x0 = x0).mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
+    CompiledSubDomain("near(x[0], x1) && on_boundary", x1 = x1).mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
+    CompiledSubDomain("near(x[1], y1) && on_boundary", y1 = y1).mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], y0) && on_boundary", y0 = y0).mark(fd, 4) # bottom wall (outlet)
     ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
     #plot(fd)
@@ -157,8 +161,8 @@ for N in NN :
     
 
     solver = PETScLUSolver()
-    t = 0.0
-    file = File("poisson.pvd")
+
+    file = File("u.pvd")
 
     while t <= T + 1E-9:
             
@@ -210,6 +214,8 @@ for N in NN :
         ut = dot(u, tangent)
         vt = dot(v, tangent)
         t += dt
+        
+        u_inlet.t = t
         #break
 #plot(u0)
 #interactive()
