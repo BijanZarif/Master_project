@@ -14,11 +14,11 @@ T = 40
 mu = 1.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e3    # constant for Nitsche method
+gamma = 1e3   # constant for Nitsche method
 
 # VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
-k = Constant(1e10)      # elastic
+k = Constant(1e-1)      # elastic
 #k = - Constant(1e6)       # stiff
 k_bottom = -1e8
 k_top = -1e8
@@ -27,7 +27,7 @@ k_middle = -1e0
 
 # -------
 
-dt = 0.1
+dt = 0.05
 g = Constant(0.0)
 
 x0, x1 = 0.0, 1.0
@@ -54,14 +54,16 @@ for N in NN :
     v, q = TestFunctions(VP)
     z = TestFunction(W)
 
+
     # normal = FacetNormal(mesh)
     normal = FacetNormal(V.mesh())
     normal = boundary_projection(normal, V)
     tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
     tangent = as_vector((tangent[0], tangent[1]))
-    tangent = boundary_projection(tangent, V)
 
     # tangent = nodal_tangent(V)
+    tangent = boundary_projection(tangent, V)
+
     
     # Defining the normal and tangential components    
     un = dot(u, normal)
@@ -83,7 +85,7 @@ for N in NN :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     t = 0.0
-    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t)"), t=t, degree = 2)
+    u_inlet = Expression(("0.0", "0.5*(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -208,17 +210,12 @@ for N in NN :
         plot(mesh)
         
         u0, p0 = VP_.split()
+        plot(u0, key="u0")
         file << u0
-        un = dot(u,normal)
-        vn = dot(v,normal)
-        ut = dot(u, tangent)
-        vt = dot(v, tangent)
+
         t += dt
         
         u_inlet.t = t
-        #break
-#plot(u0)
-#interactive()
 
 if __name__ == "__main__":
     # insert cdoe to be executed when module is callled
