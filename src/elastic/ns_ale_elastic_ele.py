@@ -9,23 +9,23 @@ from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 NN = [2**4]
-T = 40
+T = 50
 #T = 1.5
-mu = 1.0
+mu = 1.0/8.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e4   # constant for Nitsche method
+gamma = 1e1   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
 use_projected_normal = True
 
-# VALUES OF k SHOULD BE NEGATIVE (OR I CHANGE THE SIGN IN THE VARIATIONAL FORM)
+
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
-k = Constant(1e-1)      # elastic
-#k = - Constant(1e6)       # stiff
+k = Constant(1e-3)      # elastic
+#k = Constant(1e6)       # stiff
+
 k_bottom = 1e2
 k_top = 1e2
 k_middle = 1e-1
-
 #k = Expression( "(x[1]<1)*k_bottom + (x[1]>1.9)*k_top + (x[1]>1 || x[1]<1.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 #k = Expression( "(x[1]<0.1)*k_bottom + (x[1]>0.9)*k_top + (x[1]>0.1 || x[1]<0.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 
@@ -41,13 +41,10 @@ y0, y1 = 0.0, 1.0
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 2*N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N)  
     x = SpatialCoordinate(mesh)
+    h = CellSize(mesh)
     
-
-    # h = CellSize(mesh)
-    
-    h = mesh.hmax()
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
     P = FunctionSpace(mesh, "CG", 1)        # space for p, q
@@ -77,6 +74,8 @@ for N in NN :
     vn = dot(v, normal)
     ut = dot(u, tangent)
     vt = dot(v, tangent)
+    
+
     
     # The functions are initialized to zero
     up0 = Function(VP)
@@ -120,20 +119,14 @@ for N in NN :
     
     # Here I need to impose just the Dirichlet conditions. The ones regarding the stresses were already encountered in the
     # weak formulation
-    bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the topo wall
+    bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the top wall
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
-            DirichletBC(W.sub(1), Constant(0.), fd, 4),
-           #DirichletBC(W, Constant((0.,0.)), fd, 4),
+            DirichletBC(W.sub(1), Constant(0.), fd, 4),     # I fix the y component to zero, but the x component can move
+           #DirichletBC(W, Constant((0.,0.)), fd, 4),       # I fix both components to zero
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
                            
-
-    # bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
-    #         DirichletBC(W, u0, fd, 2),
-    #        DirichletBC(W, Constant((0.,0.)), fd, 4),
-    #        DirichletBC(W, Constant((0.,0.)), fd, 3)]
-    
     # check the BC are correct
     #U = Function(VP)
     #for bc in bcu: bc.apply(U.vector())
@@ -230,13 +223,17 @@ for N in NN :
            normal.assign(nodal_normal(V))
            tangent.assign(nodal_tangent(V))
     
-        un = dot(u, normal)
-        vn = dot(v, normal)
-        ut = dot(u, tangent)
-        vt = dot(v, tangent)
+        plot(normal)
+        plot(tangent)
+    
+        # DO I NEED THIS? OR un,vn,ut,vt get updated automatically?
+        # un = dot(u, normal)
+        # vn = dot(v, normal)
+        # ut = dot(u, tangent)
+        # vt = dot(v, tangent)
         
         u0, p0 = VP_.split()
-        plot(u0, key="u0")
+        #plot(u0, key="u0")
         #file << u0
 
         t += dt

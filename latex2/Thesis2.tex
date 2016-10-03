@@ -651,7 +651,8 @@ The last step is to apply Nitsche's method to the term
 \]
 Hence, the weak formulation of Navier-Stokes equations with Nitsche's method reads
 
-\begin{align*}
+\begin{align}
+\label{eq:nitsche:6}
  \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
@@ -662,7 +663,7 @@ Hence, the weak formulation of Navier-Stokes equations with Nitsche's method rea
 = \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
 - \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g) \, ds 
 + \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} g \, v_t \, ds
-\end{align*}
+\end{align} 
 
 Moreover, since we are assuming $u^t = g = 0$, the final form reads
 \begin{align*}
@@ -723,6 +724,23 @@ Actually I used
 \rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)] - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - \mathbf{p}^{\rm i+1}I) &= \mathbf{f}^{\rm i+1/2}, \\
  \label{eq:ns:4}
 \nabla \mathbf{u}^{i+1} &= 0,
+\end{align}
+
+From equations~\eqref{eq:nitsche:6}, using the inner product $\langle f, g \rangle = \int_\Omega f g \, d \Omega$, the numerical scheme reads
+
+\begin{align}
+\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle 
++ \rho \langle \nabla \mathbf{u}^{\rm i+1/2}, \mathbf{v} \rangle 
++ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle 
+- \langle p , div(\mathbf{v}) \rangle \\
+- \langle q , div(\mathbf{u}) \rangle
+- \langle (\nabla \mathbf{u} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle 
+- \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle 
++ \frac{\gamma}{h} \langle u^t , v^t \rangle \\
+= \langle \mathbf{f}, \mathbf{v} \rangle
+- k \langle (\mathbf{X} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle
+- \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle
++ \frac{\gamma}{h} \langle g, v^t \rangle
 \end{align}
 
 \subsection{Spatial discretization}
