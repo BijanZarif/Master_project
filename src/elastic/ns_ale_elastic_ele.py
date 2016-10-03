@@ -108,8 +108,8 @@ for N in NN :
     fd = FacetFunction("size_t", mesh)
     CompiledSubDomain("near(x[0], x0) && on_boundary", x0 = x0).mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
     CompiledSubDomain("near(x[0], x1) && on_boundary", x1 = x1).mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-    CompiledSubDomain("near(x[1], y1) && (x[0] != x1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
-    CompiledSubDomain("near(x[1], y0) && (x[0] != x1) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
+    CompiledSubDomain("near(x[1], y1) && (x[0] != x1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)  [in this way I exclude the point x1,y1]
+    CompiledSubDomain("near(x[1], y0) && (x[0] != x1) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet) [in this way I exclude the point x1,y0]
     # CompiledSubDomain("near(x[1], y1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
     # CompiledSubDomain("near(x[1], y0) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
 
