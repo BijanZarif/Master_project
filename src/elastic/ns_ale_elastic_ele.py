@@ -22,12 +22,12 @@ use_projected_normal = True
 # k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
 k = Constant(1e-1)      # elastic
 #k = - Constant(1e6)       # stiff
-k_bottom = 1e1
-k_top = 1e1
+k_bottom = 1e2
+k_top = 1e2
 k_middle = 1e-1
 
-# k = Expression( "(x[1]<2)*k_bottom + (x[1]>3.8)*k_top + (x[1]>2 || x[1]<3.8)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
-k = Expression( "(x[1]<0.1)*k_bottom + (x[1]>0.9)*k_top + (x[1]>0.1 || x[1]<0.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
+#k = Expression( "(x[1]<1)*k_bottom + (x[1]>1.9)*k_top + (x[1]>1 || x[1]<1.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
+#k = Expression( "(x[1]<0.1)*k_bottom + (x[1]>0.9)*k_top + (x[1]>0.1 || x[1]<0.9)*k_middle", k_bottom = k_bottom, k_top = k_top, k_middle = k_middle )
 
 # -------
 
@@ -124,8 +124,8 @@ for N in NN :
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
-           # DirichletBC(W.sub(1), Constant(0.), fd, 4),
-           DirichletBC(W, Constant((0.,0.)), fd, 4),
+            DirichletBC(W.sub(1), Constant(0.), fd, 4),
+           #DirichletBC(W, Constant((0.,0.)), fd, 4),
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
                            
 
@@ -215,9 +215,8 @@ for N in NN :
         Y.vector()[:] = w0.vector()[:]*dt
         X.vector()[:] += Y.vector()[:]
 
-        
+        # check the values of the tangential and normal components
         aa, bb = assemble(inner(u0,normal)**2 * ds(2))**.5, assemble(inner(u0, tangent)**2 * ds(2))**.5
-        
         print "{0:1.4e} {1:1.4e}".format(aa, bb)
         
         # Move the mesh
@@ -243,8 +242,3 @@ for N in NN :
         t += dt
         
         u_inlet.t = t
-
-if __name__ == "__main__":
-    # insert cdoe to be executed when module is callled
-    pass
- 
