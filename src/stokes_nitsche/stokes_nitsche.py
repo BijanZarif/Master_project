@@ -104,7 +104,16 @@ for n in N:
     F0 -= inner(p*Identity(2), grad(v))*dx
     F0 -= inner(f, v)*dx
     
+    # Nitsche's method
+    F0 -= nu*inner(grad(u)*n,v)*ds
+    F0 += inner(p*Identity(2)*n,v)*ds
+    F0 -= nu*inner(grad(v)*n,u)*ds
+    F0 += gamma * h**-1 * inner(u,v)*ds
+    
     F1 = q*div(u)*dx
+    
+    # Nitsche's method
+    F1 -= 
     
     F = F0 + F1
     

@@ -350,8 +350,8 @@ the fluid flow. We will assume that the tissue boundary $\partial
 \Omega_{\rm tissue}$ is elastic with stiffness $k > 0$ and in particular
 allowed to move. To this end, we introduce the boundary conditions
 \begin{align}
-\mu \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} - p \mathbf{n} = - k \mathbf{y} \cdot \mathbf{n} \qquad \text{ on } \partial \Omega_{\rm tissue},\\
-\mathbf{u}^t = \mathbf{0} \qquad \text{ on } \partial \Omega_{\rm tissue},
+(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n}) \cdot \mathbf{n} = k \mathbf{y} \cdot \mathbf{n} \qquad \text{ on } \partial \Omega_{\rm tissue},\\
+u^t = g = 0 \qquad \text{ on } \partial \Omega_{\rm tissue},
 \end{align}
 
 %\begin{equation}
@@ -361,8 +361,8 @@ allowed to move. To this end, we introduce the boundary conditions
 %\end{equation}
 
 where $\mathbf{n}$ is the outward pointing boundary normal and
-$\mathbf{y}$ still denotes the mesh displacement. For simplicity, on
-the spinal cord side, we assume that the cord is rigid and fixed,
+$\mathbf{y}$ still denotes the mesh displacement, and $u^t$ is the tangential component of the velocity field $\mathbf{u}$, i.e. $u^t = \mathbf{u} \cdot \mathbf{t}$. For simplicity, on
+the spinal cord tissue, we assume that the cord is rigid and fixed,
 i.e.:
 \begin{equation}
   \mathbf{u} = \mathbf{0} \quad \text { on } \partial \Omega_{\rm cord}.
@@ -626,7 +626,8 @@ According to the boundary conditions, the boundary term $\partial \Omega_{tissue
 = \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
 \end{align*}
 
-Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, I can rewrite the boundary term:
+The vector $\mathbf{v}$ can be split in its normal and tangential components, as follows: $\mathbf{v} = v_n \mathbf{n} + v_t \mathbf{t}$. Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, and substituting the $\mathbf{v}$ in \eqref{eq:nitsche:5},  the boundary term becomes
+
 
 \begin{align}
 \label{eq:nitsche:5}
@@ -644,8 +645,36 @@ Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial 
 & + \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds \\
 \end{align}
 
-The vector $\mathbf{v}$ can be split in its normal and tangential components, as follows: $\mathbf{v} = v_n \mathbf{n} + v_t \mathbf{t}$. Substituting the $\mathbf{v}$ in \eqref{eq:nitsche:5} and simplifying we have
+The last step is to apply Nitsche's method to the term
+\[
+\int_{\partial \Omega_{tissue}}(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds.
+\]
+Hence, the weak formulation of Navier-Stokes equations with Nitsche's method reads
 
+\begin{align*}
+ \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} v_n \, ds \\
+- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds 
+- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u_t) \, ds 
++ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u_t \, v_t \, ds \\
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g) \, ds 
++ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} g \, v_t \, ds
+\end{align*}
+
+Moreover, since we are assuming $u^t = g = 0$, the final form reads
+\begin{align*}
+ \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega_{tissue}} (k \mathbf{y}) \cdot \mathbf{n} v_n \, ds 
+- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v_t) \, ds 
+- \int_{\partial \Omega_{tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u_t) \, ds  \\
++ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u_t \, v_t \, ds 
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+\end{align*}
 
 
 \section{FEniCS}
