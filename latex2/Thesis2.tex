@@ -520,39 +520,40 @@ What we would like to do now is using the previous method to weakly set boundary
 \begin{align}
 - \Delta \mathbf{u} &= \mathbf{f} \quad \text{ in } \Omega, \\
 \label{eq:nitsche:4}
-\frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} &= \mathbf{l} \quad \text{ on } \Gamma, \\ 
-\mathbf{u}^t &= \mathbf{g} \quad \text{ on } \Gamma.
+\frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} &= l \quad \text{ on } \Gamma, \\ 
+u^t &= g \quad \text{ on } \Gamma.
 \end{align}
+where $\mathbf{u} = u^n \mathbf{n} + u^t \mathbf{t}$, and $\mathbf{n}$ and $\mathbf{t}$ are respectively the normal and tangential vectors. We multiply by a test function $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$, and substitute it in~\eqref{eq:nitsche:3}. Integrating over the domain $\Omega$, we obtain
 
-where $\mathbf{u}^n$ and $\mathbf{u}^t$ are respectively the normal and tangential components of the velocity $\mathbf{u}$, and $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$. We multiply by a test function $\mathbf{v}$, and substitute $\mathbf{u} = \mathbf{u}^n + \mathbf{u}^t$ and $\mathbf{v} = \mathbf{v}^n + \mathbf{v}^t$ in~\eqref{eq:nitsche:3}. Integrating over the domain $\Omega$, we obtain
-
-\begin{equation}
+\begin{align}
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}^n}{\partial \mathbf{n}} \mathbf{v}^n \, ds
-- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-= \int_\Omega \mathbf{fv} \, dx.
-\end{equation}
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} (v^n \mathbf{n} + v^t \mathbf{t} ) \, ds
+& = \int_\Omega \mathbf{fv} \, dx, \\
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} v^n \, ds
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} v^t \, ds
+& = \int_\Omega \mathbf{fv} \, dx.
+\end{align}
 
 From the boundary condition~\eqref{eq:nitsche:4}, we have
 
 \begin{equation}
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-=  \int_{\Gamma} \mathbf{l} \mathbf{v}^n \, ds
-+ \int_\Omega \mathbf{fv} \, dx
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds
+=  \int_{\Gamma} l \, v^n \, ds \int_\Omega \mathbf{fv} \, dx.
 \end{equation}
 
 Applying the Nitsche method on the boundary term in the left hand side, we get
 
 \begin{align}
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}^t}{\partial \mathbf{n}} \mathbf{v}^t \, ds
-- \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{u}^t \, ds
-&+ \gamma \int_{\Gamma} h^{-1} \mathbf{u}^t \mathbf{v}^t \, ds = \\
-	 \int_{\Gamma} \mathbf{l} \mathbf{v}^n \, ds
-+ \int_\Omega \mathbf{fv} \, dx
- - \int_{\Gamma} \frac{\partial \mathbf{v}^t}{\partial \mathbf{n}} \mathbf{g} \, ds
-&+ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \mathbf{v}^t \, ds
+- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds 
+- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t \, ds
+&+ \frac{\gamma}{h} \int_{\Gamma} u^t \, v^t \, ds \\
+=  \int_{\Gamma} l \, v^n \, ds
++ \int_\Omega \mathbf{fv} \, dx.
+- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g \, ds
+&+ \frac{\gamma}{h} \int_{\Gamma} g \, v^t \, ds
 \end{align}
 
 \subsection{Applying Nitsche's method to Navier-Stokes}
@@ -734,7 +735,7 @@ From equations~\eqref{eq:nitsche:6}, using the inner product $\langle f, g \rang
 + \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle 
 - \langle p , div(\mathbf{v}) \rangle \\
 - \langle q , div(\mathbf{u}) \rangle
-- \langle (\nabla \mathbf{u} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle 
+- \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle 
 - \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle 
 + \frac{\gamma}{h} \langle u^t , v^t \rangle \\
 = \langle \mathbf{f}, \mathbf{v} \rangle
