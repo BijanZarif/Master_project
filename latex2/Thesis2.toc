@@ -8,20 +8,19 @@
 \contentsline {section}{\numberline {3.2}Modelling the SAS with elastic surroundings}{5}
 \contentsline {chapter}{\numberline {4}Numerical methods}{7}
 \contentsline {section}{\numberline {4.1}Finite element formulation}{7}
-\contentsline {section}{\numberline {4.2}Weak formulation of Navier-Stokes with ALE term}{7}
-\contentsline {section}{\numberline {4.3}Weak formulation of N-S on moving domain}{8}
-\contentsline {subsection}{\numberline {4.3.1}The Nitsche's method}{9}
-\contentsline {subsection}{\numberline {4.3.2}Applying Nitsche's method to Navier-Stokes}{10}
-\contentsline {section}{\numberline {4.4}FEniCS}{13}
-\contentsline {section}{\numberline {4.5}Numerical scheme}{13}
-\contentsline {subsection}{\numberline {4.5.1}Time discretization}{13}
-\contentsline {subsection}{\numberline {4.5.2}Spatial discretization}{14}
-\contentsline {chapter}{\numberline {5}Verification}{16}
-\contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{16}
-\contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{18}
-\contentsline {section}{\numberline {5.3}Driven cavity}{19}
-\contentsline {section}{\numberline {5.4}ALE test case}{21}
-\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{21}
-\contentsline {chapter}{\numberline {6}Numerical results}{23}
-\contentsline {chapter}{\numberline {7}Discussion}{24}
-\contentsline {chapter}{\numberline {8}Conclusions}{25}
+\contentsline {section}{\numberline {4.2}Weak formulation of N-S on moving domain}{7}
+\contentsline {subsection}{\numberline {4.2.1}The Nitsche method}{8}
+\contentsline {subsection}{\numberline {4.2.2}Navier-Stokes formulation with the Nitsche method}{10}
+\contentsline {section}{\numberline {4.3}FEniCS}{11}
+\contentsline {section}{\numberline {4.4}Numerical scheme}{11}
+\contentsline {subsection}{\numberline {4.4.1}Time discretization}{11}
+\contentsline {subsection}{\numberline {4.4.2}Spatial discretization}{13}
+\contentsline {chapter}{\numberline {5}Verification}{14}
+\contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{14}
+\contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{16}
+\contentsline {section}{\numberline {5.3}Driven cavity}{17}
+\contentsline {section}{\numberline {5.4}ALE test case}{19}
+\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{19}
+\contentsline {chapter}{\numberline {6}Numerical results}{21}
+\contentsline {chapter}{\numberline {7}Discussion}{22}
+\contentsline {chapter}{\numberline {8}Conclusions}{23}

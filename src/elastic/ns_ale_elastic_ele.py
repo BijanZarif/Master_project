@@ -9,18 +9,17 @@ from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 NN = [2**4]
-T = 50
+T = 10
 #T = 1.5
 mu = 1.0/8.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e1   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
+gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
 use_projected_normal = True
 
 
-# k BIG: the tissue is stiff, k SMALL: the tissue is more flexible
-k = Constant(1e-3)      # elastic
+k = Constant(1e-8)      # elastic
 #k = Constant(1e6)       # stiff
 
 k_bottom = 1e2
@@ -31,7 +30,7 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.05
+dt = 0.01
 g = Constant(0.0)
 
 
@@ -41,7 +40,7 @@ y0, y1 = 0.0, 1.0
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 1 * N)  
     x = SpatialCoordinate(mesh)
     h = CellSize(mesh)
     
@@ -91,8 +90,8 @@ for N in NN :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     t = 0.0
-    # u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*sin(t*2*pi)"), t=t, degree = 2)
-    u_inlet = Expression(("0.0", "0.1*(-1*fabs(x[0]*(x[0] - 1)))"), t=t, degree = 2)
+    u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
+    #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))"), degree = 2)
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -107,10 +106,10 @@ for N in NN :
     fd = FacetFunction("size_t", mesh)
     CompiledSubDomain("near(x[0], x0) && on_boundary", x0 = x0).mark(fd, 1) # left wall (cord)     PHYSICAL BOUNDARY --> here the values of w and u have to be the same
     CompiledSubDomain("near(x[0], x1) && on_boundary", x1 = x1).mark(fd, 2) # right wall (tissue)  PHYSICAL BOUNDARY --> here the values of w and u have to be the same
-    # CompiledSubDomain("near(x[1], y1) && (x[0] != x1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)  [in this way I exclude the point x1,y1]
-    # CompiledSubDomain("near(x[1], y0) && (x[0] != x1) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet) [in this way I exclude the point x1,y0]
-    CompiledSubDomain("near(x[1], y1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
-    CompiledSubDomain("near(x[1], y0) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
+    #CompiledSubDomain("near(x[1], y1) && (x[0] != x1) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)  [in this way I exclude the point x1,y1]
+    #CompiledSubDomain("near(x[1], y0) && (x[0] != x1) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet) [in this way I exclude the point x1,y0]
+    CompiledSubDomain("near(x[1], y1) ||(near(x[0], x1) && near(x[1], y1) ) && on_boundary", x1 = x1, y1 = y1).mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], y0) ||(near(x[0], x1) && near(x[1], y0) ) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall (outlet)
 
     ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
@@ -121,10 +120,11 @@ for N in NN :
     # weak formulation
     bcu = [DirichletBC(VP.sub(0), u_inlet, fd, 3),   # inlet at the top wall
            DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
+    
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
-            DirichletBC(W.sub(1), Constant(0.), fd, 4),     # I fix the y component to zero, but the x component can move
-           #DirichletBC(W, Constant((0.,0.)), fd, 4),       # I fix both components to zero
+            #DirichletBC(W.sub(1), Constant(0.), fd, 4),     # I fix the y component to zero, but the x component can move
+           DirichletBC(W, Constant((0.,0.)), fd, 4),       # I fix both components to zero
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
                            
     # check the BC are correct
@@ -144,13 +144,11 @@ for N in NN :
          - inner(f,v) ) * dx
     
     # Boundary term with elastic constant
-    # I put a minus in this term, as it follows from the computations of the variational form. But then I want the term [ky] to be negative,
-    # so I put a negative value of the [k]
  
-    b = k * inner(dot(X + dt * u, normal), vn) * ds(2)    # what should I use here as displacement?
+    b = k * inner(dot(Y + dt * u, normal), vn) * ds(2)    # what should I use here as displacement?
                                                                                                 
-    c = ( - dot(grad(u)*normal, tangent) * vt - dot(grad(v)*normal, tangent) * ut
-          + Constant(gamma)/h * ut*vt + dot(grad(v)*normal, tangent) * g - Constant(gamma)/h * g*vt ) * ds(2)
+    c = ( - Constant(mu) * dot(grad(u)*normal, tangent) * vt - Constant(mu) * dot(grad(v)*normal, tangent) * ut
+          + Constant(gamma)/h * ut*vt + Constant(mu) * dot(grad(v)*normal, tangent) * g - Constant(gamma)/h * g*vt ) * ds(2)
     
     # Bilinear and linear forms
     F = dudt + a + b + c
@@ -169,11 +167,12 @@ for N in NN :
 
     solver = PETScLUSolver()
 
-    #file = File("u.pvd")
-
+    #file = File("solutions/velocity/u.pvd")
+    #out = File("solutions/square_1e4/ALE_1e4.pvd")
+    
     while t <= T + 1E-9:
             
-        print "Solving for t = {}".format(t)  
+        #print "Solving for t = {}".format(t)  
         
         # Solving the Navier-Stokes equations
         # I need to reassemble the system
@@ -207,35 +206,47 @@ for N in NN :
         # Compute the mesh displacement
         Y.vector()[:] = w0.vector()[:]*dt
         X.vector()[:] += Y.vector()[:]
-
+        
+        #out << Y, t
+        print "max displacement = {}".format(Y.vector().max())
+        print "min displacement = {}".format(Y.vector().min())
+        print "abs value displacement = {}".format(abs(Y.vector().max()))
+        
         # check the values of the tangential and normal components
-        aa, bb = assemble(inner(u0,normal)**2 * ds(2))**.5, assemble(inner(u0, tangent)**2 * ds(2))**.5
-        print "{0:1.4e} {1:1.4e}".format(aa, bb)
+        # aa, bb = assemble(inner(u0,normal)**2 * ds(2))**.5, assemble(inner(u0, tangent)**2 * ds(2))**.5
+        # print "{0:1.4e} {1:1.4e}".format(aa, bb)
         
         # Move the mesh
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        plot(mesh)
+        #plot(mesh, title = str(t))
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
         if use_projected_normal == True:
            normal.assign(nodal_normal(V))
            tangent.assign(nodal_tangent(V))
     
-        plot(normal)
-        plot(tangent)
+        #plot(normal)
+        #plot(tangent)
     
         # DO I NEED THIS? OR un,vn,ut,vt get updated automatically?
-        # un = dot(u, normal)
-        # vn = dot(v, normal)
-        # ut = dot(u, tangent)
-        # vt = dot(v, tangent)
+        un = dot(u, normal)
+        vn = dot(v, normal)
+        ut = dot(u, tangent)
+        vt = dot(v, tangent)
         
-        u0, p0 = VP_.split()
-        #plot(u0, key="u0")
-        #file << u0
+        u01, p01 = VP_.split()
+        plot(u01, key="u01", title = str(t))
+        #plot(p01, key='p01', title = str(t))
+        #file << u01
 
         t += dt
         
         u_inlet.t = t
+
+
+#u01, p01 = VP_.split()
+#plot(u01, key="u01", title = str(t))
+#plot(p01, key='p01', title = str(t))
+interactive()
