@@ -396,7 +396,8 @@ walls.
 \section{Finite element formulation}
 
 \section{Weak formulation of N-S on moving domain}
-We start from equations~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, and multiply the first one by a test function $\mathbf{v}$, and by a test function $q$ the second equation, and integrate over $\Omega$. We obtain:
+In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
+We obtain:
 
 \begin{align}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
@@ -412,19 +413,28 @@ Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{
 - \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
 \]
 \\
-The boundary $\partial \Omega_t$ can be divided in the four boundaries:
+The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary were the solution is known. If $\Gamma_D$ is the portion of the boundary where we set Dirichlet conditions, we can define
 
-\[
-\partial \Omega_t= \partial \Omega_{Top} \cup \partial \Omega_{Bottom} \cup \partial \Omega_{Cord} \cup  \partial \Omega_{Tissue}.
-\]
+\begin{equation}
+\hat{V} = \set{\mathbf{v} \in [H^1(\Omega)]^2 | \mathbf{v}_{|_{\Gamma_D}} = \mathbf{0}} 
+\end{equation}
+\\
+and we can choose $Q = L^2(\Omega)$. In our setup, the boundary $\partial \Omega_t$ is divided in the four boundaries:
 
-On $\partial \Omega_{Top}$ and $\partial \Omega_{Cord}$ we assume Dirichlet boundary conditions for the velocity $\mathbf{u}$, hence the test function $\mathbf{v}$ will be zero on these two boundaries. Moreover, we assume zero stress on the bottom boundary, i.e. $\sigma \cdot \mathbf{n} = 0$ on $\partial \Omega_{Bottom}$. The boundary term becomes
+\begin{equation}
+\partial \Omega_t= \partial \Omega_{\rm Top} \cup
+\partial \Omega_{\rm Bottom} \cup
+\partial \Omega_{\rm Cord} \cup
+\partial \Omega_{\rm Tissue}.
+\end{equation}
+
+Since we are assuming $\Gamma_D = \partial \Omega_{Top} \cup \partial \Omega_{Cord}$, the test function $\mathbf{v}$ will be zero on these two boundaries. Moreover, we assume zero stress on the bottom boundary, i.e. $\sigma \cdot \mathbf{n} = 0$ on $\partial \Omega_{Bottom}$. The boundary term becomes
 
 \[
 - \int_{\partial \Omega_t} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx =
 - \int_{\partial \Omega_{\rm Tissue}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx.
 \]
-
+\\
 Hence, the variational formulation reads:
 
 \begin{equation}
@@ -438,7 +448,13 @@ Hence, the variational formulation reads:
 \end{split}
 \end{equation}
 
-As we are solving a Poisson equation for the mesh velocity $\mathbf{w}$, we need to discretize the problem. Let $\mathbf{z}$ be a test function in the space $\set{}$. We multiply equation~\eqref{eq:bc:2} by $\mathbf{z}$ and integrate on the entire domain $\Omega$ to obtain
+As we are solving a Poisson equation for the mesh velocity $\mathbf{w}$, we need to discretize the problem. According to the boundary conditions~\eqref{eq:bc:5}, the function $\mathbf{w}$ belongs to the space
+
+\begin{equation}
+W = \set{\mathbf{w} \in [H^1(\Omega)]^2 | \mathbf{w}_{|_{\partial \Omega_t \setminus \Omega_{\rm Tissue}}} = \mathbf{0}, \mathbf{w}_{|_{\partial \Omega_{\rm Tissue} } }  = \mathbf{u} } 
+\end{equation}
+
+Let $\mathbf{z}$ be a test function in the space $\set{}$. We multiply equation~\eqref{eq:bc:2} by $\mathbf{z}$ and integrate on the entire domain $\Omega$ to obtain
 
 \begin{equation}
 \label{eq:bc:4}
@@ -618,17 +634,19 @@ Moreover, since we are assuming $u^t = g = 0$, the final form reads
 \section{Numerical scheme}
 
 \subsection{Time discretization}
-In the following we present a possibility of discretization of the Navier-Stokes equations, that was used in this thesis. Starting from equations~\eqref{eq:ns:1}--\eqref{eq:ns:2}, we now want to use the so called Crank-Nicolson discretization to solve these equations. Let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be the time interval, and $\Delta t = t_{i+1} - t_i$ the time step. We apply a backward Euler discretization to the time derivative $\partial \mathbf{u}/ \partial t$
+In the following we present a discretization of the Navier-Stokes equations, that was used in the numerical simulations. Starting from equations~\eqref{eq:ns:1}--\eqref{eq:ns:2}, we want to use the so called Crank-Nicolson discretization to solve them. Let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be a time interval, and $\Delta t = t_{i+1} - t_i$ the time step. We apply a backward Euler discretization to the time derivative $\partial \mathbf{u}/ \partial t$
 
 \begin{equation}
 \frac{\partial \mathbf{u}}{\partial t} \approx \frac{\mathbf{u}^{i+1} -\mathbf{u}^i }{\Delta t},
 \end{equation}
+\\
 where $\mathbf{u}^i$ is an approximation of $\mathbf{u}(t_i)$ at the time level $i$. A midpoint Crank-Nicolson scheme may be written as:
 
 \begin{align}
-\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w})]^{i+1/2} - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - \mathbf{p}^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
+\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w})]^{i+1/2} - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - p^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
 \nabla \mathbf{u}^{i+1} &= 0,
 \end{align}
+\\
 where we set $\mathbf{u}^{\rm i+1/2} = \frac{\mathbf{u}^i + \mathbf{u}^{i+1}}{2}$.
 The convective term may be written as
 
@@ -648,34 +666,37 @@ Moreover, the stress tensor $\sigma$ is discretized as follows
 The resulting discretization yields to
 
 \begin{align}
-\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)] - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - \mathbf{p}^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
+\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)] - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - p^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
 \nabla \mathbf{u}^{i+1} &= 0,
 \end{align}
+\\
+By defining the inner products
 
-Actually I used
-\begin{align}
- \label{eq:ns:3}
-\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)] - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - \mathbf{p}^{\rm i+1}I) &= \mathbf{f}^{\rm i+1/2}, \\
- \label{eq:ns:4}
-\nabla \mathbf{u}^{i+1} &= 0,
-\end{align}
+\[
+\langle f, g \rangle_\Omega = \int_\Omega f \cdot g \, d \Omega, \qquad
+\langle f, g \rangle_\Gamma = \int_\Omega f \cdot g \, d \Omega_{\rm Tissue},
+\]
+\\
+the numerical scheme reads
 
-From equations~\eqref{eq:nitsche:6}, using the inner product $\langle f, g \rangle = \int_\Omega f g \, d \Omega$, the numerical scheme reads
-
-\begin{align}
-\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle 
-+ \rho \langle \nabla \mathbf{u}^{\rm i+1/2}, \mathbf{v} \rangle 
-+ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle 
-- \langle p , div(\mathbf{v}) \rangle \\
-- \langle q , div(\mathbf{u}) \rangle
-- \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle 
-- \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle 
-+ \frac{\gamma}{h} \langle u^t , v^t \rangle \\
-= \langle \mathbf{f}, \mathbf{v} \rangle
-- k \langle (\mathbf{X} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle
-- \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle
-+ \frac{\gamma}{h} \langle g, v^t \rangle
-\end{align}
+\begin{equation}
+\begin{split}
+\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle_\Omega
++ \rho \langle \nabla \mathbf{u}^{\rm i+1/2} \cdot (\mathbf{u}^{\rm i} - \mathbf{w}^{\rm i}), \mathbf{v} \rangle_\Omega
++ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega
+& - \langle p , div(\mathbf{v}) \rangle_\Omega \\
+- \langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega
+- \mu \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle_\Gamma 
+- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle_\Gamma 
+&+ \frac{\gamma}{h} \langle u^t , v^t \rangle_\Gamma \\
+= \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega
+- k \langle (\mathbf{y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_\Gamma
+- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle_\Gamma
+&+ \frac{\gamma}{h} \langle g, v^t \rangle_\Gamma
+\end{split}
+\end{equation}
+\\
+where $\mathbf{y}$ is the mesh displacement.
 
 \subsection{Spatial discretization}
 Starting from the scheme~\eqref{eq:ns:3}--\eqref{eq:ns:4} for the Navier-Stokes equations, the unknown velocity $\mathbf{u}^{\rm i + 1}$ and the pressure $\mathbf{p}^{\rm i + 1}$ are denoted as the trial functions in the trial spaces $V$ and $Q$ given by
