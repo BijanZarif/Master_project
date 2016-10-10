@@ -9,7 +9,7 @@
 \contentsline {chapter}{\numberline {4}Numerical methods}{7}
 \contentsline {section}{\numberline {4.1}Finite element formulation}{7}
 \contentsline {section}{\numberline {4.2}Weak formulation of N-S on moving domain}{7}
-\contentsline {subsection}{\numberline {4.2.1}The Nitsche method}{8}
+\contentsline {subsection}{\numberline {4.2.1}The Nitsche method}{9}
 \contentsline {subsection}{\numberline {4.2.2}Navier-Stokes formulation with the Nitsche method}{10}
 \contentsline {section}{\numberline {4.3}FEniCS}{12}
 \contentsline {section}{\numberline {4.4}Numerical scheme}{12}
