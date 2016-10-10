@@ -9,8 +9,6 @@ from matplotlib import pyplot as plt
 from fenics import *
 from mshr import *   # I need this if I want to use the functions below to create a mesh
 
-# domain = Rectangle(Point(0., 0.), Point(1.0,1.0))
-# mesh = generate_mesh(domain, 16)
 
 N = [2**2, 2**3, 2**4, 2**5, 2**6]
 h = [1./i for i in N]
@@ -22,10 +20,15 @@ errsH1pressure = []
 rates1 = []
 rates2 = []
 rates3 = []
+gamma = Constant(100.0)
+g = Constant((0.0, 0.0))
 
 for n in N:
 
     mesh = UnitSquareMesh(n,n)
+    
+    normal = FacetNormal(mesh)
+    h = CellSize(mesh)
     
     # ANOTHER WAY TO DEFINE THE TAYLOR HOOD ON FEniCS 1.7
     #P1 = FiniteElement("Lagrange", triangle, 1)
@@ -41,13 +44,12 @@ for n in N:
     v, q = TestFunctions(W)
     
     x = SpatialCoordinate(mesh)
-    nu = 1.0/8.0
+    nu = Constant(1.0/8.0)
     
     
     # I have to remember that the u_exact has to satisfy as well the boundary conditions (and not only the system of equations)
     # that's why there's the pi*x[0], so the sin is 0 on the right boundary (i.e. x[0] = 1))
     u_exact = as_vector((0, sin(pi*x[0]))) # to use as a solution to verify the convergence 
-    #u_exact = as_vector((0, x[0]*(1-x[0])))   # as_vector() ???
     p_exact = 0.5 - x[1]            # this function has mean value zero (its integral in [0,1] x [0,1] is zero)
                                     # hence, I can use it as exact solution to compare it with the numerical solution
                                     # since I put the constraint that mean_value(pressure) = 0
@@ -58,62 +60,61 @@ for n in N:
     # Since the pressure is defined up to some constant, we compare the gradients
     g =  nu*div(grad(u_exact)) + f             # pressure gradient
     
-    #u_exact_e = Expression((" 0 ", "x[0]*(1-x[0])" ), domain=mesh, degree=2)
+    
     u_exact_e = Expression((" 0 ", "sin(pi*x[0])" ))
     p_exact_e = Expression("0.5-x[1]", domain=mesh, degree=1)
     
     # plot(u_exact_e, mesh = mesh, title = "exact velocity")
     # plot(p_exact_e, mesh = mesh, title = "exact pressure")
     
+    # -------- BC -------
+
+    # Define boundary conditions
+    fd = FacetFunction("size_t", mesh)
+    CompiledSubDomain("near(x[0], 0.0) && on_boundary").mark(fd, 1) # left wall (cord)    
+    CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) # right wall (tissue)  
+    CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(fd, 4) # bottom wall (outlet)
+    ds = Measure("ds", domain = mesh, subdomain_data = fd)
+    #plot(fd)
+    #interactive()
+
+    # bcs = [DirichletBC(W.sub(0), u_exact_e, fd, 3),
+    #        DirichletBC(W.sub(0), u_exact_e, fd, 4),
+    #        DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 1),
+    #        DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 2)]
     
-    inflow = DirichletBC(W.sub(0), u_exact_e, "(x[1] > 1.0 - DOLFIN_EPS) && on_boundary")
-    outflow = DirichletBC(W.sub(0), u_exact_e, "(x[1] < DOLFIN_EPS) && on_boundary")
-    sides = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , "on_boundary && ((x[0] < DOLFIN_EPS) || (x[0] > 1.0 - DOLFIN_EPS))")
-    # bc_V = DirichletBC(W.sub(0), u_exact_e, "on_boundary")
+    ## check the BC are correct
+    #U = Function(W)
+    #for bc in bcs: bc.apply(U.vector())
+    #plot(U.sub(0))
+    #interactive()
     
-    # # this is to verify that I am actually applying some BC
-    # U = Function(W)
-    # # this applies BC to a vector, where U is a function
-    # inflow.apply(U.vector())
-    # outflow.apply(U.vector())
-    # sides.apply(U.vector())
-    # 
-    # plot(U.split()[0])
-    # interactive()
-    # exit()
     
-    bcs = [inflow, outflow, sides]
-    #bcs = [bc_V]
     
-    # BY MAGNE
-    # a = inner(grad(u), grad(v)) * dx
-    # b = q * div(u) * dx
-    # 
-    # lhs = a + b + adjoint(b)   # STILL NOT CLEAR 
-    # rhs = inner(f, v) * dx
-    # 
-    # A = assemble(lhs, PETScMatrix())
-    # B = assemble(rhs)
-    # 
-    # for bc in bcs:
-    #     bc.apply(A)
-    #     bc.apply(B)
+    # BC for Nitsche, I am not setting the BC strongly on the right wall
+    bcs = [DirichletBC(W.sub(0), u_exact_e, fd, 3),
+           DirichletBC(W.sub(0), u_exact_e, fd, 4),
+           DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 1)]
     
+    # ---------------
     
     F0 = nu*inner(grad(u), grad(v))*dx
     F0 -= inner(p*Identity(2), grad(v))*dx
     F0 -= inner(f, v)*dx
     
-    # Nitsche's method
-    F0 -= nu*inner(grad(u)*n,v)*ds
-    F0 += inner(p*Identity(2)*n,v)*ds
-    F0 -= nu*inner(grad(v)*n,u)*ds
-    F0 += gamma * h**-1 * inner(u,v)*ds
+    # ------ Nitsche
+    F0 += inner(p*normal, v)*ds(2)
     
-    F1 = q*div(u)*dx
+    F0 -= nu * inner(grad(u) * normal,v) * ds(2)
+    F0 -= nu * inner(grad(v) * normal,u) * ds(2)
+    F0 += gamma * h**-1 * inner(u,v) * ds(2) 
+    F0 += nu * inner(grad(v) * normal, g) * ds(2)
+    F0 -= gamma * h**-1 * inner(g,v) * ds(2)
     
-    # Nitsche's method
-    F1 -= 
+    # -------
+    
+    F1 = -q*div(u)*dx  # continuity equation 
     
     F = F0 + F1
     
