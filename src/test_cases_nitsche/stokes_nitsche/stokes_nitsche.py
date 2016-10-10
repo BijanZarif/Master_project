@@ -21,14 +21,14 @@ rates1 = []
 rates2 = []
 rates3 = []
 gamma = Constant(100.0)
-g = Constant((0.0, 0.0))
+g1 = Constant((0.0, 0.0))
 
 for n in N:
 
     mesh = UnitSquareMesh(n,n)
     
     normal = FacetNormal(mesh)
-    h = CellSize(mesh)
+    h1 = CellSize(mesh)
     
     # ANOTHER WAY TO DEFINE THE TAYLOR HOOD ON FEniCS 1.7
     #P1 = FiniteElement("Lagrange", triangle, 1)
@@ -108,9 +108,9 @@ for n in N:
     
     F0 -= nu * inner(grad(u) * normal,v) * ds(2)
     F0 -= nu * inner(grad(v) * normal,u) * ds(2)
-    F0 += gamma * h**-1 * inner(u,v) * ds(2) 
-    F0 += nu * inner(grad(v) * normal, g) * ds(2)
-    F0 -= gamma * h**-1 * inner(g,v) * ds(2)
+    F0 += gamma * h1**-1 * inner(u,v) * ds(2) 
+    F0 += nu * inner(grad(v) * normal, g1) * ds(2)
+    F0 -= gamma * h1**-1 * inner(g1,v) * ds(2)
     
     # -------
     
