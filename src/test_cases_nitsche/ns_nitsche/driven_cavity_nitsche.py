@@ -3,17 +3,20 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**5]
+N = [2**6]
 #dt = 0.1
 #dt = 0.05
-dt = 0.025
-#dt = 0.0125
+#dt = 0.025
+dt = 0.0125
 
 T = 2.5
-nu = 1.0/1000.0
+nu = Constant(1.0/1000.0)
 rho = 1.0
 #theta = 1.0
 theta = 0.5
+
+gamma = Constant(10.0)
+g = Constant((0.0, 0.0))
 
 # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
 
@@ -29,6 +32,8 @@ def epsilon(u):
 for n in N:
 
     mesh  = UnitSquareMesh(n,n, "crossed")
+    normal = FacetNormal(mesh)
+    h = CellSize(mesh)
     
     #plot(mesh)
     #interactive()
@@ -52,27 +57,50 @@ for n in N:
     f_mid = (1.0-theta)*f0 + theta*f
     p_mid = (1.0-theta)*p0 + theta*p
     
-    # The BC should be correct
-    up = DirichletBC(W.sub(0), (1.0, 0.0), "near(x[1], 1.0) && on_boundary" )
-    walls = DirichletBC(W.sub(0), (0.0, 0.0), "( x[1] < 1.0 || (near(x[0],0.0) && near(x[1],1.0)) \
-                                               || (near(x[0],1.0) && near(x[1],1.0))) && on_boundary" )
+    # -------------
+    
+    # Define boundaries
+    fd = FacetFunction("size_t", mesh)
+    CompiledSubDomain("near(x[0], 0.0) && on_boundary").mark(fd, 1) # left wall (cord)    
+    CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) # right wall (tissue)  
+    CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 3) # top wall (inlet)
+    CompiledSubDomain("near(x[1], 0.0) || (near(x[0], 1.0) && near(x[1], 1.0)) && on_boundary").mark(fd, 4) # bottom wall (outlet)
+    ds = Measure("ds", domain = mesh, subdomain_data = fd)
+    #plot(fd)
+    #interactive()
+    
+    # bcu = [DirichletBC(W.sub(0), Constant((1.0, 0.0)), fd, 3),
+    #        DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 4),
+    #        DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 1),
+    #        DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 2)]
+    
+    ## check the BC are correct
+    #U = Function(W)
+    #for bc in bcu: bc.apply(U.vector())
+    #plot(U.sub(0))
+    #interactive()
     
     
-    # # this is to verify that I am actually applying some BC
+    bcu = [DirichletBC(W.sub(0), Constant((1.0, 0.0)), fd, 3),
+           DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 4),
+           DirichletBC(W.sub(0), Constant((0.0, 0.0)), fd, 1)]
+    
+    # # check the BC are correct
     # U = Function(W)
-    # # this applies BC to a vector, where U is a function
-    # up.apply(U.vector())
-    # walls.apply(U.vector())
-    # 
-    # uh, ph = U.split()
-    # plot(uh)
+    # for bc in bcu: bc.apply(U.vector())
+    # plot(U.sub(0))
     # interactive()
-    # exit()
     
-    bcu = [up, walls]
+    # -------------
     
-    dudt = Constant(1.0/dt) * inner(u-u0, v) * dx
-    a = Constant(nu) * 2.0*inner(epsilon(u_mid), epsilon(v)) * dx
+    dudt = Constant(dt**-1) * inner(u-u0, v) * dx
+    #a = Constant(nu) * 2.0*inner(epsilon(u_mid), epsilon(v)) * dx
+    a = nu * inner(grad(u_mid), grad(v)) * dx
+    
+    a += inner(p_mid*normal, v)*ds(2) #+ inner(q*normal, u_mid)*ds(2) - inner(q*normal, g)*ds(2)
+    a += - nu * inner(grad(u_mid)*normal, v)*ds(2) - nu * inner(grad(v)*normal, u_mid)*ds(2) + gamma * h**-1 * inner(u_mid,v)*ds(2)
+    a += nu * inner(grad(v)*normal, g)*ds(2) - gamma * h**-1 * inner(g, v)*ds(2)
+    
     
     # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
     #----------------
@@ -140,7 +168,7 @@ for n in N:
         
         # I need to assign up0 because u0 and p0 are not "proper" functions
         up0.assign(U)   # the first part of U is u0, and the second part is p0
-        u0, p0 = U.split()
+        #u0, p0 = U.split()
         #plot(u0, title = str(t))
         
         #ufile << up0.split()[0]
@@ -154,14 +182,14 @@ for n in N:
     V1 = FunctionSpace(mesh, "CG", 1)
     psi = TrialFunction(V1)
     q1 = TestFunction(V1)
-    a = dot(grad(psi), grad(q1))*dx
+    a1 = dot(grad(psi), grad(q1))*dx
     #L = curl(u) * q1 * dx
-    L = dot(u[1].dx(0) - u[0].dx(1), q1)*dx
+    L1 = dot(u[1].dx(0) - u[0].dx(1), q1)*dx
     
     g = Constant(0.0)
     bc_psi = DirichletBC(V1, g, "on_boundary")
     psi = Function(V1)
-    solve(a == L, psi, bc_psi)
+    solve(a1 == L1, psi, bc_psi)
     
     #plot(psi)
     #interactive()

@@ -69,7 +69,7 @@ for n in N:
     
     # -------- BC -------
 
-    # Define boundary conditions
+    # Define boundaries
     fd = FacetFunction("size_t", mesh)
     CompiledSubDomain("near(x[0], 0.0) && on_boundary").mark(fd, 1) # left wall (cord)    
     CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) # right wall (tissue)  
@@ -105,12 +105,15 @@ for n in N:
     
     # ------ Nitsche
     F0 += inner(p*normal, v)*ds(2)
+    F0 += inner(q*normal, u)*ds(2)
+    F0 -= inner(q*normal, g1) * ds(2)
     
     F0 -= nu * inner(grad(u) * normal,v) * ds(2)
     F0 -= nu * inner(grad(v) * normal,u) * ds(2)
     F0 += gamma * h1**-1 * inner(u,v) * ds(2) 
     F0 += nu * inner(grad(v) * normal, g1) * ds(2)
     F0 -= gamma * h1**-1 * inner(g1,v) * ds(2)
+    
     
     # -------
     
