@@ -59,8 +59,9 @@ for n, dt in N :
     # Previous velocity, starting with exact solution as initial guess
     u0 = interpolate(u_exact_e, V)
 
+    
     # Define u_mid
-    u1 = theta*u + (1-theta)*u0
+    u1 = theta*u + (1-theta)*u0   # why is this u0? shouldn't it be u1 = theta*u + (1-theta)*u ? Anyway if theta=1 it doesn't change anything
 
     # Define test functions for NS and for the mesh problem
     v, q = TestFunctions(VP)
@@ -90,10 +91,10 @@ for n, dt in N :
 
     # define boundary conditions
     fd = FacetFunction("size_t", mesh)
-    CompiledSubDomain("near(x[0], 0.0)").mark(fd, 1)
-    CompiledSubDomain("near(x[0], 1.0)").mark(fd, 2)
-    CompiledSubDomain("near(x[1], 1.0)").mark(fd, 3)
-    CompiledSubDomain("near(x[1], 0.0)").mark(fd, 4)
+    CompiledSubDomain("near(x[0], 0.0)").mark(fd, 1)    # bottom
+    CompiledSubDomain("near(x[0], 1.0)").mark(fd, 2)    # top
+    CompiledSubDomain("near(x[1], 1.0)").mark(fd, 3)    # right wall
+    CompiledSubDomain("near(x[1], 0.0)").mark(fd, 4)    # left wall
 
     #plot(fd, interactive())
     #bcs = [DirichletBC(VP.sub(0), u_exact_e, fd, 1),
@@ -103,9 +104,9 @@ for n, dt in N :
 
     # Pressure boundary condition not a Dirichlet one, but a Neumann
     # one (to enforce in variational formulation)
-    bcs = [DirichletBC(VP.sub(0), u_exact_e, fd, 1),
-           DirichletBC(VP.sub(0), u_exact_e, fd, 3),
-           DirichletBC(VP.sub(0), u_exact_e, fd, 4)]
+    bcs = [DirichletBC(VP.sub(0), u_exact_e, fd, 1),    # bottom
+           DirichletBC(VP.sub(0), u_exact_e, fd, 3),    # right
+           DirichletBC(VP.sub(0), u_exact_e, fd, 4)]    # left
 
     #bcw = [DirichletBC(W, Constant(0., 0.), fd, 1),
     #       DirichletBC(W, v_mesh_e, fd, 3),
@@ -148,10 +149,12 @@ for n, dt in N :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
+        plot(mesh)
         #solve((u_x-u0[0])*u_x_*dx == 0, u_x)
         #plot(u_x, title = "x-component")
         
-        plot(p)
+        
+        #plot(p)
 
         t += dt
 

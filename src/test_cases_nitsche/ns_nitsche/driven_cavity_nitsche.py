@@ -3,7 +3,7 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**6]
+N = [2**7]
 #dt = 0.1
 #dt = 0.05
 #dt = 0.025
@@ -16,7 +16,7 @@ rho = 1.0
 theta = 0.5
 
 gamma = Constant(10.0)
-g = Constant((0.0, 0.0))
+g1 = Constant((0.0, 0.0))
 
 # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
 
@@ -99,7 +99,7 @@ for n in N:
     
     a += inner(p_mid*normal, v)*ds(2) #+ inner(q*normal, u_mid)*ds(2) - inner(q*normal, g)*ds(2)
     a += - nu * inner(grad(u_mid)*normal, v)*ds(2) - nu * inner(grad(v)*normal, u_mid)*ds(2) + gamma * h**-1 * inner(u_mid,v)*ds(2)
-    a += nu * inner(grad(v)*normal, g)*ds(2) - gamma * h**-1 * inner(g, v)*ds(2)
+    a += nu * inner(grad(v)*normal, g1)*ds(2) - gamma * h**-1 * inner(g1, v)*ds(2)
     
     
     # When theta = 0.5, if I put u_mid instead of u in the continuity equation, the results go crazy
