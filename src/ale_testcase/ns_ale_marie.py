@@ -3,9 +3,9 @@ set_log_level(ERROR)
 
 # parameters
 #N = [2**2, 2**3, 2**4]#, 2**5, 2**6]
-N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
+N = [(2**n, 0.05**(2*n)) for n in range(1, 5)]
 
-dt = 0.1
+#dt = 0.1
 #dt = 0.05
 #dt = 0.025
 #dt = 0.0125
@@ -61,7 +61,7 @@ for n, dt in N :
 
     
     # Define u_mid
-    u1 = theta*u + (1-theta)*u0   # why is this u0? shouldn't it be u1 = theta*u + (1-theta)*u ? Anyway if theta=1 it doesn't change anything
+    u1 = theta*u + (1-theta)*u0  
 
     # Define test functions for NS and for the mesh problem
     v, q = TestFunctions(VP)
@@ -149,7 +149,7 @@ for n, dt in N :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        plot(mesh)
+        #plot(mesh)
         #solve((u_x-u0[0])*u_x_*dx == 0, u_x)
         #plot(u_x, title = "x-component")
         
@@ -158,7 +158,7 @@ for n, dt in N :
 
         t += dt
 
-    print "t = ", t
+    print "dt = ", dt
     # I don't need to update the pressure at each time step because the pressure at the next time step doesn't appear in my numerical scheme
     #p0 = Function(P)
     #p_assigner.assign(p0, up.sub(1))
