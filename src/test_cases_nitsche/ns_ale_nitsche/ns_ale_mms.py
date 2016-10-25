@@ -2,15 +2,16 @@ from dolfin import *
 
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4]
+N = [2**3, 2**4, 2**5]
 dt = 0.005
 
-T = 1.0
+T = 10.0
 
 rho = 1.0
 mu = 1.0/8.0
 theta = 1.0
 t = Constant(0.0)
+C = 0.1
 
 def sigma(u,p):
     return mu*grad(u) - p*Identity(2)
@@ -21,17 +22,22 @@ for n in N:
     x = SpatialCoordinate(mesh)
     normal = FacetNormal(mesh)
     
-    u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), pi = pi, t = 0.0)
-    #w_exact_e = Expression(("sin(2*pi*x[1])*cos(t)", "0.0"), pi = pi, t = 0.0)
-    w_exact_e = Expression(("0.0", "0.0"))
-    p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = 0.0)
+    ##EP: Why do you use Expression? It is better to use directly UFL
     
+    u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t)
+    w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t)
+    # w_exact_e = Expression(("0.0", "0.0"))
+    p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t)
+    
+    #Write exact solution using UFL
     u_exact = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t) ))
-    #w_exact = as_vector(( sin(2*pi*x[1])*cos(t) , 0.0))
-    w_exact = as_vector((0.0, 0.0))
+    w_exact = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    # w_exact = as_vector((0.0, 0.0))
     p_exact = cos(x[0])*cos(x[1])*cos(t)
     
-    dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
+    #It is better to use diff(u_exact, t)
+    dudt = diff(u_exact, t)
+    #dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
     f = rho * dudt + rho * grad(u_exact)*(u_exact - w_exact) - div(mu*grad(u_exact) - p_exact*Identity(2))
     #print "dudt = {}".format(dudt(1))
     
@@ -40,6 +46,7 @@ for n in N:
     
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
+    Ve = VectorFunctionSpace(mesh, "CG", 4) # space to interpolate exact solution
     P = FunctionSpace(mesh, "CG", 1)        # space for p, q
     W = VectorFunctionSpace(mesh, "CG", 1)       # space for w
     VP = V * P                  
@@ -54,10 +61,11 @@ for n in N:
     u0, p0 = split(up0)
     w0 = Function(W)
     
-    u0 = interpolate(u_exact_e, V)   # I want to start with u0 = u_exact_e as initial condition
+    u_exact_int = interpolate(u_exact_e, V)
+    assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
     
     f0 = Constant((0.0, 0.0))
-    f = Constant((0.0, 0.0))
+
     
     X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
     Y = Function(W)
@@ -97,14 +105,15 @@ for n in N:
     L1 = dot(Constant((0.0,0.0)),z)*dx  
     
     
-    t_ = dt    
+    t_ = dt
     while t_ < (T - 1E-9):
         
         t.assign(t_)    # in this way the constant t should be updated with the value t_
-        u_exact_e.t = t_
-        w_exact_e.t = t_
-        p_exact_e.t = t_
-        
+        # If t is a constant, everything that depends from t is automatically updated
+        # u_exact_e.t = t_
+        # w_exact_e.t = t_
+        # p_exact_e.t = t_
+
         A = assemble(a0)
         b = assemble(L0)
         
