@@ -74,7 +74,7 @@ for dt in DT:
         W_ = Function(W)
         
         ## This is WRONG: f0 is not zero. If you use implicit Euler nothing changes.
-        
+        ## Change it if you want to use CN
         f0 = Constant((0.0,0.0))
         u_mid = (1.0-theta)*u0 + theta*u
         f_mid = (1.0-theta)*f0 + theta*f
@@ -102,6 +102,7 @@ for dt in DT:
         F += mu * inner(grad(u_mid), grad(v)) * dx
         F -= inner(p*Identity(2), grad(v)) * dx
         F -= inner(q, div(u)) * dx
+        # If you use CN then you need to define the exact stress at tmid -> sigma(u_mid, p_mid)
         F -= inner(sigma(u_exact,p_exact)*normal, v) * ds(2)
         F -= inner(f_mid, v) * dx
         
