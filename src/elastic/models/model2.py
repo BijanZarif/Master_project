@@ -9,19 +9,19 @@ from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 NN = [2**4]
-T = 10
+T = 20
 #T = 1.5
 
 mu = 0.700e-5       # [kg/(cm * s)]
 rho = 1e-3          # [kg/cm^3]  
 
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
+gamma = 1e3   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
 use_projected_normal = True
 
 
-k = Constant(1e-8)      # elastic
+k = Constant(1e-5)      # elastic
 #k = Constant(1e6)       # stiff
 
 k_bottom = 1e2
@@ -32,7 +32,7 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.01
+dt = 0.0003
 g = Constant(0.0)
 
 
@@ -125,8 +125,8 @@ for N in NN :
     
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
-            #DirichletBC(W.sub(1), Constant(0.), fd, 4),     # I fix the y component to zero, but the x component can move
-           DirichletBC(W, Constant((0.,0.)), fd, 4),       # I fix both components to zero
+            DirichletBC(W.sub(1), Constant(0.), fd, 4),     # I fix the y component to zero, but the x component can move
+           #DirichletBC(W, Constant((0.,0.)), fd, 4),       # I fix both components to zero
            DirichletBC(W, Constant((0.,0.)), fd, 3)]
                            
     # check the BC are correct
@@ -213,6 +213,7 @@ for N in NN :
         print "max displacement = {}".format(Y.vector().max())
         print "min displacement = {}".format(Y.vector().min())
         print "abs value displacement = {}".format(abs(Y.vector().max()))
+        print "CellSize(mesh) = {}".format(h)
         
         # check the values of the tangential and normal components
         # aa, bb = assemble(inner(u0,normal)**2 * ds(2))**.5, assemble(inner(u0, tangent)**2 * ds(2))**.5
@@ -222,7 +223,9 @@ for N in NN :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        #plot(mesh, title = str(t))
+        h = CellSize(mesh)
+        
+        plot(mesh, title = str(t))
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
         if use_projected_normal == True:

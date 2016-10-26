@@ -220,7 +220,7 @@ for N in NN :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        #plot(mesh, title = str(t))
+        plot(mesh, title = str(t))
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
         if use_projected_normal == True:
