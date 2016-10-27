@@ -10,37 +10,47 @@ DT = [1./N[i] for i in range(len(N))]
 
 rho = 1.0
 mu = 1.0/8.0
-theta = 1.0
-t = Constant(0.0)
+theta = 0.5
+t_ = 0.0
+t0 = Constant(0.0)
+t1 = Constant(1.0)
 C = 0.1
 
 def sigma(u,p):
     return mu*grad(u) - p*Identity(2)
 
 for dt in DT:
+    print "dt = {}".format(dt)
     for n in N:
         
+        print "n = {}".format(n)
         mesh = UnitSquareMesh(n, n)
         x = SpatialCoordinate(mesh)
         normal = FacetNormal(mesh)
         
         ##EP: Why do you use Expression? It is better to use directly UFL
         
-        u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t)
-        w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t)
+        u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t_)
+        w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t_)
         # w_exact_e = Expression(("0.0", "0.0"))
-        p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t)
+        p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t_)
         
         #Write exact solution using UFL
-        u_exact = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t) ))
-        w_exact = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+        u_exact0 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t0) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t0) ))
+        u_exact1 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t1) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t1) ))
+        w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
+        w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
         # w_exact = as_vector((0.0, 0.0))
-        p_exact = cos(x[0])*cos(x[1])*cos(t)
+        p_exact0 = cos(x[0])*cos(x[1])*cos(t0)
+        p_exact1 = cos(x[0])*cos(x[1])*cos(t1)
         
         #It is better to use diff(u_exact, t)
-        dudt = diff(u_exact, t)
+        dudt0 = diff(u_exact0, t0)
+        dudt1 = diff(u_exact1, t1)
+        
         #dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
-        f = rho * dudt + rho * grad(u_exact)*(u_exact - w_exact) - div(mu*grad(u_exact) - p_exact*Identity(2))
+        f0 = rho * dudt0 + rho * grad(u_exact0)*(u_exact0 - w_exact0) - div(mu*grad(u_exact0) - p_exact0*Identity(2))
+        f1 = rho * dudt1 + rho * grad(u_exact1)*(u_exact1 - w_exact1) - div(mu*grad(u_exact1) - p_exact1*Identity(2))
         #print "dudt = {}".format(dudt(1))
         
         
@@ -73,12 +83,11 @@ for dt in DT:
         VP_ = Function(VP)   
         W_ = Function(W)
         
-        ## This is WRONG: f0 is not zero. If you use implicit Euler nothing changes.
-        
-        f0 = Constant((0.0,0.0))
         u_mid = (1.0-theta)*u0 + theta*u
-        f_mid = (1.0-theta)*f0 + theta*f   # at every time step I should have f0 which is the f_exact calculated at the time t=i
+        f_mid = (1.0-theta)*f0 + theta*f1   # at every time step I should have f0 which is the f_exact calculated at the time t=i
                                             # while f is the f_exact at the time t=i+1
+        sigma_mid = (1.0-theta)*sigma(u_exact0,p_exact0) + theta*sigma(u_exact1,p_exact1)
+        
 
         # Define boundary conditions
         fd = FacetFunction("size_t", mesh)
@@ -103,7 +112,7 @@ for dt in DT:
         F += mu * inner(grad(u_mid), grad(v)) * dx
         F -= inner(p*Identity(2), grad(v)) * dx
         F -= inner(q, div(u)) * dx
-        F -= inner(sigma(u_exact,p_exact)*normal, v) * ds(2)
+        F -= inner(sigma_mid*normal, v) * ds(2)
         F -= inner(f_mid, v) * dx
         
         a0, L0 = lhs(F), rhs(F)
@@ -112,14 +121,16 @@ for dt in DT:
         L1 = dot(Constant((0.0,0.0)),z)*dx  
         
         
-        t_ = dt
         while t_ < (T - 1E-9):
             
-            t.assign(t_)    # in this way the constant t should be updated with the value t_
+            
+            t0.assign(t_)    # in this way the constant t should be updated with the value t_
+            t1.assign(t_ + dt)
+            
             # If t is a constant, everything that depends from t is automatically updated
-            # u_exact_e.t = t_
-            # w_exact_e.t = t_
-            # p_exact_e.t = t_
+            u_exact_e.t = t_
+            w_exact_e.t = t_
+            p_exact_e.t = t_
             # a0, L0 = lhs(F), rhs(F)
             # 
             # a1 = inner(grad(w), grad(z)) * dx
@@ -159,13 +170,13 @@ for dt in DT:
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
             
-            # plot(mesh)
+            #plot(mesh)
             
             assign(up0, VP_)
             # u0, p0 = VP_.split()
             #plot(u0, title = str(t))
-            # plot(u0, key = "u0", title = "u0", mesh=mesh)
-            interactive()
+            #plot(u0, key = "u0", title = "u0", mesh=mesh)
+            #interactive()
             
             t_ += dt
             
