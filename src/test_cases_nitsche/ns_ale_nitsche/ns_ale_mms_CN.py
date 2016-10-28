@@ -74,7 +74,9 @@ for dt in DT:
         w0 = Function(W)
         
         u_exact_int = interpolate(u_exact_e, V)
+        w_exact_int = interpolate(w_exact_e, W)
         assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
+        assign(w0, w_exact_int)
         
         X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Y = Function(W)
@@ -170,7 +172,7 @@ for dt in DT:
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
             
-            #plot(mesh)
+            plot(mesh)
             
             assign(up0, VP_)
             # u0, p0 = VP_.split()
