@@ -163,6 +163,8 @@ for dt in DT:
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
 
+            plot(u0, key="u0", title = "u0", mesh=mesh)
+            plot(u_exact1, key="uexact", title = "uexact", mesh=mesh)
             t_ += dt
 
         print "t_ = ", t_
