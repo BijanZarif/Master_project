@@ -33,17 +33,17 @@ for dt in DT:
         ##EP: Why do you use Expression? It is better to use directly UFL
         
         u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t1)
-        # w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1)
-        w_exact_e = Expression(("0.0", "0.0"))
+        w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1)
+        # w_exact_e = Expression(("0.0", "0.0"))
         p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1)
         
         #Write exact solution using UFL
         u_exact0 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t0) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t0) ))
         u_exact1 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t1) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t1) ))
-        # w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
-        # w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
-        w_exact0 = Constant((0.0,0.0))
-        w_exact1 = Constant((0.0,0.0))
+        w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
+        w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
+        # w_exact0 = Constant((0.0,0.0))
+        # w_exact1 = Constant((0.0,0.0))
         p_exact0 = cos(x[0])*cos(x[1])*cos(t0)
         p_exact1 = cos(x[0])*cos(x[1])*cos(t1)
         
@@ -63,7 +63,7 @@ for dt in DT:
         V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
         Ve = VectorFunctionSpace(mesh, "CG", 4) # space to interpolate exact solution
         P = FunctionSpace(mesh, "CG", 1)        # space for p, q
-        W = VectorFunctionSpace(mesh, "CG", 1)       # space for w
+        W = VectorFunctionSpace(mesh, "CG", 2)       # space for w
         VP = V * P                  
         
         u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
@@ -81,7 +81,8 @@ for dt in DT:
         assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
         assign(w0, w_exact_int)
         
-        X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+        Xn = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+        Xn_1 = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Y = Function(W)
         
         # I want to store my solutions here
@@ -151,14 +152,15 @@ for dt in DT:
             
             solve(A1, W_.vector(), b1)
     
-            up0.assign(VP_)   # the first part of VP_ is u0, and the second part is p0
+            up0.assign(VP_) # the first part of VP_ is u0, and the second part is p0
             w0.assign(W_)
             
             
             # Compute the mesh displacement
+            #Needs to be modified!! Make a second order scheme!            
             Y.vector()[:] = w0.vector()[:]*dt
             X.vector()[:] += Y.vector()[:]
-            
+
              # Move the mesh
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
