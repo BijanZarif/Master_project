@@ -18,8 +18,10 @@ def sigma(u,p):
     return mu*grad(u) - p*Identity(2)
 
 for dt in DT:
+    print "dt = {}".format(dt)
     for n in N:
         
+        print "n = {}".format(n)
         mesh = UnitSquareMesh(n, n)
         x = SpatialCoordinate(mesh)
         normal = FacetNormal(mesh)
@@ -63,8 +65,15 @@ for dt in DT:
         u0, p0 = split(up0)
         w0 = Function(W)
         
+        # If I just do this without initializing my w0 to the w_exact, then the w0 at the first time step will be 0 as default
+        # u_exact_int = interpolate(u_exact_e, V)
+        # assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
+        
         u_exact_int = interpolate(u_exact_e, V)
+        w_exact_int = interpolate(w_exact_e, W)
         assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
+        assign(w0, w_exact_int)
+        
         
         X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Y = Function(W)
@@ -159,13 +168,13 @@ for dt in DT:
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
             
-            # plot(mesh)
+            #plot(mesh)
             
             assign(up0, VP_)
             # u0, p0 = VP_.split()
             #plot(u0, title = str(t))
             # plot(u0, key = "u0", title = "u0", mesh=mesh)
-            interactive()
+            #interactive()
             
             t_ += dt
             
