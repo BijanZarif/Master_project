@@ -16,7 +16,7 @@ mu = 0.700e-5       # [kg/(cm * s)]
 rho = 1e-3          # [kg/cm^3]  
 
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
-gamma = 1e3   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
+gamma = 1e1   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
 use_projected_normal = True
 
@@ -32,7 +32,7 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.0003
+dt = 0.05
 g = Constant(0.0)
 
 

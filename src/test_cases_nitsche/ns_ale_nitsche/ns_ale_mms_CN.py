@@ -2,17 +2,14 @@ from dolfin import *
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4, 2**5, 2**6]
-# N = [2**5]
-
-T = 0.1
-#DT = [1./N[i] for i in range(len(N))]
-
-DT = [1e-4]
+M = [2**4, 2**5, 2**6]
+N = [2**7]
+T = 1.0
+DT = [1./M[i] for i in range(len(M))]
 
 rho = 1.0
 mu = 1.0/8.0
-theta = 1.0
+theta = 0.5
 C = 0.1
 
 def sigma(u,p):
@@ -34,18 +31,18 @@ for dt in DT:
         
         ##EP: Why do you use Expression? It is better to use directly UFL
         
-        u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t1)
-        w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1)
-        # w_exact_e = Expression(("0.0", "0.0"))
-        p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1)
+        u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t1, degree=4)
+        #w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1, degree=4)
+        w_exact_e = Expression(("0.0", "0.0"))
+        p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1, degree=4)
         
         #Write exact solution using UFL
         u_exact0 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t0) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t0) ))
         u_exact1 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t1) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t1) ))
-        w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
-        w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
-        # w_exact0 = Constant((0.0,0.0))
-        # w_exact1 = Constant((0.0,0.0))
+        #w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
+        #w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
+        w_exact0 = Constant((0.0,0.0))
+        w_exact1 = Constant((0.0,0.0))
         p_exact0 = cos(x[0])*cos(x[1])*cos(t0)
         p_exact1 = cos(x[0])*cos(x[1])*cos(t1)
         
@@ -63,10 +60,12 @@ for dt in DT:
         
         # Taylor-Hood elements
         V = VectorFunctionSpace(mesh, "CG", 2)  # space for u, v
-        Ve = VectorFunctionSpace(mesh, "CG", 4) # space to interpolate exact solution
+        #Ve = VectorFunctionSpace(mesh, "CG", 4) # space to interpolate exact solution
         P = FunctionSpace(mesh, "CG", 1)        # space for p, q
         W = VectorFunctionSpace(mesh, "CG", 2)       # space for w
-        VP = V * P                  
+        VP = V * P
+        
+        assigner = FunctionAssigner(V, VP.sub(0))
         
         u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
         w = TrialFunction(W)
@@ -85,7 +84,7 @@ for dt in DT:
         assign(w0, w_exact_int)
         
         X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
-        Xn_1 = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+        #Xn_1 = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Y = Function(W)
         
         # I want to store my solutions here
@@ -118,7 +117,7 @@ for dt in DT:
     
         F = Constant(1./dt) * rho * inner(u - u0, v) * dx
         F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
-        F += mu * inner(2.0*sym(grad(u_mid)), grad(v)) * dx
+        F += 2.0 * mu * inner(sym(grad(u_mid)), sym(grad(v))) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
         F -= inner(sigma_mid*normal, v) * ds(2)
@@ -175,11 +174,25 @@ for dt in DT:
 
             #plot(mesh)
             #plot(u0, key="u0", title = "u0", mesh=mesh)
-            #plot(u_exact1, key="uexact", title = "uexact", mesh=mesh)
+            #plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
+            
+            # foo = project(u0, V)
+            # error_f = interpolate(u_exact_e, V)
+            # error_f.vector().axpy(-1, foo.vector())
+            # 
+            # try:
+            #     pp_plt.plot(error_f)
+            # except NameError:
+            #     pp_plt = plot(error_f)
+    
+            
+            
             t_ += dt
 
         print "t_ = ", t_
         print "t1 = ",  float(t1)
         print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
+        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
 
 
