@@ -907,9 +907,45 @@ In our case, a Crank-Nicolson (second order) discretization was used, with $\the
 (MISSING: PUT MY STREAM FUNCTION, OYVIND'S, AND THE ERROR BETWEEN THEM. \\
 NOTE: Oyvind's stream function minimum is not exactly the same as the fenics book, what should I put then as a reference?)
 
+\newpage
 
-\section{ALE test case}
-See Vegard
+\section{MMS for Navier-Stokes and ALE}
+As a test case for ALE we use the method of manifactured solutions. The exact solution that we choose has to satisfy the condition $\nabla \cdot \mathbf{u} = 0$. We can use the following functions
+
+\begin{equation}
+\mathbf{u}_{exact} = \left[ \begin{array}{c} sin(2\pi y) cos(2\pi x) cos(t) \\ - sin(2 \pi x) cos(2 \pi y) cos(t) \end{array} \right], \quad
+p_{exact} = cos(x) cos(y) cos(t).
+\end{equation}
+
+Since in the N-S formulation with ALE we encounter also the mesh velocity $\mathbf{w}$, we need a $\mathbf{w}_exact$ which satisfies $- \Delta \mathbf{w}_{\rm exact} = 0$, as we are applying a Laplacian smoothing. We choose
+
+\begin{equation}
+\mathbf{w}_{exact} = \left[ \begin{array}{c} C \, sin(2 \pi y) cos(t) \\
+0 \end{array} \right]
+\end{equation}
+
+As boundary conditions we choose
+
+\begin{align}
+\mathbf{u} &= \mathbf{u}_{exact} &&\text{on } \partial \Omega \setminus  \partial \Omega_{\rm tissue} \\
+\sigma \cdot \mathbf{n} &= \sigma_{\rm exact} \cdot \mathbf{n} &&\text{on }  \partial \Omega_{\rm tissue}
+\end{align}
+
+where $\sigma_{\rm exact} = \mu \mathbf{u}_{\rm exact} - p_{\rm exact}I$.
+
+The numerical scheme reads
+
+\begin{equation}
+\begin{split}
+\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle_\Omega
++ \rho \langle \nabla \mathbf{u}^{\rm i+ 1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i), \mathbf{v} \rangle_\Omega
++ \mu \langle \nabla \mathbf{u}^{\rm i + 1/2} , \mathbf{v} \rangle_\Omega \\
+- \langle p, div(v) \rangle_\Omega 
+- \langle q, div(\mathbf{u}^{\rm i+1/2}) \rangle_\Omega
+- \langle \sigma_{\rm exact} \cdot \mathbf{n}, \mathbf{v} \rangle_{\partial \Omega_{\rm tissue}} = \langle \mathbf{f}^{\rm i+1/2}, \mathbf{v} \rangle.
+\end{split}
+\end{equation}
+
 \section{ALE + elasticity test case}
 
 \chapter{Numerical results}

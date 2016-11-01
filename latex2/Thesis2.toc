@@ -19,8 +19,8 @@
 \contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{15}
 \contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{17}
 \contentsline {section}{\numberline {5.3}Driven cavity}{18}
-\contentsline {section}{\numberline {5.4}ALE test case}{20}
-\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{20}
-\contentsline {chapter}{\numberline {6}Numerical results}{22}
-\contentsline {chapter}{\numberline {7}Discussion}{23}
-\contentsline {chapter}{\numberline {8}Conclusions}{24}
+\contentsline {section}{\numberline {5.4}MMS for Navier-Stokes and ALE}{21}
+\contentsline {section}{\numberline {5.5}ALE + elasticity test case}{22}
+\contentsline {chapter}{\numberline {6}Numerical results}{23}
+\contentsline {chapter}{\numberline {7}Discussion}{24}
+\contentsline {chapter}{\numberline {8}Conclusions}{25}
