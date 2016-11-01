@@ -2,11 +2,13 @@ from dolfin import *
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4, 2**5, 2**6, 2**7]
+N = [2**4, 2**5, 2**6]
 # N = [2**5]
 
-T = 1.0
-DT = [1./N[i] for i in range(len(N))]
+T = 0.1
+#DT = [1./N[i] for i in range(len(N))]
+
+DT = [1e-4]
 
 rho = 1.0
 mu = 1.0/8.0
@@ -75,13 +77,14 @@ for dt in DT:
         up0 = Function(VP)
         u0, p0 = split(up0)
         w0 = Function(W)
+        w_1 = Function(W)
         
         u_exact_int = project(u_exact0, V)
         w_exact_int = project(w_exact0, W)
         assign(up0.sub(0), u_exact_int) # I want to start with u0 = u_exact_e as initial condition
         assign(w0, w_exact_int)
         
-        Xn = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
+        X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Xn_1 = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         Y = Function(W)
         
@@ -158,15 +161,21 @@ for dt in DT:
             
             # Compute the mesh displacement
             #Needs to be modified!! Make a second order scheme!            
-            Y.vector()[:] = w0.vector()[:]*dt
+            #Y.vector()[:] = w0.vector()[:]*dt
+            #X.vector()[:] += Y.vector()[:]
+
+            # With the trapezoidal rule: X1 = dt/2*(w1 - w0) + X0
+            Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w_1.vector()[:])
             X.vector()[:] += Y.vector()[:]
+            w_1.assign(w0)
 
              # Move the mesh
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
 
-            plot(u0, key="u0", title = "u0", mesh=mesh)
-            plot(u_exact1, key="uexact", title = "uexact", mesh=mesh)
+            #plot(mesh)
+            #plot(u0, key="u0", title = "u0", mesh=mesh)
+            #plot(u_exact1, key="uexact", title = "uexact", mesh=mesh)
             t_ += dt
 
         print "t_ = ", t_
