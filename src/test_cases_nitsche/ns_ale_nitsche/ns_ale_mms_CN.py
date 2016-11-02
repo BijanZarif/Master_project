@@ -1,8 +1,9 @@
 from dolfin import *
+from tabulate import tabulate
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4, 2**5, 2**6, 2**7]
+N = [2**4, 2**5]
 #N = [2**7]
 T = 1.0
 DT = [1./N[i] for i in range(len(N))]
@@ -12,11 +13,19 @@ mu = 1.0/8.0
 theta = 0.5
 C = 0.1
 
+u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
+print u_errors
+print u_errors[0][1]
+p_errors = [[] for i in range(len(N))]
 def sigma(u,p):
     return 2.0*mu*sym(grad(u)) - p*Identity(2)
 
+i = 0
+
 for dt in DT:
     print "dt = {}".format(dt)
+
+    j=0
     for n in N:
         
         t_ = 0.0
@@ -191,8 +200,17 @@ for dt in DT:
 
         print "t_ = ", t_
         print "t1 = ",  float(t1)
-        print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
-        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
-        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
+        # print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
+        # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
+
+        u_errors[i][j] = "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        j +=1
+        # print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
+        # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
+    i +=1
+    
+
 
 
