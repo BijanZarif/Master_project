@@ -2,10 +2,10 @@ from dolfin import *
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-M = [2**4, 2**5, 2**6]
-N = [2**7]
+N = [2**4, 2**5, 2**6, 2**7]
+#N = [2**7]
 T = 1.0
-DT = [1./M[i] for i in range(len(M))]
+DT = [1./N[i] for i in range(len(N))]
 
 rho = 1.0
 mu = 1.0/8.0
