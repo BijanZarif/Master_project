@@ -14,9 +14,7 @@ theta = 0.5
 C = 0.1
 
 u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
-print u_errors
-print u_errors[0][1]
-p_errors = [[] for i in range(len(N))]
+p_errors = [[j for j in range(len(N))] for i in range(len(DT))]
 def sigma(u,p):
     return 2.0*mu*sym(grad(u)) - p*Identity(2)
 
