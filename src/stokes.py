@@ -3,6 +3,10 @@
 # - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
 
+import matplotlib
+matplotlib.use('webagg')
+matplotlib.rc('webagg', port = 8000, open_in_browser = False)
+
 from numpy import *
 from math import *
 from matplotlib import pyplot as plt

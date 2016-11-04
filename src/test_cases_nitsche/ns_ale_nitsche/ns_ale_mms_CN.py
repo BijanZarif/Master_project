@@ -4,7 +4,7 @@ set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
 N = [2**4, 2**5]
-#N = [2**7]
+#N = [2**4]
 T = 1.0
 DT = [1./N[i] for i in range(len(N))]
 
@@ -39,17 +39,17 @@ for dt in DT:
         ##EP: Why do you use Expression? It is better to use directly UFL
         
         u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t1, degree=4)
-        #w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1, degree=4)
-        w_exact_e = Expression(("0.0", "0.0"))
+        w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1, degree=4)
+        #w_exact_e = Expression(("0.0", "0.0"))
         p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1, degree=4)
         
         #Write exact solution using UFL
         u_exact0 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t0) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t0) ))
         u_exact1 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t1) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t1) ))
-        #w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
-        #w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
-        w_exact0 = Constant((0.0,0.0))
-        w_exact1 = Constant((0.0,0.0))
+        w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
+        w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
+        #w_exact0 = Constant((0.0,0.0))
+        #w_exact1 = Constant((0.0,0.0))
         p_exact0 = cos(x[0])*cos(x[1])*cos(t0)
         p_exact1 = cos(x[0])*cos(x[1])*cos(t1)
         
@@ -195,7 +195,10 @@ for dt in DT:
             
             
             t_ += dt
-
+        
+        plot(u0, key= "u0", title = "u0", mesh= mesh)
+        plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
+        #interactive()
         print "t_ = ", t_
         print "t1 = ",  float(t1)
         # print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
@@ -203,12 +206,15 @@ for dt in DT:
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
 
         u_errors[i][j] = "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        p_errors[i][j] = "{0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         j +=1
         # print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
         # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
     i +=1
     
+print "u_errors = ", u_errors
+print "p_errors = ", p_errors
 
 
 
