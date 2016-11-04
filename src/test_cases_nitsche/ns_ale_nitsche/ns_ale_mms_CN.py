@@ -3,19 +3,21 @@ from tabulate import tabulate
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4, 2**5]
+N = [2**4, 2**5, 2**6]
 #N = [2**4]
-T = 1.0
-DT = [1./N[i] for i in range(len(N))]
-
+T = 0.1
+#DT = [1./N[i] for i in range(len(N))]
+DT = [1./10000]
 rho = 1.0
 mu = 1.0/8.0
-theta = 0.5
-#theta = 1.0
+theta = 1.0
+# theta = 0.5
 C = 0.1
 
 u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
 p_errors = [[j for j in range(len(N))] for i in range(len(DT))]
+w_errors = [[j for j in range(len(N))] for i in range(len(DT))]
+
 def sigma(u,p):
     return 2.0*mu*sym(grad(u)) - p*Identity(2)
 
@@ -41,7 +43,7 @@ for dt in DT:
         
         u_exact_e = Expression(("sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t)", "-sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"), t = t1, degree=4)
         w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1, degree=4)
-        #w_exact_e = Expression(("0.0", "0.0"))
+        # w_exact_e = Expression(("0.0", "0.0"))
         p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1, degree=4)
         
         
@@ -50,8 +52,8 @@ for dt in DT:
         u_exact1 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t1) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t1) ))
         w_exact0 = as_vector(( C*sin(2*pi*x[1])*cos(t0) , 0.0))
         w_exact1 = as_vector(( C*sin(2*pi*x[1])*cos(t1) , 0.0))
-        #w_exact0 = Constant((0.0,0.0))
-        #w_exact1 = Constant((0.0,0.0))
+        # w_exact0 = Constant((0.0,0.0))
+        # w_exact1 = Constant((0.0,0.0))
         p_exact0 = cos(x[0])*cos(x[1])*cos(t0)
         p_exact1 = cos(x[0])*cos(x[1])*cos(t1)
         
@@ -135,6 +137,7 @@ for dt in DT:
         a0, L0 = lhs(F), rhs(F)
         
         a1 = inner(grad(w), grad(z)) * dx
+        ## This is wrong! Right hand side is not zero!! Change it!
         L1 = dot(Constant((0.0,0.0)),z)*dx  
         
         
@@ -179,7 +182,7 @@ for dt in DT:
             X.vector()[:] += Y.vector()[:]
             w_1.assign(w0)
 
-            if t_ == T + dt:
+            if t_ > (T - dt + 1e-9):
                 break
             
              # Move the mesh
@@ -214,17 +217,23 @@ for dt in DT:
         # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
         
-        u_errors[i][j] = "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
-        
-        t1.assign(t_ - dt/2)
+        u_errors[i][j] = "{0:1.4e}".  format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        w_errors[i][j] = "{0:1.4e}".format(errornorm(w_exact_e, W_, "L2"))
+        # t1.assign(t_ - dt/2.0)
         p_errors[i][j] = "{0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         j +=1
-        # print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
-        # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
-        # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
+        print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
+        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
     i +=1
     
+def convergence_rates(errors, hs):
+    rates = [(math.log(errors[i+1]/errors[i]))/(math.log(hs[i+1]/hs[i])) for i in range(len(hs)-1)]
+
+    return rates
+
 print "u_errors = ", u_errors
+print "w_errors = ", w_errors
 print "p_errors = ", p_errors
 
 
