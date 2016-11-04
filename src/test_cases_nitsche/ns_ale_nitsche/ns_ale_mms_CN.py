@@ -1,5 +1,7 @@
 from dolfin import *
 from tabulate import tabulate
+import math
+
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
@@ -10,12 +12,13 @@ DT = [1./N[i] for i in range(len(N))]
 
 rho = 1.0
 mu = 1.0/8.0
-theta = 0.5
-#theta = 1.0
+#theta = 0.5
+theta = 1.0
 C = 0.1
 
 u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
 p_errors = [[j for j in range(len(N))] for i in range(len(DT))]
+w_errors = [[j for j in range(len(N))] for i in range(len(DT))]
 def sigma(u,p):
     return 2.0*mu*sym(grad(u)) - p*Identity(2)
 
@@ -135,7 +138,7 @@ for dt in DT:
         a0, L0 = lhs(F), rhs(F)
         
         a1 = inner(grad(w), grad(z)) * dx
-        L1 = dot(Constant((0.0,0.0)),z)*dx  
+        L1 = inner(-div(grad(w_exact1)),z) * dx  
         
         
         while t_ < (T - 1E-9):
@@ -215,17 +218,28 @@ for dt in DT:
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
         
         u_errors[i][j] = "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        w_errors[i][j] = "{0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
         
-        t1.assign(t_ - dt/2)
+        t1.assign(t_ - dt*(1-theta))
         p_errors[i][j] = "{0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         j +=1
         # print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
         # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
     i +=1
-    
-print "u_errors = ", u_errors
-print "p_errors = ", p_errors
 
+
+
+# def rate(error):
+#     return [math.log(error[i]/error[i+1], 2) for i in range(len(error)-1)]
+#     
+print "u_errors = ", u_errors
+# print rate(u_errors)
+# 
+print "w_errors = ", w_errors
+# print rate(w_errors)
+# 
+print "p_errors = ", p_errors
+# print rate(p_errors)
 
 
