@@ -11,6 +11,7 @@ DT = [1./N[i] for i in range(len(N))]
 rho = 1.0
 mu = 1.0/8.0
 theta = 0.5
+#theta = 1.0
 C = 0.1
 
 u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
@@ -42,6 +43,7 @@ for dt in DT:
         w_exact_e = Expression(("C*sin(2*pi*x[1])*cos(t)", "0.0"), C=C, t = t1, degree=4)
         #w_exact_e = Expression(("0.0", "0.0"))
         p_exact_e = Expression("cos(x[0])*cos(x[1])*cos(t)", t = t1, degree=4)
+        
         
         #Write exact solution using UFL
         u_exact0 = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t0) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t0) ))
@@ -170,11 +172,16 @@ for dt in DT:
             #Y.vector()[:] = w0.vector()[:]*dt
             #X.vector()[:] += Y.vector()[:]
 
+            
+
             # With the trapezoidal rule: X1 = dt/2*(w1 - w0) + X0
             Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w_1.vector()[:])
             X.vector()[:] += Y.vector()[:]
             w_1.assign(w0)
 
+            if t_ == T + dt:
+                break
+            
              # Move the mesh
             ALE.move(mesh, Y)
             mesh.bounding_box_tree().build(mesh)
@@ -196,16 +203,20 @@ for dt in DT:
             
             t_ += dt
         
-        plot(u0, key= "u0", title = "u0", mesh= mesh)
-        plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
+        #plot(u0, key= "u0", title = "u0", mesh= mesh)
+        #plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
+        #plot(p_exact_e, key = "pexact", title = "p_exact_e", mesh = mesh)
+        #plot(p0, key = "p0",title = "p0", mesh = mesh)
         #interactive()
         print "t_ = ", t_
         print "t1 = ",  float(t1)
         # print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
         # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
-
+        
         u_errors[i][j] = "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
+        
+        t1.assign(t_ - dt/2)
         p_errors[i][j] = "{0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
         j +=1
         # print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
