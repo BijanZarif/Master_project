@@ -412,7 +412,7 @@ Hence, the variational formulation reads:
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, dx
++ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds
 - \int_{\partial \Omega_{\rm tissue}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx
 =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
 \end{split}
@@ -556,21 +556,21 @@ Finally, we apply what said earlier to the Navier-Stokes equations. Since $\nabl
 = \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds \\ 
 \end{equation}
 \\
-The vector $\mathbf{v}$ can be split in its normal and tangential components, i.e. $\mathbf{v} = v_n \mathbf{n} + v^t \mathbf{t}$. Substituting it in the term $(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}$, we have the following equalities:
+The vector $\mathbf{v}$ can be split in its normal and tangential components, i.e. $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$. Substituting it in the term $(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}$, we have the following equalities:
 
 \begin{align}
 (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}
 & = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} - p \, \mathbf{n} \cdot \mathbf{v} \\
-& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot (v_n \mathbf{n} + v^t \mathbf{t}) - p \, v_n \\
-& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} \, v_n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t   - p \, v_n \\
+& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot (v^n \mathbf{n} + v^t \mathbf{t}) - p \, v^n \\
+& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} \, v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t   - p \, v^n \\
 \label{eq:ns:7}
-& = (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n}) \cdot \mathbf{n} v_n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t. 
+& = (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n}) \cdot \mathbf{n} v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t. 
 \end{align}
 
 By integrating~\eqref{eq:ns:7} over $\partial \Omega_{\rm tissue}$, and from boundary condition~\eqref{eq:bc:1}, we obtain
 
 \begin{equation}
-\int_{\partial \Omega_{\rm tissue}} k \mathbf{y} \cdot \mathbf{n} \, v_n \, ds 
+\int_{\partial \Omega_{\rm tissue}} k \mathbf{y} \cdot \mathbf{n} \, v^n \, ds 
 + \underbrace{ \int_{\partial \Omega_{\rm tissue}} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds }_{(\star)}
 \end{equation}
 \\
@@ -582,8 +582,8 @@ The last step is to apply Nitsche's method to the term $(\star)$, as shown in th
  \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, dx  % tob&bottom term
-- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v_n \, ds 
++ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
+- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
 - \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
 - \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds
 + \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
@@ -599,8 +599,8 @@ Moreover, since we are assuming $u^t = g = 0$, the final form reads
  \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho [(\mathbf{u - w}) \cdot \nabla] \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, dx  % tob&bottom term
-- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v_n \, ds 
++ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
+- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
 - \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
 - \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds 
 + \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
@@ -654,8 +654,9 @@ The resulting discretization yields to
 By defining the inner products
 
 \[
-\langle f, g \rangle_\Omega = \int_\Omega f \cdot g \, d \Omega, \qquad
-\langle f, g \rangle_\Gamma = \int_\Omega f \cdot g \, d \Omega_{\rm tissue},
+\langle f, g \rangle_\Omega = \int_\Omega f \cdot g \, dx, \quad
+\langle f, g \rangle_{\Gamma_{\rm tissue}} = \int_{\partial \Omega_{\rm tissue}} f \cdot g \, ds, \quad
+\langle f, g \rangle_{\Gamma_{\rm tb}} = \int_{\partial \Omega_{\rm tb}} f \cdot g \, ds
 \]
 \\
 the numerical scheme reads
@@ -667,13 +668,14 @@ the numerical scheme reads
 + \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega
 & - \langle p , div(\mathbf{v}) \rangle_\Omega \\
 - \langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega
-- \mu \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle_\Gamma 
-- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle_\Gamma 
-&+ \frac{\gamma}{h} \langle u^t , v^t \rangle_\Gamma \\
++ \langle \bar{p} \mathbf{n}, \mathbf{v} \rangle_{\Gamma_{\rm tb}}
+- \mu \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle_{\Gamma_{\rm tissue}} \\
+- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle_{\Gamma_{\rm tissue}} 
+&+ \frac{\gamma}{h} \langle u^t , v^t \rangle_{\Gamma_{\rm tissue}} \\
 = \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega
-- k \langle (\mathbf{y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_\Gamma
-- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle_\Gamma
-&+ \frac{\gamma}{h} \langle g, v^t \rangle_\Gamma
+- k \langle (\mathbf{y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_{\Gamma_{\rm tissue}}
+- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle_{\Gamma_{\rm tissue}}
+&+ \frac{\gamma}{h} \langle g, v^t \rangle_{\Gamma_{\rm tissue}}
 \end{split}
 \end{equation}
 \\
