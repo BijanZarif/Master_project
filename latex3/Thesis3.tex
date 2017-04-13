@@ -673,13 +673,15 @@ the numerical scheme reads
 - \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle_{\Gamma_{\rm tissue}} 
 &+ \frac{\gamma}{h} \langle u^t , v^t \rangle_{\Gamma_{\rm tissue}} \\
 = \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega
-- k \langle (\mathbf{y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_{\Gamma_{\rm tissue}}
+- k \langle (\mathbf{Y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_{\Gamma_{\rm tissue}}
 - \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle_{\Gamma_{\rm tissue}}
 &+ \frac{\gamma}{h} \langle g, v^t \rangle_{\Gamma_{\rm tissue}}
 \end{split}
 \end{equation}
 \\
-where $\mathbf{y}$ is the mesh displacement.
+where $\mathbf{Y}$ is the mesh displacement.
+
+\todo[inline]{Note that in the program I have defined $\frac{\mathbf{X}^{i+1} - \mathbf{X}^i}{dt} = \mathbf{w}^{i+1} = \mathbf{u}^{i+1}$, hence $\mathbf{X}^{i+1} = \mathbf{X}^i + dt* \mathbf{u}^{i+1}$. So instead of $\mathbf{Y} + dt \mathbf{u}$ I should have $\mathbf{X} + dt \mathbf{u}$ in Python program, where $\mathbf{X}$ and $\mathbf{Y}$ are defined in the program.}
 
 \subsection{Spatial discretization}
 Starting from the scheme~\eqref{eq:ns:3}--\eqref{eq:ns:4} for the Navier-Stokes equations, the unknown velocity $\mathbf{u}^{\rm i + 1}$ and the pressure $\mathbf{p}^{\rm i + 1}$ are denoted as the trial functions in the trial spaces $V$ and $Q$ given by

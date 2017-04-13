@@ -14,7 +14,7 @@
 \contentsline {section}{\numberline {4.3}FEniCS}{13}
 \contentsline {section}{\numberline {4.4}Numerical scheme}{13}
 \contentsline {subsection}{\numberline {4.4.1}Time discretization}{13}
-\contentsline {subsection}{\numberline {4.4.2}Spatial discretization}{14}
+\contentsline {subsection}{\numberline {4.4.2}Spatial discretization}{15}
 \contentsline {chapter}{\numberline {5}Verification}{16}
 \contentsline {section}{\numberline {5.1}Method of manifactured solutions (MMS)}{16}
 \contentsline {section}{\numberline {5.2}Pressure-driven channel flow (2D)}{18}
