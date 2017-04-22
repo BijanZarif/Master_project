@@ -1,7 +1,7 @@
 ## ALE + NAVIER-STOKES EQUATIONS ##
-
 # rho * du/dt + rho * (grad(u) . u - w) - div( mu * grad(u) - pI ) = f
 # div( u ) = 0
+
 import sys
 sys.path.append("~/Repositories/Master_project/src/magne")
 from dolfin import *
@@ -9,10 +9,9 @@ from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 NN = [2**4]
-T = 10
-#T = 1.5
-mu = 1.0/8.0
-rho = 1.0
+T = 10              # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
+mu = 0.700e-5       # [kg/(cm * s)]
+rho = 1e-3          # [kg/cm^3]  
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
@@ -30,12 +29,12 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.01
-g = Constant(0.0)
+dt = 0.05
+g = Constant(0.0)       # constant for the Nitsche method
 
-
-x0, x1 = 0.0, 1.0
-y0, y1 = 0.0, 1.0
+# Dimensions of the model: bottom wall is 0.4 cm, tissue wall is 4.0 cm
+x0, x1 = 0.0, 0.4
+y0, y1 = 0.0, 4.0
 
 
 for N in NN : 
