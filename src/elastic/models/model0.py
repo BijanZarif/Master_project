@@ -164,7 +164,7 @@ for N in NN :
     # because of systole and diastole. Hence, in the first half cycle (systole) the inlet boundary is the top wall, while in the second half cycle the inlet
     # boundary is the bottom wall. WHAT BOUNDARY TO USE IN inner()*ds(???) ?
     # MAYBE IT'S BETTER IF I PUT THE RIGHT CONFIGURATION OF THE MODEL, WITH PARAMETERS AND STRUCTURE
-    d = p_inlet*inner(normal, v) * ds(4)
+    d = p_inlet*inner(normal, v) * ds(3) + p_inlet*inner(normal, v) * ds(4)
     
     
     
