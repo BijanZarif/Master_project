@@ -8,7 +8,7 @@ from dolfin import *
 from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**4]
+NN = [2**2]
 T = 10              # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
 mu = 0.700e-5       # [kg/(cm * s)]
 rho = 1e-3          # [kg/cm^3]  
@@ -260,9 +260,8 @@ for N in NN :
         #file << u01
 
         t += dt
-        
-        #p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)
         p_inlet.t = t
+        print "pressure time update = {}".format(p_inlet.t)
 
 
 #u01, p01 = VP_.split()
