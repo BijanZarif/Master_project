@@ -39,7 +39,7 @@ y0, y1 = 0.0, 4.0
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 1 * N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 4 * N)  
     x = SpatialCoordinate(mesh)
     h = CellSize(mesh)
     
@@ -91,9 +91,10 @@ for N in NN :
     t = 0.0
     
     # NEW
-    a = Constant(1961.0)  # [Pa/Pascal]
-    b = Constant(24.3)    # [Pa/Pascal]
-    p_inlet = Expression(("0.0", " (a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)" ), a=a, b=b, y1=y1, y0=y0, t=t, degree=2)
+    a_pressure = Constant(1961.0)  # [Pa/Pascal]
+    b_pressure = Constant(24.3)    # [Pa/Pascal]
+    #p_inlet = Expression(("0.0", " (a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)" ), a=a, b=b, y1=y1, y0=y0, t=t, degree=2)
+    p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)  # I NEED TO UPDATE THE TIME!! HOW DO I DO THAT IF I DON'T HAVE AN EXPRESSION?
     # NEW
     
     #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
@@ -260,7 +261,8 @@ for N in NN :
 
         t += dt
         
-        u_inlet.t = t
+        p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)
+        #u_inlet.t = t
 
 
 #u01, p01 = VP_.split()
