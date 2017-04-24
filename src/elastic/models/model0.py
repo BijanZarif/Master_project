@@ -93,8 +93,8 @@ for N in NN :
     # NEW
     a_pressure = Constant(1961.0)  # [Pa/Pascal]
     b_pressure = Constant(24.3)    # [Pa/Pascal]
-    #p_inlet = Expression(("0.0", " (a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)" ), a=a, b=b, y1=y1, y0=y0, t=t, degree=2)
-    p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)  # I NEED TO UPDATE THE TIME!! HOW DO I DO THAT IF I DON'T HAVE AN EXPRESSION?
+    p_inlet = Expression("(a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)", a=a_pressure, b=b_pressure, y1=y1, y0=y0, t=t, degree=2)
+    #p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)  # I NEED TO UPDATE THE TIME!! HOW DO I DO THAT IF I DON'T HAVE AN EXPRESSION?
     # NEW
     
     #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
@@ -261,8 +261,8 @@ for N in NN :
 
         t += dt
         
-        p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)
-        #u_inlet.t = t
+        #p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)
+        p_inlet.t = t
 
 
 #u01, p01 = VP_.split()
