@@ -256,7 +256,7 @@ for N in NN :
         
         u01, p01 = VP_.split()
         plot(u01, key="u01", title = str(t))
-        #plot(p01, key='p01', title = str(t))
+        plot(p01, key='p01', title = str(t))
         #file << u01
 
         t += dt
