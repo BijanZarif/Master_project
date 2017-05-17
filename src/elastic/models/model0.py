@@ -94,7 +94,6 @@ for N in NN :
     a_pressure = Constant(1961.0)  # [Pa/Pascal]
     b_pressure = Constant(24.3)    # [Pa/Pascal]
     p_inlet = Expression("(a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)", a=a_pressure, b=b_pressure, y1=y1, y0=y0, t=t, degree=2)
-    #p_inlet =  (a_pressure - ((y1 - x[1])/(y1 - y0))*b_pressure ) * sin(2*pi*t)  # I NEED TO UPDATE THE TIME!! HOW DO I DO THAT IF I DON'T HAVE AN EXPRESSION?
     # NEW
     
     #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
@@ -163,7 +162,6 @@ for N in NN :
     # SECOND PROBLEM: the boundary for the inlet pressure changes at every half cycle. A cardiac cycle lasts 1 second, and at 0.5 the fluid chances direction
     # because of systole and diastole. Hence, in the first half cycle (systole) the inlet boundary is the top wall, while in the second half cycle the inlet
     # boundary is the bottom wall. WHAT BOUNDARY TO USE IN inner()*ds(???) ?
-    # MAYBE IT'S BETTER IF I PUT THE RIGHT CONFIGURATION OF THE MODEL, WITH PARAMETERS AND STRUCTURE
     d = p_inlet*inner(normal, v) * ds(3) + p_inlet*inner(normal, v) * ds(4)
     
     
