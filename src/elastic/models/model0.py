@@ -119,8 +119,8 @@ for N in NN :
 
     ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
-    plot(fd)
-    interactive()
+    #plot(fd)
+    #interactive()
     
     # Here I need to impose just the Dirichlet conditions. The ones regarding the stresses were already encountered in the
     # weak formulation. 
@@ -167,7 +167,7 @@ for N in NN :
     
     
     # Bilinear and linear forms
-    F = dudt + a + b + c
+    F = dudt + a + b + c + d
     
     a0, L0 = lhs(F), rhs(F)    
     
