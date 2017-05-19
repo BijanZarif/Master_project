@@ -10,8 +10,8 @@ from tangent_and_normal import *
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
 NN = [2**2]
 T = 10              # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
-mu = 0.700e-5       # [kg/(cm * s)]
-rho = 1e-3          # [kg/cm^3]  
+mu = 0.700e-3       # [g/(mm * s)]
+rho = 1e-3          # [g/mm^3]  
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
 
@@ -29,12 +29,12 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.05
+dt = 0.002
 g = Constant(0.0)       # constant for the Nitsche method
 
 # Dimensions of the model: bottom wall is 0.4 cm, tissue wall is 4.0 cm
 x0, x1 = 0.0, 0.4
-y0, y1 = 0.0, 4.0
+y0, y1 = 0.0, 6.0
 
 
 for N in NN : 
@@ -90,11 +90,10 @@ for N in NN :
     f = Constant((0.0, 0.0))
     t = 0.0
     
-    # NEW
-    a_pressure = Constant(1961.0)  # [Pa/Pascal]
-    b_pressure = Constant(24.3)    # [Pa/Pascal]
-    p_inlet = Expression("(a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)", a=a_pressure, b=b_pressure, y1=y1, y0=y0, t=t, degree=2)
-    # NEW
+    amplitude = Constant(20.0)  # [Pascal]
+    #b_pressure = Constant(24.3)    # [Pa/Pascal]
+    #p_inlet = Expression("(a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)", a=a_pressure, b=b_pressure, y1=y1, y0=y0, t=t, degree=2)
+    p_inlet = Expression("a*sin(2*pi*t)", a=amplitude, t=t, degree=2)
     
     #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
     
@@ -162,7 +161,7 @@ for N in NN :
     # SECOND PROBLEM: the boundary for the inlet pressure changes at every half cycle. A cardiac cycle lasts 1 second, and at 0.5 the fluid chances direction
     # because of systole and diastole. Hence, in the first half cycle (systole) the inlet boundary is the top wall, while in the second half cycle the inlet
     # boundary is the bottom wall. WHAT BOUNDARY TO USE IN inner()*ds(???) ?
-    d = p_inlet*inner(normal, v) * ds(3) + p_inlet*inner(normal, v) * ds(4)
+    d = inner(p_inlet * normal, v) * ds(3) + inner(Constant(0.0) * normal, v) * ds(4)
     
     
     
@@ -236,7 +235,7 @@ for N in NN :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        plot(mesh, title = str(t))
+        plot(mesh, title = str("mesh at time t= ") + str(t))
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
         if use_projected_normal == True:
@@ -253,8 +252,8 @@ for N in NN :
         vt = dot(v, tangent)
         
         u01, p01 = VP_.split()
-        plot(u01, key="u01", title = str(t))
-        plot(p01, key='p01', title = str(t))
+        plot(u01, key="u01", title = str("velocity at time t= ") + str(t))
+        plot(p01, key='p01', title = str("pressure at time t= ") + str(t))
         #file << u01
 
         t += dt
