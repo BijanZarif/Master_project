@@ -91,12 +91,7 @@ for N in NN :
     t = 0.0
     
     amplitude = Constant(20.0)  # [Pascal]
-    #b_pressure = Constant(24.3)    # [Pa/Pascal]
-    #p_inlet = Expression("(a - ((y1 - x[1])/(y1 - y0))*b ) * sin(2*pi*t)", a=a_pressure, b=b_pressure, y1=y1, y0=y0, t=t, degree=2)
     p_inlet = Expression("a*sin(2*pi*t)", a=amplitude, t=t, degree=2)
-    
-    #u_inlet = Expression(("0.0", "(-1*fabs(x[0]*(x[0] - 1)))*cos(t*2*pi)"), t = t, degree = 2)
-    
     
     # parabolic initial flow
     #up0.assign(interpolate(Expression(("0.0", "-1*fabs(x[0]*(x[0] - 1))", "0.0"), degree = 2), VP))
@@ -149,8 +144,8 @@ for N in NN :
          - inner(f,v) ) * dx
     
     # Boundary term with elastic constant
-    b = k * inner(dot(X + dt * u, normal), vn) * ds(2)    # I used X as displacement
-    # the sign here is opposite to the variational formulation that I wrote in latex, but the one in latex should be correct
+    b = - k * inner(dot(X + dt * u, normal), vn) * ds(2)    # I used X as displacement
+    # same sign as in the variational form in latex
                                                                                                 
     # Nitsche term                                                                                            
     c = ( - Constant(mu) * dot(grad(u)*normal, tangent) * vt - Constant(mu) * dot(grad(v)*normal, tangent) * ut
@@ -161,7 +156,7 @@ for N in NN :
     # SECOND PROBLEM: the boundary for the inlet pressure changes at every half cycle. A cardiac cycle lasts 1 second, and at 0.5 the fluid chances direction
     # because of systole and diastole. Hence, in the first half cycle (systole) the inlet boundary is the top wall, while in the second half cycle the inlet
     # boundary is the bottom wall. WHAT BOUNDARY TO USE IN inner()*ds(???) ?
-    d = inner(p_inlet * normal, v) * ds(3) + inner(Constant(0.0) * normal, v) * ds(4)
+    d = inner(p_inlet * normal, v) * ds(3) #+ inner(Constant(0.0) * normal, v) * ds(4)
     
     
     
