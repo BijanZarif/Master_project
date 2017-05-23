@@ -204,6 +204,7 @@ for dt in DT:
         t1.assign(t_ - dt*(1-theta))
         p_errors[i][j] = "{0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
         j +=1
+        
 
         print "||p - ph||_L2 = {0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
         print "||w - wh||_H1 = {0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
