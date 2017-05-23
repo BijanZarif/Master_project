@@ -8,8 +8,8 @@ from dolfin import *
 from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**2]
-T = 10              # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
+NN = [2**4]
+T = 10             # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
 mu = 0.700e-3       # [g/(mm * s)]
 rho = 1e-3          # [g/mm^3]  
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
@@ -29,7 +29,7 @@ k_middle = 1e-1
 
 # -------
 
-dt = 0.002
+dt = 0.0002
 g = Constant(0.0)       # constant for the Nitsche method
 
 # Dimensions of the model: bottom wall is 0.4 cm, tissue wall is 4.0 cm
@@ -180,7 +180,7 @@ for N in NN :
     #file = File("solutions/velocity/u.pvd")
     #out = File("solutions/square_1e4/ALE_1e4.pvd")
     
-    while t <= T + 1E-9:
+    while t <= 2*dt:
             
         #print "Solving for t = {}".format(t)  
         
@@ -254,9 +254,12 @@ for N in NN :
         t += dt
         p_inlet.t = t
         print "pressure time update = {}".format(p_inlet.t)
-
+    
+    u01, p01 = VP_.split()    
+    ufile = File("velocity_2x2_0.002.pvd")
+    ufile << u01
 
 #u01, p01 = VP_.split()
 #plot(u01, key="u01", title = str(t))
 #plot(p01, key='p01', title = str(t))
-interactive()
+#interactive()
