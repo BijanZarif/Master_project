@@ -5,10 +5,10 @@ import math
 set_log_level(50)
 #N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
 
-N = [2**4, 2**5, 2**6]
+N = [2**3, 2**4, 2**5]
 #N = [2**4]
-T = 0.1
-DT = [1./N[i] for i in range(len(N))]
+T = 1.0
+DT = [1./(float(N[i])) for i in range(len(N))]
 #DT = [1./10000]
 rho = 1.0
 mu = 1.0/8.0
@@ -31,21 +31,21 @@ def exact_solutions(mesh, C, t):
     x = SpatialCoordinate(mesh)
     u_e = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t) ))
     p_e = cos(x[0])*cos(x[1])*cos(t)
-    w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    #w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    w_e = as_vector((x[0]-x[0], x[0]-x[0]))
     return u_e, p_e, w_e
     
-def f(rho, mu, dudt, u_e, p_e, w_e):
-    ff = rho * dudt + rho * grad(u_e)*(u_e - w_e) - div(2.0*mu*sym(grad(u_e)) - p_e*Identity(2))
+def f(rho, mu, dudt, u_e1, u_e0, p_e, w_e):
+    ff = rho * dudt + rho * grad(u_e0)*(u_e0 - w_e) - div(2.0*mu*sym(grad(u_e1)) - p_e*Identity(2))
     return ff
 
-i = 0
-
 for dt in DT:
+    print "="*20
     print "dt = {}".format(dt)
-
-    j=0
+    i = 0 
     for n in N:
         
+        j = 0 
         t_ = 0.0
         t0 = Constant(0.0)
         t1 = Constant(dt)
@@ -67,6 +67,7 @@ for dt in DT:
 
         (u_exact0, p_exact0, w_exact0) = exact_solutions(mesh, C, t0)
         (u_exact1, p_exact1, w_exact1) = exact_solutions(mesh, C, t1)
+
         #Write exact solution using UFL
         # w_exact0 = Constant((0.0,0.0))
         # w_exact1 = Constant((0.0,0.0))
@@ -76,8 +77,8 @@ for dt in DT:
         dudt1 = diff(u_exact1, t1)
         
         #dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
-        f0 = f(rho, mu, dudt, u_exact0, p_exact0, w_exact0)
-        f1 = f(rho, mu, dudt, u_exact1, p_exact1, w_exact1)
+        f0 = f(rho, mu, dudt0, u_exact0, u_exact1, p_exact0, w_exact0)
+        f1 = f(rho, mu, dudt1, u_exact0, u_exact1, p_exact1, w_exact1)
         #print "dudt = {}".format(dudt(1))
         
         
@@ -86,17 +87,16 @@ for dt in DT:
         # Taylor-Hood elements
         V = VectorElement("Lagrange", mesh.ufl_cell(), 2)
         P = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
-        V0 = FunctionSpace(mesh, "CG", 2)
+        V0 = VectorFunctionSpace(mesh, "CG", 2)
         P0 = FunctionSpace(mesh, "CG", 1)
-        Ve = FunctionSpace(mesh, "CG", 4)
+        V1 = VectorFunctionSpace(mesh, "CG", 1)
+        Ve = VectorFunctionSpace(mesh, "CG", 4)
         Pe = FunctionSpace(mesh, "CG", 4)
 
         # Make a mixed space
         TH = V * P
         VP = FunctionSpace(mesh, TH)
-        
-        assigner = FunctionAssigner(V, VP.sub(0))
-        
+                
         u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
         w = TrialFunction(V0)
         
@@ -108,7 +108,7 @@ for dt in DT:
         w0 = Function(V0)
         w1 = Function(V0)
         
-        assign(up0.sub(0), project(u_exact0, V0)) # I want to start with u0 = u_exact_e as initial condition
+        assign(up0.sub(0), project(u_exact0, V0))
         assign(w0, project(w_exact0, V0))
         
         X = Function(V0)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
@@ -132,10 +132,11 @@ for dt in DT:
                DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 3),
                DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 4)]
         
-        bcw = [DirichletBC(W, project(w_exact1, Ve), "on_boundary")]
+        bcw = [DirichletBC(V0, project(w_exact1, Ve), "on_boundary")]
     
         F = Constant(1./dt) * rho * inner(u - u0, v) * dx
-        F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
+        #F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
+        F += rho * inner(grad(u0)*(u0), v) * dx        
         F += 2.0 * mu * inner(sym(grad(u_mid)), sym(grad(v))) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
@@ -186,57 +187,29 @@ for dt in DT:
             
 
             # With the trapezoidal rule: X1 = dt/2*(w1 - w0) + X0
-            Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w_1.vector()[:])
+            Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w1.vector()[:])
             X.vector()[:] += Y.vector()[:]
-            w_1.assign(w0)
+            w1.assign(w0)
 
-            if t_ > (T - dt + 1e-9):
-                break
-            
-             # Move the mesh
-            ALE.move(mesh, Y)
-            mesh.bounding_box_tree().build(mesh)
-
-            #plot(mesh)
-            #plot(u0, key="u0", title = "u0", mesh=mesh)
-            #plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
-            
-            # foo = project(u0, V)
-            # error_f = interpolate(u_exact_e, V)
-            # error_f.vector().axpy(-1, foo.vector())
-            # 
-            # try:
-            #     pp_plt.plot(error_f)
-            # except NameError:
-            #     pp_plt = plot(error_f)
-    
-            
+            ALE.move(mesh, project(Y, V1))
+            mesh.bounding_box_tree().build(mesh)            
             
             t_ += dt
         
-        #plot(u0, key= "u0", title = "u0", mesh= mesh)
-        #plot(u_exact_e, key="uexact", title = "uexact", mesh=mesh)
-        #plot(p_exact_e, key = "pexact", title = "p_exact_e", mesh = mesh)
-        #plot(p0, key = "p0",title = "p0", mesh = mesh)
-        #interactive()
-        print "t_ = ", t_
-        print "t1 = ",  float(t1)
+        plot(u0, mesh=mesh)
+        u_errors[i][j] = "{0:1.4e}".format(errornorm(project(u_exact1, Ve), VP_.sub(0), "H1"))
+        w_errors[i][j] = "{0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
+        print "||u - ph||_H1 = {0:1.4e}".format(errornorm(project(u_exact1, Ve) , VP_.sub(0), "H1"))  
 
-        # print "||u - uh||_H1 = {0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
-        # print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
-        # print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
-        
-        u_errors[i][j] = "{0:1.4e}".format(errornorm(project(u_exact0, Ve), VP_.sub(0), "H1"))
-        w_errors[i][j] = "{0:1.4e}".format(errornorm(project(w_exact0, Ve), W_, "H1"))
-        
         t1.assign(t_ - dt*(1-theta))
-        p_errors[i][j] = "{0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
+        p_errors[i][j] = "{0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
         j +=1
-        print "{0:1.4e}".format(errornorm(u_exact_e, VP_.sub(0), "H1"))
-        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(p_exact_e, VP_.sub(1), "L2"))
-        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(w_exact_e, W_, "H1"))
-    i +=1
+
+        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
+        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
     
+    i +=1
+
 def convergence_rates(errors, hs):
     rates = [(math.log(errors[i+1]/errors[i]))/(math.log(hs[i+1]/hs[i])) for i in range(len(hs)-1)]
 
