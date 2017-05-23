@@ -8,7 +8,7 @@ set_log_level(50)
 N = [2**3, 2**4, 2**5]
 #N = [2**4]
 T = 1.0
-DT = [1./(float(N[i])) for i in range(len(N))]
+DT = [1./(float(N[i]*N[i])) for i in range(len(N))]
 #DT = [1./10000]
 rho = 1.0
 mu = 1.0/8.0
@@ -35,10 +35,15 @@ def exact_solutions(mesh, C, t):
     w_e = as_vector((x[0]-x[0], x[0]-x[0]))
     return u_e, p_e, w_e
     
-def f(rho, mu, dudt, u_e1, u_e0, p_e, w_e):
-    ff = rho * dudt + rho * grad(u_e0)*(u_e0 - w_e) - div(2.0*mu*sym(grad(u_e1)) - p_e*Identity(2))
+def f(rho, mu, dudt, u_e, p_e, w_e):
+    #ff = rho * dudt + rho * grad(u_e0)*(u_e0 - w_e) - div(2.0*mu*sym(grad(u_e1))) - grad(p_e)
+    ff = rho * dudt - div(2.0*mu*sym(grad(u_e))) + grad(p_e)
+
     return ff
 
+fileu = File("u.pvd")
+fileu0 = File("u0_ex.pvd")
+fileu1 = File("u1_ex.pvd")
 for dt in DT:
     print "="*20
     print "dt = {}".format(dt)
@@ -77,8 +82,8 @@ for dt in DT:
         dudt1 = diff(u_exact1, t1)
         
         #dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
-        f0 = f(rho, mu, dudt0, u_exact0, u_exact1, p_exact0, w_exact0)
-        f1 = f(rho, mu, dudt1, u_exact0, u_exact1, p_exact1, w_exact1)
+        f0 = f(rho, mu, dudt0, u_exact0, p_exact0, w_exact0)
+        f1 = f(rho, mu, dudt1, u_exact0, p_exact1, w_exact1)
         #print "dudt = {}".format(dudt(1))
         
         
@@ -127,16 +132,11 @@ for dt in DT:
 
         # Define boundary conditions
         
-        bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1),
-               # DirichletBC(VP.sub(0), u_exact_e, fd, 2),
-               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 3),
-               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 4)]
         
-        bcw = [DirichletBC(V0, project(w_exact1, Ve), "on_boundary")]
     
         F = Constant(1./dt) * rho * inner(u - u0, v) * dx
         #F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
-        F += rho * inner(grad(u0)*(u0), v) * dx        
+        #F += rho * inner(grad(u0)*(u0), v) * dx        
         F += 2.0 * mu * inner(sym(grad(u_mid)), sym(grad(v))) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
@@ -155,7 +155,22 @@ for dt in DT:
 
             t0.assign(t_)    # in this way the constant t should be updated with the value t_
             t1.assign(t_ + dt)
-                        
+        
+            bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1),
+               # DirichletBC(VP.sub(0), u_exact_e, fd, 2),
+               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 3),
+               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 4)]
+            
+            #bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), "on_boundary")]
+            bcw = [DirichletBC(V0, project(w_exact0, Ve), "on_boundary")]
+
+            fileu << project(u0, V0)
+            fileu0 << project(u_exact0, V0)
+            fileu1 << project(u_exact1, V0)
+            
+            plot(VP_.sub(0), key="u", title="u")
+            plot(u_exact0, key="u0", title="uex0")
+            plot(u_exact1, key="u1", title="uex1")
             A = assemble(a0)
             b = assemble(L0)
             
@@ -195,8 +210,8 @@ for dt in DT:
             mesh.bounding_box_tree().build(mesh)            
             
             t_ += dt
-        
-        plot(u0, mesh=mesh)
+
+
         u_errors[i][j] = "{0:1.4e}".format(errornorm(project(u_exact1, Ve), VP_.sub(0), "H1"))
         w_errors[i][j] = "{0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
         print "||u - ph||_H1 = {0:1.4e}".format(errornorm(project(u_exact1, Ve) , VP_.sub(0), "H1"))  
@@ -204,7 +219,7 @@ for dt in DT:
         t1.assign(t_ - dt*(1-theta))
         p_errors[i][j] = "{0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
         j +=1
-        
+
 
         print "||p - ph||_L2 = {0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
         print "||w - wh||_H1 = {0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
