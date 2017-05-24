@@ -9,7 +9,7 @@ T = 1.0
 DT = [1./(float(N[i])) for i in range(len(N))]
 rho = 1.0
 mu = 1.0/8.0
-theta = 1.0
+theta = 0.5
 C = 0.1
 
 u_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
@@ -26,13 +26,13 @@ def exact_solutions(mesh, C, t):
     x = SpatialCoordinate(mesh)
     u_e = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t), -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)))
     p_e = cos(x[0])*cos(t)
-    #w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
-    w_e = as_vector((x[0]-x[0], x[0]-x[0]))
+    w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    #w_e = as_vector((x[0]-x[0], x[0]-x[0]))
     return u_e, p_e, w_e
     
 def f(rho, mu, dudt, u_e, p_e, w_e):
-    #ff = rho * dudt + rho * grad(u_e)*(u_e - w_e) - mu*div(grad(u_e)) + grad(p_e)
-    ff = rho * dudt - div(mu*grad(u_e)) + grad(p_e)
+    ff = rho * dudt + rho * grad(u_e)*(u_e - w_e) - mu*div(grad(u_e)) + grad(p_e)
+    #ff = rho * dudt - div(mu*grad(u_e)) + grad(p_e)
 
     return ff
 
@@ -98,7 +98,7 @@ for dt in DT:
         TH = V * P
         VP = FunctionSpace(mesh, TH)
                 
-        u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
+        #u, p = TrialFunctions(VP)   # u is a trial function of V, while p a trial function of P
         w = TrialFunction(V0)
         
         v, q = TestFunctions(VP)
@@ -117,7 +117,7 @@ for dt in DT:
         Y = Function(V0)
         
         # I want to store my solutions here
-        VP_ = Function(VP)   
+        VP_ = Function(VP); (u,p) = split(VP_) 
         W_ = Function(V0)
         
         u_mid = (1.0-theta)*u0 + theta*u
@@ -126,8 +126,7 @@ for dt in DT:
         sigma_mid = (1.0-theta)*sigma(mu, u_exact0, p_exact0, Ve, Pe) + theta*sigma(mu, u_exact1, p_exact1, Ve, Pe)
     
         F = Constant(1./dt) * rho * inner(u - u0, v) * dx
-        #F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
-        #F += rho * inner(grad(u0)*(u0), v) * dx        
+        F += rho * inner(grad(u_mid)*(u_mid - w0), v) * dx  
         F += mu * inner(grad(u_mid), grad(v)) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
@@ -160,14 +159,17 @@ for dt in DT:
             filep0 << project(p_exact0, P0)
             filep1 << project(p_exact1, P0)
 
-            A = assemble(a0)
-            b = assemble(L0)
+            #A = assemble(a0)
+            #b = assemble(L0)
             
-            for bc in bcu:
-                bc.apply(A,b)
+            #for bc in bcu:
+            #    bc.apply(A,b)
         
-            solve(A, VP_.vector(), b)
-            
+            solve(F == 0, VP_, bcu, solver_parameters={"newton_solver":
+                                            {"relative_tolerance": 1e-20}})
+            #solve(A, VP_.vector(), b)
+            plot(VP_.sub(0), key="u", mesh=mesh)
+            plot(VP_.sub(1), key="p", mesh=mesh)
             # Solving the Poisson problem
             A1 = assemble(a1)
             b1 = assemble(L1)
