@@ -8,7 +8,7 @@ from dolfin import *
 from tangent_and_normal import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**4]
+NN = [2**3]
 T = 10             # 10 cardiac cycles, 1 cardiac cycle lasts 1 second in my model
 mu = 0.700e-3       # [g/(mm * s)]
 rho = 1e-3          # [g/mm^3]  
@@ -18,8 +18,8 @@ gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Ma
 use_projected_normal = True
 
 
-k = Constant(1e-8)      # elastic
-#k = Constant(1e6)       # stiff
+#k = Constant(1e-5)      # elastic
+k = Constant(1e6)       # stiff
 
 k_bottom = 1e2
 k_top = 1e2
@@ -116,10 +116,10 @@ for N in NN :
     #plot(fd)
     #interactive()
     
-    # Here I need to impose just the Dirichlet conditions. The ones regarding the stresses were already encountered in the
-    # weak formulation. 
-    bcu = [DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1)]   # left wall
-    # Here I removed the Dirichlet BC on the top wall because I am going to impose Neumann with p_inlet in the weak formulation
+    # DIRICHLET BC (The bc regarding the stresses were already encountered in the weak formulation) 
+    bcu = [DirichletBC(VP.sub(0), Constant((0.0,0.0)), fd, 1),   # left wall
+           DirichletBC(VP.sub(0).sub(0), Constant(0.0), fd, 3),     # I set tangential velocity zero on the top wall, as Vegard suggested
+           DirichletBC(VP.sub(0).sub(0), Constant(0.0), fd, 4)]   # I set tangential velocity zero on the bottom wall, as Vegard suggested
     
     bcw = [DirichletBC(W, Constant((0.0,0.0)), fd, 1),
             DirichletBC(W, u0, fd, 2),                      # or   DirichletBC(W, dot(u0,unit)*unit, fd, 2)]   # if unit = (1,0)
@@ -152,10 +152,6 @@ for N in NN :
           + Constant(gamma)/h * ut*vt + Constant(mu) * dot(grad(v)*normal, tangent) * g - Constant(gamma)/h * g*vt ) * ds(2)
     
     # Boundary term with the pressure gradient
-    # FIRST PROBLEM: how do I define the p_inlet? As an expression it doesn't work
-    # SECOND PROBLEM: the boundary for the inlet pressure changes at every half cycle. A cardiac cycle lasts 1 second, and at 0.5 the fluid chances direction
-    # because of systole and diastole. Hence, in the first half cycle (systole) the inlet boundary is the top wall, while in the second half cycle the inlet
-    # boundary is the bottom wall. WHAT BOUNDARY TO USE IN inner()*ds(???) ?
     d = inner(p_inlet * normal, v) * ds(3) #+ inner(Constant(0.0) * normal, v) * ds(4)
     
     
@@ -180,7 +176,7 @@ for N in NN :
     #file = File("solutions/velocity/u.pvd")
     #out = File("solutions/square_1e4/ALE_1e4.pvd")
     
-    while t <= 2*dt:
+    while t <= T + 1E-9:
             
         #print "Solving for t = {}".format(t)  
         
