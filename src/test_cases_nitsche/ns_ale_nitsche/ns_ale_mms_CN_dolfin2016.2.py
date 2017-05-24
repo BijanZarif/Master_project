@@ -2,55 +2,55 @@ from dolfin import *
 from tabulate import tabulate
 import math
 
-set_log_level(50)
-#N = [(2**n, 0.5**(2*n)) for n in range(1, 5)]
+set_log_level(60)
 
 N = [2**3, 2**4, 2**5]
-#N = [2**4]
 T = 1.0
-DT = [1./(float(N[i]*N[i])) for i in range(len(N))]
-#DT = [1./10000]
+DT = [1./(float(N[i])) for i in range(len(N))]
 rho = 1.0
 mu = 1.0/8.0
 theta = 1.0
-# theta = 0.5
-
-#theta = 0.5
-theta = 1.0
 C = 0.1
 
-u_errors = [[j for j in range(len(N))] for i in range(len(DT))]
-p_errors = [[j for j in range(len(N))] for i in range(len(DT))]
-w_errors = [[j for j in range(len(N))] for i in range(len(DT))]
+u_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
+p_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
+w_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
 
-def sigma(u,p):
-    return 2.0*mu*sym(grad(u)) - p*Identity(2)
+def sigma(mu, u, p, Ve, Pe):
+    #project(u, Ve)
+    #project(p, Pe)
+    return mu*grad(u) - p*Identity(2)
 
 def exact_solutions(mesh, C, t):
 
     x = SpatialCoordinate(mesh)
-    u_e = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t) , -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t) ))
-    p_e = cos(x[0])*cos(x[1])*cos(t)
+    u_e = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t), -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)))
+    p_e = cos(x[0])*cos(t)
     #w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
     w_e = as_vector((x[0]-x[0], x[0]-x[0]))
     return u_e, p_e, w_e
     
 def f(rho, mu, dudt, u_e, p_e, w_e):
-    #ff = rho * dudt + rho * grad(u_e0)*(u_e0 - w_e) - div(2.0*mu*sym(grad(u_e1))) - grad(p_e)
-    ff = rho * dudt - div(2.0*mu*sym(grad(u_e))) + grad(p_e)
+    #ff = rho * dudt + rho * grad(u_e)*(u_e - w_e) - mu*div(grad(u_e)) + grad(p_e)
+    ff = rho * dudt - div(mu*grad(u_e)) + grad(p_e)
 
     return ff
 
 fileu = File("u.pvd")
 fileu0 = File("u0_ex.pvd")
 fileu1 = File("u1_ex.pvd")
+
+filep = File("p.pvd")
+filep0 = File("p0_ex.pvd")
+filep1 = File("p1_ex.pvd")
+
+ii = 0 
 for dt in DT:
     print "="*20
     print "dt = {}".format(dt)
-    i = 0 
+    jj = 0
     for n in N:
-        
-        j = 0 
+
         t_ = 0.0
         t0 = Constant(0.0)
         t1 = Constant(dt)
@@ -61,21 +61,16 @@ for dt in DT:
         x = SpatialCoordinate(mesh)
         normal = FacetNormal(mesh)      
         fd = FacetFunction("size_t", mesh)
-        CompiledSubDomain("near(x[0], 0.0) && on_boundary").mark(fd, 1) # left wall (cord)    
-        CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) # right wall (tissue)  
-        # CompiledSubDomain("near(x[1], 1.0) ||( near(x[0], 1.0) && near(x[1], 1.0) ) && on_boundary").mark(fd, 3) # top wall (inlet)
-        # CompiledSubDomain("near(x[1], 0.0) ||( near(x[0], 1.0) && near(x[1], 0.0) ) && on_boundary").mark(fd, 4) # bottom wall (outlet)
-        CompiledSubDomain("near(x[1], 1.0)").mark(fd, 3) # top wall (inlet)
-        CompiledSubDomain("near(x[1], 0.0)").mark(fd, 4) # bottom wall (outlet)
+        CompiledSubDomain("on_boundary").mark(fd, 1) 
+        CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) 
+        CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(fd, 2) 
+        CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 2) 
 
         ds = Measure("ds", domain = mesh, subdomain_data = fd)
 
         (u_exact0, p_exact0, w_exact0) = exact_solutions(mesh, C, t0)
         (u_exact1, p_exact1, w_exact1) = exact_solutions(mesh, C, t1)
 
-        #Write exact solution using UFL
-        # w_exact0 = Constant((0.0,0.0))
-        # w_exact1 = Constant((0.0,0.0))
         
         #It is better to use diff(u_exact, t)
         dudt0 = diff(u_exact0, t0)
@@ -83,7 +78,7 @@ for dt in DT:
         
         #dudt =  as_vector(( -sin(2*pi*x[1])*cos(2*pi*x[0])*sin(t) , sin(2*pi*x[0])*cos(2*pi*x[1])*sin(t) ))
         f0 = f(rho, mu, dudt0, u_exact0, p_exact0, w_exact0)
-        f1 = f(rho, mu, dudt1, u_exact0, p_exact1, w_exact1)
+        f1 = f(rho, mu, dudt1, u_exact1, p_exact1, w_exact1)
         #print "dudt = {}".format(dudt(1))
         
         
@@ -94,6 +89,7 @@ for dt in DT:
         P = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
         V0 = VectorFunctionSpace(mesh, "CG", 2)
         P0 = FunctionSpace(mesh, "CG", 1)
+        
         V1 = VectorFunctionSpace(mesh, "CG", 1)
         Ve = VectorFunctionSpace(mesh, "CG", 4)
         Pe = FunctionSpace(mesh, "CG", 4)
@@ -127,20 +123,15 @@ for dt in DT:
         u_mid = (1.0-theta)*u0 + theta*u
         f_mid = (1.0-theta)*f0 + theta*f1   # at every time step I should have f0 which is the f_exact calculated at the time t=i
                                             # while f is the f_exact at the time t=i+1
-        sigma_mid = (1.0-theta)*sigma(u_exact0, p_exact0) + theta*sigma(u_exact1, p_exact1)
-        
-
-        # Define boundary conditions
-        
-        
+        sigma_mid = (1.0-theta)*sigma(mu, u_exact0, p_exact0, Ve, Pe) + theta*sigma(mu, u_exact1, p_exact1, Ve, Pe)
     
         F = Constant(1./dt) * rho * inner(u - u0, v) * dx
         #F += rho * inner(grad(u_mid)*(u0 - w0), v) * dx
         #F += rho * inner(grad(u0)*(u0), v) * dx        
-        F += 2.0 * mu * inner(sym(grad(u_mid)), sym(grad(v))) * dx
+        F += mu * inner(grad(u_mid), grad(v)) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
-        F -= inner(sigma_mid*normal, v) * ds(2)
+        F -= inner(dot(sigma_mid,normal), v) * ds(2)
         F -= inner(f_mid, v) * dx
         
         a0, L0 = lhs(F), rhs(F)
@@ -156,10 +147,7 @@ for dt in DT:
             t0.assign(t_)    # in this way the constant t should be updated with the value t_
             t1.assign(t_ + dt)
         
-            bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1),
-               # DirichletBC(VP.sub(0), u_exact_e, fd, 2),
-               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 3),
-               DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 4)]
+            bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1)]
             
             #bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), "on_boundary")]
             bcw = [DirichletBC(V0, project(w_exact0, Ve), "on_boundary")]
@@ -168,9 +156,10 @@ for dt in DT:
             fileu0 << project(u_exact0, V0)
             fileu1 << project(u_exact1, V0)
             
-            plot(VP_.sub(0), key="u", title="u")
-            plot(u_exact0, key="u0", title="uex0")
-            plot(u_exact1, key="u1", title="uex1")
+            filep << project(p0, P0)
+            filep0 << project(p_exact0, P0)
+            filep1 << project(p_exact1, P0)
+
             A = assemble(a0)
             b = assemble(L0)
             
@@ -212,19 +201,19 @@ for dt in DT:
             t_ += dt
 
 
-        u_errors[i][j] = "{0:1.4e}".format(errornorm(project(u_exact1, Ve), VP_.sub(0), "H1"))
-        w_errors[i][j] = "{0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
-        print "||u - ph||_H1 = {0:1.4e}".format(errornorm(project(u_exact1, Ve) , VP_.sub(0), "H1"))  
+        u_errors[ii][jj] = "{0:1.4e}".format(errornorm(VP_.sub(0), project(u_exact1, Ve), norm_type="H1", degree_rise=3))
+        w_errors[ii][jj] = "{0:1.4e}".format(errornorm(W_, project(w_exact1, Ve), norm_type="H1", degree_rise=3))
+        print "||u - uh||_H1 = {0:1.4e}".format(errornorm(VP_.sub(0), project(u_exact1, Ve), norm_type="H1", degree_rise=3))  
+        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(W_, project(w_exact1, Ve), norm_type="H1", degree_rise=3))
 
         t1.assign(t_ - dt*(1-theta))
-        p_errors[i][j] = "{0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
-        j +=1
+        p_errors[ii][jj] = "{0:1.4e}".format(errornorm(VP_.sub(1), project(p_exact1, Pe), norm_type="L2", degree_rise=3))
+        jj +=1
 
 
-        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(project(p_exact1, Pe), VP_.sub(1), "L2"))
-        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(project(w_exact1, Ve), W_, "H1"))
+        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(VP_.sub(1), project(p_exact1, Pe), norm_type="L2", degree_rise=3))
     
-    i +=1
+    ii +=1
 
 def convergence_rates(errors, hs):
     rates = [(math.log(errors[i+1]/errors[i]))/(math.log(hs[i+1]/hs[i])) for i in range(len(hs)-1)]
