@@ -32,14 +32,14 @@ k_middle = 1e-1
 dt = 0.0002
 g = Constant(0.0)       # constant for the Nitsche method
 
-# Dimensions of the model: bottom wall is 0.4 cm, tissue wall is 4.0 cm
-x0, x1 = 0.0, 0.4
-y0, y1 = 0.0, 6.0
+# Dimensions of the model: bottom wall is 4.0 mm, tissue wall is 60.0 mm
+x0, x1 = 0.0, 4.0
+y0, y1 = 0.0, 60.0
 
 
 for N in NN : 
    
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 4 * N)  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 6*N)  
     x = SpatialCoordinate(mesh)
     h = CellSize(mesh)
     
@@ -251,9 +251,9 @@ for N in NN :
         p_inlet.t = t
         print "pressure time update = {}".format(p_inlet.t)
     
-    u01, p01 = VP_.split()    
-    ufile = File("velocity_2x2_0.002.pvd")
-    ufile << u01
+    #u01, p01 = VP_.split()    
+    #ufile = File("velocity_2x2_0.002.pvd")
+    #ufile << u01
 
 #u01, p01 = VP_.split()
 #plot(u01, key="u01", title = str(t))

@@ -34,13 +34,13 @@ def f(rho, mu, dudt, u_e, p_e, w_e):
     #ff = rho * dudt - div(mu*grad(u_e)) + grad(p_e)
     return ff
 
-fileu = File("u.pvd")
-fileu0 = File("u0_ex.pvd")
-fileu1 = File("u1_ex.pvd")
-
-filep = File("p.pvd")
-filep0 = File("p0_ex.pvd")
-filep1 = File("p1_ex.pvd")
+# fileu = File("u.pvd")
+# fileu0 = File("u0_ex.pvd")
+# fileu1 = File("u1_ex.pvd")
+# 
+# filep = File("p.pvd")
+# filep0 = File("p0_ex.pvd")
+# filep1 = File("p1_ex.pvd")
 
 ii = 0 
 for dt in DT:
@@ -148,13 +148,13 @@ for dt in DT:
             #bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), "on_boundary")]
             bcw = [DirichletBC(V0, project(w_exact0, Ve), "on_boundary")]
 
-            fileu << project(u0, V0)
-            fileu0 << project(u_exact0, V0)
-            fileu1 << project(u_exact1, V0)
-            
-            filep << project(p0, P0)
-            filep0 << project(p_exact0, P0)
-            filep1 << project(p_exact1, P0)
+            # fileu << project(u0, V0)
+            # fileu0 << project(u_exact0, V0)
+            # fileu1 << project(u_exact1, V0)
+            # 
+            # filep << project(p0, P0)
+            # filep0 << project(p_exact0, P0)
+            # filep1 << project(p_exact1, P0)
 
             #A = assemble(a0)
             #b = assemble(L0)
@@ -226,5 +226,6 @@ print "w_errors = ", w_errors
 # 
 print "p_errors = ", p_errors
 # print rate(p_errors)
+
 
 
