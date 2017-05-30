@@ -33,8 +33,8 @@ dt = 0.0002
 g = Constant(0.0)       # constant for the Nitsche method
 
 # Dimensions of the model: bottom wall is 4.0 mm, tissue wall is 60.0 mm
-x0, x1 = 0.0, 4.0
-y0, y1 = 0.0, 60.0
+x0, x1 = 0.0, 4.0  # [mm]
+y0, y1 = 0.0, 60.0 # [mm]
 
 
 for N in NN : 
