@@ -57,12 +57,18 @@ for dt in DT:
 
         mesh = UnitSquareMesh(n, n)
         x = SpatialCoordinate(mesh)
-        normal = FacetNormal(mesh)      
+        normal = FacetNormal(mesh)
+        gamma = 1e2
+        h = CellSize(mesh)
+        
         fd = FacetFunction("size_t", mesh)
         CompiledSubDomain("on_boundary").mark(fd, 1) 
-        CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) 
-        CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(fd, 2) 
-        CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 2) 
+        CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2)  # right boundary
+        CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(fd, 2)  # btm boundary
+        CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 2)  # top boundary
+        # at the end the boundary "2" includes every boundary except the left boundary
+        # while the boundary "1" is just the left one
+        
 
         ds = Measure("ds", domain = mesh, subdomain_data = fd)
 
@@ -128,6 +134,14 @@ for dt in DT:
         F -= p * div(v) * dx
         F -= q * div(u) * dx
         F -= inner(dot(sigma_mid,normal), v) * ds(2)
+        
+        #F -= inner(dot(sigma, normal),v) * ds(1)   # I added this part because now I don't have Dirichlet condition anymore on the left boundary,
+                                                    # so this term is not zero because the test function v is not zero on the boundary
+        #Nitsche term
+        F += ( - mu * inner(grad(u_mid)*normal,v) - mu * inner(grad(u_mid)*normal,v) - gamma * h**-1 * inner(u,v) +
+              mu * inner(grad(v) * normal, u_exact1) + gamma * h**-1 * inner(u_exact1, v) ) * ds(1)
+        F += inner(p*normal,v) * ds(1)
+        
         F -= inner(f_mid, v) * dx
         
         a0, L0 = lhs(F), rhs(F)
@@ -143,7 +157,8 @@ for dt in DT:
             t0.assign(t_)    # in this way the constant t should be updated with the value t_
             t1.assign(t_ + dt)
         
-            bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1)]
+            #bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), fd, 1)]
+            # applying this boundary condition only on the left boundary
             
             #bcu = [DirichletBC(VP.sub(0), project(u_exact1, Ve), "on_boundary")]
             bcw = [DirichletBC(V0, project(w_exact0, Ve), "on_boundary")]
@@ -162,7 +177,7 @@ for dt in DT:
             #for bc in bcu:
             #    bc.apply(A,b)
         
-            solve(F == 0, VP_, bcu, solver_parameters={"newton_solver":
+            solve(F == 0, VP_, solver_parameters={"newton_solver":
                                             {"relative_tolerance": 1e-20}})
             #solve(A, VP_.vector(), b)
             plot(VP_.sub(0), key="u", mesh=mesh)
