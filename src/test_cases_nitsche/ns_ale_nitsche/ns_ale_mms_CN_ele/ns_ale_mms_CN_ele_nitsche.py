@@ -138,7 +138,7 @@ for dt in DT:
         #F -= inner(dot(sigma, normal),v) * ds(1)   # I added this part because now I don't have Dirichlet condition anymore on the left boundary,
                                                     # so this term is not zero because the test function v is not zero on the boundary
         #Nitsche term
-        F += ( - mu * inner(grad(u_mid)*normal,v) - mu * inner(grad(u_mid)*normal,v) - gamma * h**-1 * inner(u,v) +
+        F += ( - mu * inner(grad(u)*normal,v) - mu * inner(grad(v)*normal,u) - gamma * h**-1 * inner(u,v) +
               mu * inner(grad(v) * normal, u_exact1) + gamma * h**-1 * inner(u_exact1, v) ) * ds(1)
         F += inner(p*normal,v) * ds(1)
         
