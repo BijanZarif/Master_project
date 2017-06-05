@@ -977,6 +977,165 @@ The numerical scheme reads
 \end{split}
 \end{equation}
 
+% 
+Without Nitsche and $w=0$
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.0108 \times 10^{-1}$ & $5.3410 \times 10^{-2}$ &  $ 1.3308 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.9491  \times 10^{-1}$ & $5.1827 \times 10^{-2}$ &  $ 1.3130  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 1.9423 \times 10^{-1}$ & $5.0625 \times 10^{-2}$ & $ 1.2948 \times 10^{-2}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | p_{exact} - p_h |_{L^2}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.2342 \times 10^{-3}$ & $1.5843 \times 10^{-3}$ &  $ 1.5946 \times 10^{-3}$ \\
+\hline
+$ 0.0625$ & $1.6935  \times 10^{-3}$ & $4.2361 \times 10^{-4}$ &  $ 3.9789  \times 10^{-4}$ \\
+\hline
+$ 0.03125 $ & $ 1.6297 \times 10^{-3}$ & $1.9945 \times 10^{-4}$ & $ 1.0166 \times 10^{-4}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+Without Nitsche and $w \ne 0$
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $3.1954 \times 10^{-1}$ & $2.1620 \times 10^{-1}$ &  $ 2.0647 \times 10^{-1}$ \\
+\hline
+$ 0.0625$ & $3.1298  \times 10^{-1}$ & $2.0958 \times 10^{-1}$ &  $ 1.9979  \times 10^{-1}$ \\
+\hline
+$ 0.03125 $ & $ 3.147 \times 10^{-1}$ & $2.1150 \times 10^{-1}$ & $ 2.0205 \times 10^{-1}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | w_{exact} - w_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.5965 \times 10^{-2}$ & $2.5389 \times 10^{-2}$ &  $ 2.5350 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.4080  \times 10^{-2}$ & $1.3038 \times 10^{-2}$ &  $ 1.2968  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 8.5368 \times 10^{-3}$ & $6.6945 \times 10^{-3}$ & $ 6.5604 \times 10^{-3}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | p_{exact} - p_h |_{L^2}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $1.6220 \times 10^{-2}$ & $1.5294 \times 10^{-2}$ &  $ 1.5273 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.7914  \times 10^{-2}$ & $1.7039 \times 10^{-2}$ &  $ 1.7013  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 1.8622 \times 10^{-2}$ & $1.7785 \times 10^{-2}$ & $ 1.7759 \times 10^{-2}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+With Nitsche and $w=0$
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.0115 \times 10^{-1}$ & $5.3419 \times 10^{-2}$ &  $ 1.3313 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.9498  \times 10^{-1}$ & $5.1839 \times 10^{-2}$ &  $ 1.3131  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 1.9430 \times 10^{-1}$ & $5.0641 \times 10^{-2}$ & $ 1.2949 \times 10^{-2}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | p_{exact} - p_h |_{L^2}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.5986 \times 10^{-3}$ & $1.5928 \times 10^{-3}$ &  $ 1.5949 \times 10^{-3}$ \\
+\hline
+$ 0.0625$ & $2.1029  \times 10^{-3}$ & $4.4706 \times 10^{-4}$ &  $ 3.9847  \times 10^{-4}$ \\
+\hline
+$ 0.03125 $ & $ 2.0305 \times 10^{-3}$ & $2.4174 \times 10^{-4}$ & $ 1.0312 \times 10^{-4}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+
+With Nitsche and $w \ne 0$
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $3.2014 \times 10^{-1}$ & $2.1621 \times 10^{-1}$ &  $ 2.0648 \times 10^{-1}$ \\
+\hline
+$ 0.0625$ & $3.1388  \times 10^{-1}$ & $2.0962 \times 10^{-1}$ &  $ 1.9980  \times 10^{-1}$ \\
+\hline
+$ 0.03125 $ & $ 3.1581 \times 10^{-1}$ & $2.1155 \times 10^{-1}$ & $ 2.0206 \times 10^{-1}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | w_{exact} - w_h |_{H^1}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $2.5965 \times 10^{-2}$ & $2.5389 \times 10^{-2}$ &  $ 2.5350 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.4080  \times 10^{-2}$ & $1.3038 \times 10^{-2}$ &  $ 1.2968  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 8.5368 \times 10^{-3}$ & $6.6945 \times 10^{-3}$ & $ 6.5604 \times 10^{-3}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{Error in the } $ \mathbf{ | p_{exact} - p_h |_{L^2}}$ \textbf{norm}
+\begin{tabular}{| c | c | c | c |}
+\hline
+$\mathbf{dt | N}$ & $8$ & $16$ & $32$ \\
+\hline
+$ 0.125 $ & $1.6777 \times 10^{-2}$ & $1.5310 \times 10^{-2}$ &  $ 1.5274 \times 10^{-2}$ \\
+\hline
+$ 0.0625$ & $1.8533  \times 10^{-2}$ & $1.7059 \times 10^{-2}$ &  $ 1.7014  \times 10^{-2}$ \\
+\hline
+$ 0.03125 $ & $ 1.9263 \times 10^{-2}$ & $1.7807 \times 10^{-2}$ & $ 1.7761 \times 10^{-2}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+
 \section{ALE + elasticity test case}
 
 \chapter{Numerical results}

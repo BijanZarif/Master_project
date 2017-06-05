@@ -25,8 +25,8 @@ def exact_solutions(mesh, C, t):
     x = SpatialCoordinate(mesh)
     u_e = as_vector(( sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t), -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)))
     p_e = cos(x[0])*cos(t)   # the p_e is not the same as in the test case that I had written, there's a *cos(x[1]) missing
-    #w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
-    w_e = as_vector((x[0]-x[0], x[0]-x[0]))
+    w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    #w_e = as_vector((x[0]-x[0], x[0]-x[0]))
     return u_e, p_e, w_e
     
 def f(rho, mu, dudt, u_e, p_e, w_e):
