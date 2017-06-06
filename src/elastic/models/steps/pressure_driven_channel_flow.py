@@ -6,7 +6,7 @@
 from dolfin import *
 
 #NN = [2**2, 2**3, 2**4, 2**5, 2**6]
-NN = [2**4]
+NN = [2**2]
 #dt = 0.1
 #dt = 0.05
 dt = 0.025
@@ -19,7 +19,7 @@ y0, y1 = 0.0, 60  # [mm]
 
 for N in NN :
     
-    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, N, "crossed")  
+    mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), N, 6*N, "crossed")  
     #mesh = UnitSquareMesh(N, N, "crossed")  
     x = SpatialCoordinate(mesh)
     
@@ -110,10 +110,10 @@ for N in NN :
     # Ovind suggested: divide your form in different passages so if you have an error you are going to see exactly
     # what part of the form gives the error
     
-    dudt = Constant(dt**-1) * inner(u-u0, v) * dx
+    dudt = rho*Constant(dt**-1) * inner(u-u0, v) * dx
     a = Constant(mu) * inner(grad(u_mid), grad(v)) * dx
     b = q * div(u) * dx
-    c = inner(grad(u_mid)*u0, v) * dx
+    c = rho*inner(grad(u_mid)*u0, v) * dx
     d = inner(grad(p), v) * dx
     L = inner(f_mid,v)*dx
     F = dudt + a + b + c + d - L
