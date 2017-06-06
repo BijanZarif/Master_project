@@ -31,11 +31,11 @@ def exact_solutions(mesh, C, t):
     #p_e = x[0]*x[0]
 
     # mesh moves
-    #w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
-    w_e = as_vector(( x[1]*(x[1] - 1.0) , 0.0))
+    w_e = as_vector(( C*sin(2*pi*x[1])*cos(t) , 0.0))
+    #w_e = as_vector(( x[1]*(x[1] - 1.0) , 0.0))
 
     #mesh does not move
-    #w_e = as_vector((x[0]-x[0], x[0]-x[0]))
+    #w_e = as_vector((x[0]/10, 0.0))
     return u_e, p_e, w_e
     
 def f(rho, mu, dudt, u_e, p_e, w_e):
@@ -189,8 +189,8 @@ for dt in DT:
 
             # With the trapezoidal rule: X1 = dt/2*(w1 - w0) + X0
 
-            ALE.move(mesh, project(Y, V1))
-            mesh.bounding_box_tree().build(mesh)            
+            #ALE.move(mesh, project(Y, V1))
+            #mesh.bounding_box_tree().build(mesh)            
             
             t_ += dt
 
