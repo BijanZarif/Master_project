@@ -195,17 +195,14 @@ for dt in DT:
     
             up0.assign(VP_) # the first part of VP_ is u0, and the second part is p0
             w0.assign(W_)
-            
-            
-            # Compute the mesh displacement
-            #Needs to be modified!! Make a second order scheme!            
-            #Y.vector()[:] = w0.vector()[:]*dt
-            #X.vector()[:] += Y.vector()[:]
-
-            
+                
 
             # With the trapezoidal rule: X1 = dt/2*(w1 - w0) + X0
-            Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w1.vector()[:])
+            # Y.vector()[:] = 0.5*dt*(w0.vector()[:] + w1.vector()[:])
+            # X.vector()[:] += Y.vector()[:]
+            
+            # Compute the mesh displacement           
+            Y.vector()[:] = w0.vector()[:]*dt
             X.vector()[:] += Y.vector()[:]
             w1.assign(w0)
 
