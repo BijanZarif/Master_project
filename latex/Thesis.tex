@@ -941,30 +941,71 @@ NOTE: Oyvind's stream function minimum is not exactly the same as the fenics boo
 \newpage
 
 \section{MMS for Navier-Stokes and ALE}
-As a test case for ALE we use the method of manifactured solutions. The exact solution that we choose has to satisfy the condition $\nabla \cdot \mathbf{u} = 0$. We can use the following functions
+As a test case for ALE we use the method of manifactured solutions. Let $\Omega$ be the unit square $\Omega = [0,1]^2$, and we define
+
+\[
+\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{left} \cup \partial \Omega_{right}
+\]
+
+The exact solution that we choose for the Navier-Stokes equations has to satisfy
+
+\begin{align}
+\rho \dot{\mathbf{u}} + \rho \Delta \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) - \mu \Delta \mathbf{u} +  \nabla p &= \mathbf{f}_{exact}, \\
+\nabla \cdot \mathbf{u} &= 0,
+\end{align}
+
+where $\mathbf{f}_{exact} = \rho \dot{\mathbf{u}_{exact}} + \rho \Delta \mathbf{u}_{exact} \cdot (\mathbf{u}_{exact} - \mathbf{w}_{exact}) - \mu \Delta \mathbf{u}_{exact} +  \nabla p_{exact}$
+
+and
 
 \begin{equation}
 \mathbf{u}_{exact} = \left[ \begin{array}{c} sin(2\pi y) cos(2\pi x) cos(t) \\ - sin(2 \pi x) cos(2 \pi y) cos(t) \end{array} \right], \quad
-p_{exact} = cos(x) cos(y) cos(t).
+p_{exact} = cos(x) cos(t).
 \end{equation}
-
-Since in the N-S formulation with ALE we encounter also the mesh velocity $\mathbf{w}$, we need a $\mathbf{w}_exact$ which satisfies $- \Delta \mathbf{w}_{\rm exact} = 0$, as we are applying a Laplacian smoothing. We choose
 
 \begin{equation}
 \mathbf{w}_{exact} = \left[ \begin{array}{c} C \, sin(2 \pi y) cos(t) \\
 0 \end{array} \right]
 \end{equation}
 
+Moreover, the mesh velocity $\mathbf{w}$ has to satisfy the equation $- \Delta \mathbf{w} = \mathbf{g}$, where $\mathbf{g} = - \Delta \mathbf{w}_{\rm exact}$, as we are applying a Laplacian smoothing.
+
 As boundary conditions we choose
 
 \begin{align}
-\mathbf{u} &= \mathbf{u}_{exact} &&\text{on } \partial \Omega \setminus  \partial \Omega_{\rm tissue} \\
-\sigma \cdot \mathbf{n} &= \sigma_{\rm exact} \cdot \mathbf{n} &&\text{on }  \partial \Omega_{\rm tissue}
+\mathbf{u} &= \mathbf{u}_{exact} &&\text{on } \partial \Omega_1 =  \partial \Omega_{\rm left} \\
+\sigma \cdot \mathbf{n} &= \sigma_{\rm exact} \cdot \mathbf{n} &&\text{on }  \partial \Omega_ 2 = \partial \Omega \setminus  \partial \Omega_{\rm left} \\
 \end{align}
 
-where $\sigma_{\rm exact} = \mu \mathbf{u}_{\rm exact} - p_{\rm exact}I$.
+where $\sigma_{\rm exact} = \mu \nabla \mathbf{u}_{\rm exact} - p_{\rm exact}I$.
 
-The numerical scheme reads
+For what concerns the mesh velocity, we apply a Dirichlet boundary condition on the entire boundary, i.e. $\mathbf{w} = \mathbf{w}_{exact}$ on $\partial \Omega$.	
+
+The variational formulation reads:
+
+\begin{equation}
+\begin{split}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho  \nabla \mathbf{u} \cdot (\mathbf{u - w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega_2} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx
+=  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{split}
+\end{equation}
+
+and from the boundary conditions: 
+
+\begin{equation}
+\begin{split}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho  \nabla \mathbf{u} \cdot (\mathbf{u - w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega_2} \sigma_{exact} \cdot \, \mathbf{n} \, \mathbf{v} \, dx
+=  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{split}
+\end{equation}
+
+The numerical scheme using Crank-Nicolson reads
 
 \begin{equation}
 \begin{split}
@@ -972,8 +1013,8 @@ The numerical scheme reads
 + \rho \langle \nabla \mathbf{u}^{\rm i+ 1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i), \mathbf{v} \rangle_\Omega
 + \mu \langle \nabla \mathbf{u}^{\rm i + 1/2} , \mathbf{v} \rangle_\Omega \\
 - \langle p, div(v) \rangle_\Omega 
-- \langle q, div(\mathbf{u}^{\rm i+1/2}) \rangle_\Omega
-- \langle \sigma_{\rm exact} \cdot \mathbf{n}, \mathbf{v} \rangle_{\partial \Omega_{\rm tissue}} = \langle \mathbf{f}^{\rm i+1/2}, \mathbf{v} \rangle.
+- \langle q, div(\mathbf{u}^{\rm i+1}) \rangle_\Omega
+- \langle \sigma_{\rm exact} \cdot \mathbf{n}, \mathbf{v} \rangle_{\partial \Omega_2} = \langle \mathbf{f}^{\rm i+1/2}, \mathbf{v} \rangle_\Omega.
 \end{split}
 \end{equation}
 
