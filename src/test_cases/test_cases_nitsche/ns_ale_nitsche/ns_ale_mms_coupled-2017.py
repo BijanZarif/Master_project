@@ -13,45 +13,6 @@ import sympy
 # theta = 1.0
 # C = Constant(0.0)
 
-def analytical_expression(nu=None, rho=None):
-    x, y, t = sympy.symbols('x[0], x[1], t')
-    u = (y*(1.0 - y)*t, 0.0)
-    p = (1.0 - x)*t
-    w = (0.0, 0.0)
-    
-    # Compute the gradient of u
-    grad_u = ((sympy.diff(u[0], x), sympy.diff(u[0], y)),
-              (sympy.diff(u[1], x), sympy.diff(u[1], y)))
-
-    # Compute grad(u) * u
-    grad_u_x_u = (grad_u[0][0]*(u[0] - w[0]) + grad_u[0][1]*(u[1] - w[1]),
-                  grad_u[1][0]*(u[0] - w[0]) + grad_u[1][1]*(u[1] - w[1]))
-
-    # Compute sigma
-    sigma = [[nu*grad_u[i][j] for j in range(2)]
-             for i in range(2)]
-    sigma[0][0] = sigma[0][0] - p
-    sigma[1][1] = sigma[1][1] - p
-
-    for i in range(2):
-        for j in range(2):
-            sigma[i][j] = sympy.simplify(sigma[i][j])
-    
-    # Compute div(sigma)
-    div_sigma = (sympy.diff(sigma[0][0], x) + sympy.diff(sigma[0][1], y),
-                 sympy.diff(sigma[1][0], x) + sympy.diff(sigma[1][1], y))
-
-    f = [sympy.simplify(rho*sympy.diff(u[i], t) + rho*grad_u_x_u[i] - div_sigma[i]) for i in range(2)]
-
-    print "Analytical solutions:"
-
-    u = tuple(sympy.printing.ccode(u[i]) for i in range(2))
-    p = sympy.printing.ccode(p)
-    f = tuple(sympy.printing.ccode(f[i]) for i in range(2))
-    sigma = [[sympy.printing.ccode(sigma[i][j]) for j in range(2)]
-             for i in range(2)]
-
-    return (u, p, w, sigma, f)
 
 def solve_system(n=4, dt=0.1, k=1):
     
@@ -65,23 +26,10 @@ def solve_system(n=4, dt=0.1, k=1):
     rho = Constant(1.0)
     nu = Constant(1.0)
 
-    # Define analytical solutions
-    (u_e, p_e, w_e, sigma_e, f_e) = analytical_expression(nu=nu, rho=rho)
-    print "u_e = ", u_e
-    print "p_e = ", p_e
-    print "f_e = ", f_e
-    print "sigma_e = ", sigma_e
+    # Define analytical solution
+    f = Expression(("2.0 - t", "0.0"), degree=1, t=t)
+    w = Expression(("0.1", "0.1"), degree=0, t=t)
     
-    # Convert analytical representations to FEniCS Expressions
-    u_e = Expression(u_e, degree=k+2, t=t)
-    p_e = Expression(p_e, degree=k+2, t=t)
-    f = Expression(f_e, degree=k+2, t=t)
-    # Sidenote: there is something not implemented with tensor valued
-    # Expressions, using this work around instead by splitting sigma
-    # into its rows sigma0 and sigma1
-    sigma0 = Expression(sigma_e[0], degree=k+2, t=t)
-    sigma1 = Expression(sigma_e[1], degree=k+2, t=t)
-
     # Define Taylor-Hood elements of order k
     V = VectorElement("CG", mesh.ufl_cell(), k+1)
     Q = FiniteElement("CG", mesh.ufl_cell(), k)
@@ -101,22 +49,36 @@ def solve_system(n=4, dt=0.1, k=1):
     # Define short hand for sigma
     sigma = lambda u: nu*grad(u) - p*Identity(2)
 
-    # Define boundary traction s
+    # Define boundary pressure p
     n = FacetNormal(mesh) 
-    s = as_vector((dot(sigma0, n), dot(sigma1, n)))
+    p0 = as_vector((t, 0.0))
+    p1 = as_vector((0.0, 0.0))
+    
+    # Define some boundaries
+    boundary = FacetFunction("size_t", mesh, 0)
+    CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(boundary, 1) 
+    CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(boundary, 1) 
+    CompiledSubDomain("near(x[0], 0.0) && on_boundary").mark(boundary, 2) 
+    CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(boundary, 3) 
 
+    ds = Measure("ds", domain=mesh, subdomain_data=boundary)
     
     # Define variational formulation for Navier-Stokes
-    F = inner(rho*((u - u_)/dt + grad(u)*u), v)*dx() \
+    F = inner(rho*((u - u_)/dt + grad(u)*(u - w)), v)*dx() \
         + inner(sigma(u), grad(v))*dx() \
         + div(u)*q*dx() \
-        - inner(s, v)*ds() \
+        - inner(p0, v)*ds(2) \
+        - inner(p1, v)*ds(3) \
         - inner(f, v)*dx() 
     
-    bc = DirichletBC(M.sub(0), u_e, "!near(x[0], 0.0) && on_boundary")
+    bc = DirichletBC(M.sub(0), (0.0, 0.0), boundary, 1)
     
     # Initialize u_ with interpolated exact initial condition
-    assign(up_.sub(0), interpolate(u_e, M.sub(0).collapse()))
+    u_e = Expression(("x[1]*(1.0 - x[1])", "0.0"), degree=2, t=t)
+    u0 = interpolate(u_e, M.sub(0).collapse())
+    assign(up_.sub(0), u0)
+    p_e = Expression("t*(1.0 - x[0])", degree=1, t=T)
+    pT = interpolate(p_e, M.sub(1).collapse())
     
     # Step in time:
     while (float(t) < T):
@@ -132,11 +94,22 @@ def solve_system(n=4, dt=0.1, k=1):
         up_.assign(up)
 
         plot(u, key="u")
-        plot(u_e, mesh=mesh, key="u_e")
+        plot(p, key="p")
+
+        # Move mesh
+        ALE.move(mesh, w)
+        mesh.bounding_box_tree().build(mesh)
+
+        u_vec = up.split(deepcopy=True)[0].vector().array()
+        p_vec = up.split(deepcopy=True)[1].vector().array()
+        print max(p_vec)
+        print min(p_vec)
+        print max(u_vec)
+        print min(u_vec)
 
     # Compute error at t
-    print "\| u - u_e \| = ", math.sqrt(assemble(inner(u - u_e, u - u_e)*dx()))
-    print "\| u - u_e \| = ", math.sqrt(assemble(inner(p - p_e, p - p_e)*dx()))
+    print "\| u - u_e \| = ", math.sqrt(assemble(inner(u - u0, u - u0)*dx()))
+    print "\| p - p_e \| = ", math.sqrt(assemble(inner(p - pT, p - pT)*dx()))
     
     interactive()
 

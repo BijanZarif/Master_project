@@ -1,5 +1,5 @@
 from dolfin import *
-from tabulate import tabulate
+#from tabulate import tabulate
 import math
 
 set_log_level(60)
