@@ -15,12 +15,14 @@ mu = 1.0/8.0
 rho = 1.0
 theta = 1.0     # 0.5 for Crank-Nicolson, 1.0 for backwards
 gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Massing)
+ufile = File("results/velocity_16_0.01.pvd")
+#pfile = File("results/pressure_16_0.01.pvd")
 
 use_projected_normal = True
 
 
-#k = Constant(1e-8)      # elastic
-k = Constant(1e6)       # stiff
+k = Constant(1e-8)      # elastic
+#k = Constant(1e6)       # stiff
 
 k_bottom = 1e2
 k_top = 1e2
@@ -220,7 +222,7 @@ for N in NN :
         ALE.move(mesh, Y)
         mesh.bounding_box_tree().build(mesh)
 
-        plot(mesh, title = str(t))
+        #plot(mesh, title = str(t))
         
         # WE NEED THIS TO UPDATE THE NORMAL AND TANGENT, OTHERWISE WE ALWAYS USE THE NORMAL AND TANGENT FROM THE INITIAL MESH
         if use_projected_normal == True:
@@ -236,8 +238,10 @@ for N in NN :
         ut = dot(u, tangent)
         vt = dot(v, tangent)
         
-        u01, p01 = VP_.split()
-        plot(u01, key="u01", title = str(t))
+        u01, p01 = VP_.split(True)
+        ufile << u01
+        #pfile << p01
+        #plot(u01, key="u01", title = str(t))
         #plot(p01, key='p01', title = str(t))
         #file << u01
 
@@ -249,4 +253,5 @@ for N in NN :
 #u01, p01 = VP_.split()
 #plot(u01, key="u01", title = str(t))
 #plot(p01, key='p01', title = str(t))
-interactive()
+
+#interactive()
