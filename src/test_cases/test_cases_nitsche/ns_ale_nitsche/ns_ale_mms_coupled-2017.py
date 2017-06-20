@@ -1,194 +1,145 @@
 from dolfin import *
 import math
 
+import sympy
+
 #set_log_level(60)
 
-N = [2**2, 2**3]#, 2**5]
-T = 1.0
-DT = [1./(float(N[i])) for i in range(len(N))]
-rho = 1.0
-mu = 1.0/8.0
-theta = 1.0
-C = 0.1
+# N = [2**2, 2**3]#, 2**5]
+# T = 1.0
+# DT = [1./float(n) for n in N]
+# rho = 1.0
+# mu = 1.0/8.0
+# theta = 1.0
+# C = Constant(0.0)
 
-u_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
-p_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
-w_errors = [[0 for j in range(len(N))] for i in range(len(DT))]
-
-def sigma(mu, u, p):
-    return mu*grad(u) - p*Identity(2)
-
-def exact_solutions(mesh, C, t):
-    x = SpatialCoordinate(mesh)
-    u_e = as_vector((sin(2*pi*x[1])*cos(2*pi*x[0])*cos(t), -sin(2*pi*x[0])*cos(2*pi*x[1])*cos(t)))
-    p_e = cos(x[0])*cos(t)   # the p_e is not the same as in the test case that I had written, there's a *cos(x[1]) missing
-    w_e = as_vector((C*sin(2*pi*x[1])*cos(t), 0.0))
-    return u_e, p_e, w_e
+def analytical_expression(nu=None, rho=None):
+    x, y, t = sympy.symbols('x[0], x[1], t')
+    u = (y*(1.0 - y)*t, 0.0)
+    p = (1.0 - x)*t
+    w = (0.0, 0.0)
     
-def f(rho, mu, dudt, u, p, w):
-    ff = rho*dudt + rho*grad(u)*(u - w) - div(sigma(mu, u, p))
-    return ff
+    # Compute the gradient of u
+    grad_u = ((sympy.diff(u[0], x), sympy.diff(u[0], y)),
+              (sympy.diff(u[1], x), sympy.diff(u[1], y)))
 
-ii = 0 
-for dt in DT:
-    print "="*20
-    print "dt = {}".format(dt)
-    jj = 0
-    for meshsize in N:
+    # Compute grad(u) * u
+    grad_u_x_u = (grad_u[0][0]*(u[0] - w[0]) + grad_u[0][1]*(u[1] - w[1]),
+                  grad_u[1][0]*(u[0] - w[0]) + grad_u[1][1]*(u[1] - w[1]))
 
-        print "meshsize = {}".format(meshsize)
+    # Compute sigma
+    sigma = [[nu*grad_u[i][j] for j in range(2)]
+             for i in range(2)]
+    sigma[0][0] = sigma[0][0] - p
+    sigma[1][1] = sigma[1][1] - p
 
-        # Define time
-        t_ = 0.0
-        t0 = Constant(0.0)
-        t1 = Constant(dt)
-        
-        # Define mesh and mesh-related geometry concepts
-        mesh = UnitSquareMesh(meshsize, meshsize)
-        x = SpatialCoordinate(mesh)
-        n = FacetNormal(mesh)      
+    for i in range(2):
+        for j in range(2):
+            sigma[i][j] = sympy.simplify(sigma[i][j])
+    
+    # Compute div(sigma)
+    div_sigma = (sympy.diff(sigma[0][0], x) + sympy.diff(sigma[0][1], y),
+                 sympy.diff(sigma[1][0], x) + sympy.diff(sigma[1][1], y))
 
-        fd = FacetFunction("size_t", mesh, 0)
-        CompiledSubDomain("on_boundary").mark(fd, 1) 
-        CompiledSubDomain("near(x[0], 1.0) && on_boundary").mark(fd, 2) 
-        CompiledSubDomain("near(x[1], 0.0) && on_boundary").mark(fd, 2) 
-        CompiledSubDomain("near(x[1], 1.0) && on_boundary").mark(fd, 2) 
-        #plot(fd, interactive=True)
+    f = [sympy.simplify(rho*sympy.diff(u[i], t) + rho*grad_u_x_u[i] - div_sigma[i]) for i in range(2)]
 
-        # Define boundary integration measure
-        ds = Measure("ds", domain=mesh, subdomain_data=fd)
+    print "Analytical solutions:"
 
-        # Extract exact solutions at t0 and t1
-        (u_exact0, p_exact0, w_exact0) = exact_solutions(mesh, C, t0)
-        (u_exact1, p_exact1, w_exact1) = exact_solutions(mesh, C, t1)
+    u = tuple(sympy.printing.ccode(u[i]) for i in range(2))
+    p = sympy.printing.ccode(p)
+    f = tuple(sympy.printing.ccode(f[i]) for i in range(2))
+    sigma = [[sympy.printing.ccode(sigma[i][j]) for j in range(2)]
+             for i in range(2)]
 
-        # Compute d/dt u(t0) and d/dt u(t1)
-        dudt0 = diff(u_exact0, t0)
-        dudt1 = diff(u_exact1, t1)
+    return (u, p, w, sigma, f)
 
-        # Compute exact solution f = rho u_t + rho grad(u)*(u - w) -
-        # div(sigma(u, p)) at t0 and t1:
-        f0 = f(rho, mu, dudt0, u_exact0, p_exact0, w_exact0)
-        f1 = f(rho, mu, dudt1, u_exact1, p_exact1, w_exact1)
+def solve_system(n=4, dt=0.1, k=1):
+    
+    # Define space and time. Make sure to initialize t with the
+    # initial time.
+    mesh = UnitSquareMesh(n, n)
+    t = Constant(0.0)
+    T = 1.0
 
-        # Taylor-Hood element for (u, p)
-        Ve = VectorElement("CG", triangle, 2)
-        Pe = FiniteElement("CG", triangle, 1)
-        VP = FunctionSpace(mesh, MixedElement(Ve, Pe))
+    # Define model parameters:
+    rho = Constant(1.0)
+    nu = Constant(1.0)
 
-        # Define test functions for Taylor-Hood
-        v, q = TestFunctions(VP)
+    # Define analytical solutions
+    (u_e, p_e, w_e, sigma_e, f_e) = analytical_expression(nu=nu, rho=rho)
+    print "u_e = ", u_e
+    print "p_e = ", p_e
+    print "f_e = ", f_e
+    print "sigma_e = ", sigma_e
+    
+    # Convert analytical representations to FEniCS Expressions
+    u_e = Expression(u_e, degree=k+2, t=t)
+    p_e = Expression(p_e, degree=k+2, t=t)
+    f = Expression(f_e, degree=k+2, t=t)
+    # Sidenote: there is something not implemented with tensor valued
+    # Expressions, using this work around instead by splitting sigma
+    # into its rows sigma0 and sigma1
+    sigma0 = Expression(sigma_e[0], degree=k+2, t=t)
+    sigma1 = Expression(sigma_e[1], degree=k+2, t=t)
 
-        # N-S solution at previous time
-        up_ = Function(VP)
-        u_, p_, = split(up_)
+    # Define Taylor-Hood elements of order k
+    V = VectorElement("CG", mesh.ufl_cell(), k+1)
+    Q = FiniteElement("CG", mesh.ufl_cell(), k)
+    M = FunctionSpace(mesh, MixedElement(V, Q))
+    
+    # Define functions and test functions
+    up = Function(M)     # Current solution
+    up_ = Function(M)    # Previous solution
 
-        # N-S solution at current time 
-        up = Function(VP)
-        u, p = split(up)
+    (u, p) = split(up)
+    (u_, p_) = split(up_)
+    (v, q) = TestFunctions(M)
 
-        # Lagrange second order for mesh velocity w
-        We = VectorElement("CG", triangle, 2)
-        W = FunctionSpace(mesh, We)
+    # Define solver parameters
+    dt = Constant(dt)
 
-        # Current mesh velocity w
-        w = Function(W)
+    # Define short hand for sigma
+    sigma = lambda u: nu*grad(u) - p*Identity(2)
 
-        # Test function for solution of mesh problem
-        z = TestFunction(W)
-        
-        # Define total displacement field U
-        #U = Function(W) 
-        
-        # Assign to u0 and w0 the u_exact and w_exact at time t0
-        assign(up_.sub(0), project(u_exact0, VP.sub(0).collapse()))
-        #assign(upw0.sub(2), project(w_exact0, VPW.sub(2).collapse()))
-
-        # Define midpoint (in time) of u and f for use in variational
-        # formulation
-        u_mid = (1.0-theta)*u_ + theta*u
-        f_mid = (1.0-theta)*f0 + theta*f1
-
-        sigma_mid = (1.0-theta)*sigma(mu, u_, p_) + theta*sigma(mu, u, p)
-        # Carlo's old:
-        #sigma_mid = (1.0-theta)*sigma(mu, u_exact0, p_exact0, Ve, Pe) + theta*sigma(mu, u_exact1, p_exact1, Ve, Pe)
-        
-        # Variational form of Navier-Stokes equations
-        F = Constant(1./dt)*rho*inner(u - u_, v)*dx()
-        F += rho*inner(grad(u_mid)*(u_mid - w), v)*dx()
-        F += mu*inner(grad(u_mid), grad(v))*dx()
-        F -= p*div(v)*dx()
-        F -= q*div(u)*dx()
-        #F -= inner(dot(sigma_mid, n), v) * ds(2)
-        F -= inner(f_mid, v) * dx()
-
-        a0, L0 = lhs(F), rhs(F)
-
-        # Variational form for the Poisson problem for the w
-        a1 = inner(grad(w), grad(z))*dx()
-        L1 = - inner(div(grad(w_exact1)), z)*dx()
-        F_mesh = a1 - L1
-        
-        # I added the variational form for the w because I am solving in a coupled way
-        #F -= a1 - L1
-
-        bcu = DirichletBC(VP.sub(0), u_exact1, "on_boundary")
-        
-        while (t_ < T):
-
-            # Update previous and current time
-            t0.assign(t_)
-            t1.assign(t_ + dt)
-            
-            # Here I re-set the BC at every cycle, updating the time for the u_exact1 and w_exact1
-            #bcu = [DirichletBC(VPW.sub(0), project(u_exact1, Ve), fd, 1)]
-            #bcw = [DirichletBC(VPW.sub(2), project(w_exact1, Ve), "on_boundary")]
-
-            solve(F == 0, up, bcu)
-            exit()
-            
-            #solve(F == 0, VPW_, bcu + bcw, solver_parameters={"newton_solver": {"relative_tolerance": 1e-20}})
-            
-            plot(VPW_.sub(0), key="u", mesh=mesh)
-            plot(VPW_.sub(1), key="p", mesh=mesh)
-            
-            upw0.assign(VPW_)
-            v_, p_, w_ = VPW_.split(True)
-            
-            w_.vector()[:] *= float(Constant(dt))
-            U.vector()[:] += w_.vector()[:]
-            ALE.move(mesh, w_)
-            mesh.bounding_box_tree().build(mesh)
-            
-            t_ += dt
-            
-            
-            
-        u_errors[ii][jj] = "{0:1.4e}".format(errornorm(VPW_.sub(0), project(u_exact1, Ve), norm_type="H1", degree_rise=3))
-        w_errors[ii][jj] = "{0:1.4e}".format(errornorm(VPW_.sub(2), project(w_exact1, Ve), norm_type="H1", degree_rise=3))
-        print "||u - uh||_H1 = {0:1.4e}".format(errornorm(VPW_.sub(0), project(u_exact1, Ve), norm_type="H1", degree_rise=3))  
-        print "||p - ph||_L2 = {0:1.4e}".format(errornorm(VPW_.sub(1), project(p_exact1, Pe), norm_type="L2", degree_rise=3))
-        print "||w - wh||_H1 = {0:1.4e}".format(errornorm(VPW_.sub(2), project(w_exact1, Ve), norm_type="H1", degree_rise=3))
-
-        t1.assign(t_ - dt*(1-theta))
-        p_errors[ii][jj] = "{0:1.4e}".format(errornorm(VPW_.sub(1), project(p_exact1, Pe), norm_type="L2", degree_rise=3))
-        jj +=1
+    # Define boundary traction s
+    n = FacetNormal(mesh) 
+    s = as_vector((dot(sigma0, n), dot(sigma1, n)))
 
     
-    ii +=1
+    # Define variational formulation for Navier-Stokes
+    F = inner(rho*((u - u_)/dt + grad(u)*u), v)*dx() \
+        + inner(sigma(u), grad(v))*dx() \
+        + div(u)*q*dx() \
+        - inner(s, v)*ds() \
+        - inner(f, v)*dx() 
+    
+    bc = DirichletBC(M.sub(0), u_e, "!near(x[0], 0.0) && on_boundary")
+    
+    # Initialize u_ with interpolated exact initial condition
+    assign(up_.sub(0), interpolate(u_e, M.sub(0).collapse()))
+    
+    # Step in time:
+    while (float(t) < T):
 
-def convergence_rates(errors, hs):
-    rates = [(math.log(errors[i+1]/errors[i]))/(math.log(hs[i+1]/hs[i])) for i in range(len(hs)-1)]
+        # Update time
+        t.assign(float(t) + float(dt))
+        print "Solving at t = ", float(t)
 
-    return rates
+        # Solve system
+        solve(F == 0, up, bc)
 
-print "u_errors = ", u_errors
-# print rate(u_errors)
-# 
-print "w_errors = ", w_errors
-# print rate(w_errors)
-# 
-print "p_errors = ", p_errors
-# print rate(p_errors)
+        # Update previous solution
+        up_.assign(up)
 
+        plot(u, key="u")
+        plot(u_e, mesh=mesh, key="u_e")
 
+    # Compute error at t
+    print "\| u - u_e \| = ", math.sqrt(assemble(inner(u - u_e, u - u_e)*dx()))
+    print "\| u - u_e \| = ", math.sqrt(assemble(inner(p - p_e, p - p_e)*dx()))
+    
+    interactive()
+
+if __name__ == "__main__":
+
+    solve_system(n=8, dt=0.25)
