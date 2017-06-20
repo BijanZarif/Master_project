@@ -19,8 +19,8 @@ gamma = 1e2   # constant for Nitsche method, typically gamma = 10.0 (by Andre Ma
 use_projected_normal = True
 
 
-k = Constant(1e-8)      # elastic
-#k = Constant(1e6)       # stiff
+#k = Constant(1e-8)      # elastic
+k = Constant(1e6)       # stiff
 
 k_bottom = 1e2
 k_top = 1e2

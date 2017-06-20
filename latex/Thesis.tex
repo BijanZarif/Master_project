@@ -314,20 +314,19 @@ i.e.:
 \end{equation}
 % MER: Hmmm... This means that if y = 0, the wall is free to move.
 
-To induce a fluid flow in the subarachnoid space, we impose the following condition on $\partial \Omega_{\rm tb} = \partial \Omega_{\rm top} \cup \partial \Omega_{\rm bottom}$ 
+To induce a fluid flow in the subarachnoid space, we set a pressure difference on $\partial \Omega_{\rm tb} = \partial \Omega_{\rm top} \cup \partial \Omega_{\rm bottom}$. We set on $\partial \Omega_{\rm top}$ and $\partial \Omega_{\rm bottom}$ the following boundary conditions
 
-\begin{equation}
+\begin{align}
 \label{eq:bc:6}
-\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = -\bar{p} \mathbf{n}
-\end{equation}
+\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = -\bar{p} \mathbf{n} &\quad \text { on } \partial \Omega_{\rm top} \\
+\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = 0  &\quad \text { on } \partial \Omega_{\rm bottom}.
+\end{align}
 
-where $\bar{p}$ is a prescribed pressure. The inflow and outflow conditions are specified by the pressure function which we set up on the basis of chosen peak pressure and peak pressure gradient. We chose the maximum pressure during systole to be $1961Pa \approx 20 cmH_2O$ (Linge et. al., 2011 put reference). Moreover, we set the maximum difference in the pressure between the top and the bottom to be $24.3 Pa \approx 0.25 cmH_2O$ (water at $4^{\circ}$C). Since the CSF circulation is related to the cardiac cycle, during \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. Hence, we choose the coordinate system so that the systolic flow is in negative $y$-direction, and while the diastolic flow is in the positive $y$-direction. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. The pressure functions is 
+where $\bar{p}(y,t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 20kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
 
-\begin{equation}
-\bar{p}(y,t) = (a - \frac{y_{max} - y}{y_{max} - y_{min}}b) \cdot sin(2\pi t),
-\end{equation}
+\todo[inline]{Vegard said I should choose the amplitude $A$ so it produces velocities of the order of $1-5 cm/s$. $A$ should be around $15-20kPa$.}
 
-where $t$ is the time, $a = 1961 Pa$, $b = 24.3 Pa$, and $y_{max}$ and $y_{min}$ denote the $y$-coordinate of the top and the bottom of the model. The sine term is added to reproduce the pulsatile motion of the fluid.
+
 
 For the mesh equation, we let the mesh velocity follow the fluid
 velocity on the tissue boundary, while the mesh velocity is assumed to
