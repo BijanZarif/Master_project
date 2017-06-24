@@ -6,11 +6,11 @@
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**6]
+N = [2**4]
 #dt = 0.1
 #dt = 0.05
-#dt = 0.025
-dt = 0.0125
+dt = 0.025
+#dt = 0.0125
 
 for n in N :
     
@@ -162,7 +162,7 @@ for n in N :
     #plot(p0)
     interactive()
     
-    u0, p0 = U.split()
-    ufile = File("velocity_64_0.0125.pvd")
-    ufile << u0
+    #u0, p0 = U.split()
+    #ufile = File("velocity_64_0.0125.pvd")
+    #ufile << u0
     
