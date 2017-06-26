@@ -3,6 +3,7 @@
 # rho * du/dt + rho * (grad(u) . u) - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
 
+from matplotlib import pyplot as plt
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
@@ -21,7 +22,10 @@ for n in N :
     x = SpatialCoordinate(mesh)
     n = FacetNormal(mesh)
     
-    values = []
+    values_x0 = []
+    values_x1 = []
+    values_x2 = []
+    time = []
     x_0 = Point(0.0, 2.0)  # left
     x_1 = Point(30.0, 2.0)    # middle
     x_2 = Point(60.0, 2.0)   # rightf
@@ -40,7 +44,7 @@ for n in N :
     u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
     
     # T = 5 
-    T = 0.5      # only for oscillating p_inlet
+    T = 20      # only for oscillating p_inlet
     mu = 0.700e-3  # [g/(mm * s)]
     rho = 1e-3     # [g/mm^3] 
     theta = 0.5 
@@ -104,8 +108,7 @@ for n in N :
     while t <= T + 1E-9:
          
         print "solving for t = {}".format(t)
-        
-        values.append(abs(U(x_0)))
+        time.append(t)
         
         # I need to reassemble the system
         A = assemble(a0)
@@ -131,14 +134,29 @@ for n in N :
         
         t += dt
         p_in.t = t    # only for oscillating p_inlet
-        print values
-    
-    #print values    
+        #values_x0.append((U(x_0)[0]**2 + U(x_0)[1]**2)**0.5)
+        #values_x1.append((U(x_1)[0]**2 + U(x_1)[1]**2)**0.5)
+        #values_x2.append((U(x_2)[0]**2 + U(x_2)[1]**2)**0.5)
+        #print values
+        #print time
+        
+        
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
     #print "T = {}".format(t)
     print "u(1, 0.5, t = 0.5) = {}".format(U(Point(1, 0.5))[0])
-    print("------")    
+    print("------")
+    
+    #print time
+    #print values_x0
+    #print values_x1
+    #print values_x2
+    #plt.figure()
+    #plt.plot(time, values_x0, time, values_x1, time, values_x2, label = "Velocity in the point over time")
+    #plt.plot(time, values_x1, label = "Velocity in the point over time")
+    #plt.plot(time, values_x2, label = "Velocity in the point over time")
+    #plt.show()
+    
     
     #plot(u0)
     #plot(p0)

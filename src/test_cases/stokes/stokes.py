@@ -3,9 +3,9 @@
 # - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
 
-import matplotlib
-matplotlib.use('webagg')
-matplotlib.rc('webagg', port = 8000, open_in_browser = False)
+#import matplotlib
+#matplotlib.use('webagg')
+#matplotlib.rc('webagg', port = 8000, open_in_browser = False)
 
 from numpy import *
 from math import *
@@ -162,6 +162,8 @@ for n in N:
     errsH1.append(H1_error_u)
     errsL2pressure.append(L2_error_p)
     #errsH1pressure.append(H1_error_p)
+    
+    print errsH1
     
     print "||u - uh; L^2|| = {0:1.4e}".format(L2_error_u)
     print "|u - uh; H^1| = {0:1.4e}".format(H1_error_u)
