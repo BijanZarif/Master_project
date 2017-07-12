@@ -342,6 +342,7 @@ In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{e
 We obtain:
 
 \begin{align}
+\label{eq:ns:9}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
 - \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx
@@ -349,12 +350,13 @@ We obtain:
 \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx &= 0.
 \end{align}
 \\
-Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and applying Green formula, we have
+Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and applying the Green formula, we have
 
-\[
+\begin{equation}
+\label{eq:green}
 - \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
-\]
-\\
+\end{equation}
+
 The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary were the solution is known. If $\Gamma_D$ is the portion of the boundary where we set Dirichlet conditions, we can define
 
 \begin{equation}
@@ -708,7 +710,7 @@ Problem: find $(\mathbf{u}^{i+1}, \mathbf{p}^{i+1}) \in \hat{V} \times \hat{Q}$ 
 % FEniCS book page 390
 % http://prod.sandia.gov/techlib/access-control.cgi/2000/001444.pdf
 
-A test problem for which we can easily check the answer is performed using the \textit{manufactured solutions}. The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form
+A test problem for which we can easily check the answer is performed using the method of \textit{manufactured solutions} (MMS). The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form
 
 \[
 Du = g,
@@ -719,7 +721,7 @@ where $D$ is the differential operator, $u$ is the solution, and $g$ is a source
 
 
 
-\subsection{Method of manifactured solutions (MMS)}
+\subsection{MMS for Stokes equations}
 
 We want to apply the manufactured solution technique to solve the Stokes equation. Let $\Omega$ be the unit square $\Omega = [0,1]^2$, and
 
@@ -853,7 +855,7 @@ $ 64 $ & $ 8.0070 \times 10^{-9} $ & $3.4440$ \\
 \end{center}
 
 
-\subsection{MMS with parabolic inlet velocity}
+\subsection{MMS for Navier-Stokes equations with parabolic inlet velocity}
 \todo[inline]{Do the same as in Stokes,  but using NS}
 
 \subsection{Pressure-driven channel flow (2D)}
@@ -868,13 +870,13 @@ A typical test problem is finding the solution of the Navier-Stokes equations in
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.8\textwidth]{images/velocity_solution.png}
-\caption{The plot shows the solution $u(x,y)$ for $\nu = 1/8$.}
+\caption{Pressure driven channel flow. The plot shows the solution $u(x,y)$ for $\nu = 1/8$.}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.6\textwidth]{images/velocity_profile.pdf}
-\caption{Velocity profile at the points $(0.5, 1)$ and $(0.5, 0)$.}
+\caption{Pressure driven channel flow. Velocity profile at the points $(0.5, 1)$ and $(0.5, 0)$.}
 \end{figure}
 
 \subsection{Driven cavity}
@@ -885,8 +887,8 @@ A typical benchmark problem for fluid flow solvers in the two-dimensional lid-dr
 
 \[
 \begin{cases}
-\mathbf{u = 0}, & \mbox{on } \partial \Omega \backslash \Gamma \\
-\mathbf{u} = (1,0)^T, & \mbox{on } \Gamma
+\mathbf{u} = (0, 0)^T, & \mbox{on } \partial \Omega \backslash \Gamma \\
+\mathbf{u} = (1, 0)^T, & \mbox{on } \Gamma
 \end{cases}
 \]
 
@@ -916,7 +918,7 @@ As a reference value, we use the one reported on the FEniCS book [REFERENCE], wh
 \centering
 \includegraphics[width=\textwidth]{images/oyvind.png}
 \vspace{-1cm}
-\caption{The plot shows the stream function, and its minimum value $-0.06097$ (THIS IS OYVIND'S ).}
+\caption{Driven cavity. The plot shows the stream function, and its minimum value $-0.06097$. This reference solution is taken from an already validated code (reference to OASIS).}
 \end{figure}
 
 
@@ -927,14 +929,73 @@ In our case, a Crank-Nicolson (second order) discretization was used, with $\the
 \centering
 \includegraphics[width=\textwidth]{images/mine.png}
 \vspace{-1cm}
-\caption{The plot shows the stream function, and its minimum value $-0.061 121$.}
+\caption{Driven cavity. The plot shows the stream function, and its minimum value $-0.061 121$.}
 \end{figure}
 
-(MISSING: PUT MY STREAM FUNCTION, OYVIND'S, AND THE ERROR BETWEEN THEM. \\
-NOTE: Oyvind's stream function minimum is not exactly the same as the fenics book, what should I put then as a reference?)
 
 \subsection{Nitsche's method}
+Now we want to use the Nitsche method to the driven cavity test case, in order to apply Dirichlet boundary conditions in a weak way. We consider a square cavity $\Omega$ with sides of unit length, i.e. $\Omega = [0,1] \times [0,1]$, kinematic viscosity $\nu = 1/1000$, and density $\rho = 1$. No-slip boundary conditions are imposed on left and bottom edges of the square, except at the upper edge where the velocity is set to $\mathbf{u} = (1,0)^T$, as follows
 
+\[
+\begin{cases}
+\mathbf{u} = (0, 0)^T, & \mbox{on } \partial \Omega \backslash (\Gamma_1 \cup \Gamma_2) \\
+\mathbf{u} = (1, 0)^T, & \mbox{on } \Gamma_1
+\end{cases}
+\]
+
+where $ \Gamma_1 = \set{ (x,y)^T \in \partial \Omega | y = 1}$ and
+$ \Gamma_2 = \set{ (x,y)^T \in \partial \Omega | x = 1}$. On the boundary $\Gamma_2$ we will apply the condition $\mathbf{u} = \mathbf{g} = (0,0)^T$ in a weakly way using Nitsche's method. Substituting (\ref{eq:green}) in (\ref{eq:ns:9}) we have
+
+\begin{align}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{align}
+
+Since we are applying Dirichlet boundary conditions on $\partial \Omega \backslash \Gamma_2$, $\mathbf{v} = (0,0)$, hence 
+
+\begin{align}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\Gamma_2} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{align}
+
+and from (\ref{eq:bc:5}), the latter can be written as
+
+\begin{align}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\Gamma_2} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds
+= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{align}
+
+We now apply the Nitsche method on the boundary term $\Gamma_2$, that leads to
+
+\begin{align}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
++ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+- \int_{\Gamma_2} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, ds
+- \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{u} \, ds
++ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{u \, v} ds \\
+= - \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{g} \, ds
++ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{g \, v} ds
++  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+\end{align}
+
+A $128 \times 128$ number of elements was used with $dt = 0.0125$ as time step. The obtained value was $min(\psi) = -0.0597826179273$. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/stream_function_nitsche.png}
+\vspace{-1cm}
+\caption{Driven cavity with Nitsche. The plot shows the stream function, and its minimum value $-0.05978$.}
+\end{figure}
 
 \section{Navier-Stokes equations on a moving mesh}
 \subsection{Parabolic inlet velocity with fixed mesh motion}

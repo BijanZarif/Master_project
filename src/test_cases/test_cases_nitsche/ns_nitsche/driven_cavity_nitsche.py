@@ -203,5 +203,5 @@ for n in N:
     
 #if n == 64:
 #   print "N = 64"
-#   psifile = File("psi64_0.0125.pvd")
-#   psifile << psi
+psifile = File("results/psi64_0.0125.pvd")
+psifile << psi
