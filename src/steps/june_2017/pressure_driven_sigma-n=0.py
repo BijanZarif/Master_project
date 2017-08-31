@@ -3,10 +3,7 @@
 # rho * du/dt + rho * (grad(u) . u) - div( nu * grad(u) - pI ) = f
 # div( u ) = 0
 
-# Conditions on Tissue boundary: u.t = 0
-#                                (sigma.n).n = 0   =====> the pressure is not the one that I expect ====> velocity explodes
-
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
@@ -23,9 +20,7 @@ for n in N :
     
     mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), 10*n, n, "crossed")  # crossed means the triangles are divided in 2
     x = SpatialCoordinate(mesh)
-    normal = FacetNormal(mesh)
-    tangent = cross(as_vector((0,0,1)), as_vector((normal[0], normal[1], 0)))
-    tangent = as_vector((tangent[0], tangent[1]))
+    n = FacetNormal(mesh)
     
     values_x0 = []
     values_x1 = []
@@ -48,27 +43,16 @@ for n in N :
     up0 = Function(W)
     u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
     
-    # Defining the normal and tangential components    
-    un = dot(u, normal)
-    vn = dot(v, normal)
-    ut = dot(u, tangent)
-    vt = dot(v, tangent)
-    
     # T = 5 
-    T = 3      # only for oscillating p_inlet
+    T = 5      # only for oscillating p_inlet
     mu = 0.700e-3  # [g/(mm * s)]
     rho = 1e-3     # [g/mm^3] 
     theta = 0.5 
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
-    # For Nitsche method
-    nitsche_value = Constant(0.0)
-    gamma = 1000.0
-    h = CellSize(mesh)
-    
-    ufile = File("results/v_Nitsche_tang_8_0.025.pvd")
-    pfile = File("results/p_Nitsche_tang_8_0.025.pvd")
+    ufile = File("results/v_sigma-n=0_8_0.025.pvd")
+    pfile = File("results/p_sigma-n=0_8_0.025.pvd")
     
     #p_in  = Constant(1.0)
     amplitude = Constant(12.0)
@@ -94,7 +78,7 @@ for n in N :
     
     left_wall = DirichletBC(W.sub(0).sub(1), Constant(0.0), fd, 1)   # left wall - I set the y (tangential) component of the velocity to zero
     right_wall = DirichletBC(W.sub(0).sub(1), Constant(0.0), fd, 2)   # right wall - I set the y (tangential) component of the velocity to zero
-    # top_wall = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , fd, 3) # top     #I remove this if I use Nitsche
+    #top_wall = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , fd, 3) # top
     bottom_wall = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , fd, 4) # bottom
     # Neumann condition: sigma.n = 1        on the inlet
     # Neumann condition: sigma.n = 0        on the outlet
@@ -106,13 +90,9 @@ for n in N :
     F += Constant(mu) * inner(grad(u_mid), grad(v)) * dx
     F -= p * div(v) * dx
     F -= q * div(u) * dx
-    F += inner(p_in * normal, v)*ds(1)
-    F += inner(p_out * normal, v)*ds(2)
-    
-    F -= Constant(mu) * inner(grad(u) * normal, tangent) * vt * ds(3) #Nitsche terms
-    F -= Constant(mu) * inner(grad(v) * normal, tangent) * (ut - nitsche_value) * ds(3) #Nitsche terms
-    F -= gamma * h**-1 * inner(ut - nitsche_value, vt) * ds(3) #Nitsche terms
-    
+    F += inner(p_in * n, v)*ds(1)
+    #F -= inner(p_in * n, v)*ds(2)
+    F += inner(p_out * n, v)*ds(2)
     F -= inner(f_mid,v)*dx
     
     a0, L0 = lhs(F), rhs(F)
@@ -164,7 +144,6 @@ for n in N :
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
     #print "T = {}".format(t)
-    #print "u(1, 0.5, t = 0.5) = {}".format(U(Point(1, 0.5))[0])
     print("------")
     
     #print time
