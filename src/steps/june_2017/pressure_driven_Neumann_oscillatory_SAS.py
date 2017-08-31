@@ -51,8 +51,8 @@ for n in N :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
-    ufile = File("results/velocity_8_0.025.pvd")
-    pfile = File("results/pressure_8_0.025.pvd")
+    #ufile = File("results/velocity_8_0.025.pvd")
+    #pfile = File("results/pressure_8_0.025.pvd")
     
     #p_in  = Constant(1.0)
     amplitude = Constant(12.0)
