@@ -337,6 +337,70 @@ walls.
 
 \section{Finite element formulation}
 
+\section{Weak formulation of N-S on fixed domain}
+\subsection{Navier-Stokes formulation of pressure driven channel flow with $u=0$ on Tissue}
+In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
+We obtain:
+
+\begin{align}
+\label{eq:ns:9}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \, \mathbf{u}   \cdot \mathbf{v} \, dx
+- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx
+&= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx, \\
+\int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx &= 0.
+\end{align}
+
+Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and applying the Green formula, we have
+
+\begin{equation}
+\label{eq:green}
+- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega}  \underbrace{ (\mu \nabla \mathbf{u} - pI)}_{= \sigma} \cdot \mathbf{n} \, \mathbf{v} \, ds.
+\end{equation}
+
+The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary were the solution is known. The term $\int_{\partial \Omega} \sigma \cdot \mathbf{n} \,  \mathbf{v} \, ds$ can be divided into four integrals since $\partial \Omega = \partial \Omega_{inlet} \cup \partial \Omega_{outlet} \cup \partial \Omega_{tissue} \cup \partial \Omega_{cord}$. Since on the $\partial \Omega_{cord}$ boundary we assume Dirichlet boundary condition $u=0$ for the velocity, that portion of the integral is zero, because $\mathbf{v} = 0$ on $\Omega_{cord}$. Since 
+
+\[
+\int_{\partial \Omega}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+= \int_{\partial \Omega_{inlet}}  \underbrace{ \sigma \cdot \mathbf{n}}_{-p_{in}} \, \mathbf{v} \, ds
++ \int_{\partial \Omega_{outlet}}  \underbrace{ \sigma \cdot \mathbf{n}}_{-p_{out}} \, \mathbf{v} \, ds
++ \int_{\partial \Omega_{tissue}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+\]
+
+we want to apply the Dirichlet boundary condition on $\partial \Omega_{tissue}$ weakly using Nitsche's method:
+
+
+\begin{align}
+\int_{\partial \Omega_{tissue}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+&= \int_{\partial \Omega_{tissue}}  (\mu \nabla \mathbf{u} - p I) \cdot \mathbf{n} \, \mathbf{v} \, ds \\
+&= \int_{\partial \Omega_{tissue}}  \mu \nabla \mathbf{u} \cdot \mathbf{n} \mathbf{v} \, ds
+- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
+&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
+- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
+&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
++ \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{(u-g)} \, ds \\
+&+ \frac{\gamma}{h} \int_{\partial \Omega_{tissue}}  \mathbf{(u-g)} \, \mathbf{v} \, ds
+- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds
+\end{align}
+
+where we are weakly setting $\mathbf{u} = \mathbf{g} = \mathbf{0}$. The final variational form reads
+
+\begin{equation}
+\begin{split}
+\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
++ \int_{\Omega} \rho \nabla \mathbf{u} \cdot \mathbf{u} \, \mathbf{v} \, dx
++ \int_{\Omega} \mu \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx 
+- \int_{\Omega} p \, div(\mathbf{v}) \, dx \\
++ \int_{\partial \Omega_{inlet}} p_{in} \mathbf{n} \cdot \mathbf{v} \, ds
++ \int_{\partial \Omega_{outlet}} p_{out} \mathbf{n} \cdot \mathbf{v} \, ds 
+- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds \\
+- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{(u-g)} \, ds
++ \frac{\gamma}{h} \int_{\partial \Omega_{tissue}}  \mathbf{(u-g)} \, \mathbf{v} \, ds =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx \\
+\int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0.
+\end{split}
+\end{equation}
+
+
 \section{Weak formulation of N-S on moving domain}
 In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
 We obtain:
@@ -535,7 +599,7 @@ Applying the Nitsche method on the boundary term in the left hand side, we get
 \end{split}
 \end{equation}
 
-\subsection{Navier-Stokes formulation with the Nitsche method}
+\subsection{Navier-Stokes formulation with the Nitsche method (constant $k$)}
 Finally, we apply what said earlier to the Navier-Stokes equations. Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, the boundary term in~\eqref{eq:ns:5} can be written as
 
 \begin{equation}
@@ -595,6 +659,12 @@ Moreover, since we are assuming $u^t = g = 0$, the final form reads
 = \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
 \end{split}
 \end{equation}
+
+
+
+
+
+
 
 
 \section{FEniCS}
