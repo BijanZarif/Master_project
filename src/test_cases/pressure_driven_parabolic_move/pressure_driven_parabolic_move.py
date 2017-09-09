@@ -6,9 +6,10 @@
 from matplotlib import pyplot as plt
 from dolfin import *
 
-NN = [2**2, 2**3, 2**4, 2**5, 2**6]
-h = [1./i for i in NN]
-h = [1./NN[4]]
+#NN = [2**2, 2**3, 2**4, 2**5, 2**6]
+NN = [2**2]
+#h = [1./i for i in NN]
+h = [1./NN[0]]
 errsL2_velocity = []
 errsH1_velocity = []
 errsL2_pressure = []
@@ -31,18 +32,21 @@ for N in NN:
         # Taylor-Hood elements
         V = VectorFunctionSpace(mesh, "Lagrange", 2)
         Q = FunctionSpace(mesh, "Lagrange", 1)
-        # TH = V * Q
-        W = V * Q
-        # W = FunctionSpace(mesh, TH)
+        W = VectorFunctionSpace(mesh, "CG", 1)       # ALE
+        VQ = V * Q
+
+        u, p = TrialFunctions(VQ)   # u is a trial function of V somehow, while p a trial function of Q
+        v, q = TestFunctions(VQ)
         
-        u, p = TrialFunctions(W)   # u is a trial function of V somehow, while p a trial function of Q
-        v, q = TestFunctions(W)
+        w = TrialFunction(W)        # ALE
+        z = TestFunction(W)         # ALE
         
-        up0 = Function(W)
+        up0 = Function(VQ)
         u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
+        w0 = Function(W)            # ALE
         
         
-        T = 20 
+        T = 25 
         mu = 1.0/8.0  # [g/(mm * s)]
         rho = 1     # [g/mm^3] 
         theta = 1 
@@ -51,11 +55,15 @@ for N in NN:
         
         u_exact = as_vector(( 1.0/(2*mu) * x[1]*(1-x[1]) , 0))
         p_exact = 1 - x[0]
+        w_move = Expression(("0.0", "-0.5*cos(pi*t)*x[0]*(x[0] - 1)"), degree = 2, t=0.0)   # ALE
         
-        ufile = File("results_parabolic/velocity.pvd")
-        pfile = File("results_parabolic/pressure.pvd")
+        ufile = File("results_parabolic_move/velocity_parab_move.pvd")
+        pfile = File("results_parabolic_move/pressure_parab_move.pvd")
         
-        p_in  = Constant(1.0)
+        #p_in  = Constant(1.0)
+        amplitude = Constant(1.0)
+        #amplitude = Constant(6.0)  # [kPa]
+        p_in = Expression("a*sin(0.1*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
         p_out = Constant(0.0) 
         
         u_mid = (1.0-theta)*u0 + theta*u
@@ -72,18 +80,26 @@ for N in NN:
         CompiledSubDomain("near(x[1], y0) ||(near(x[0], x1) && near(x[1], y0) ) && on_boundary", x1 = x1, y0 = y0).mark(fd, 4) # bottom wall 
         ds = Measure("ds", domain = mesh, subdomain_data = fd)
     
-        
-        left_wall = DirichletBC(W.sub(0).sub(1), Constant(0.0), fd, 1)   # left wall - I set the y (tangential) component of the velocity to zero
-        right_wall = DirichletBC(W.sub(0).sub(1), Constant(0.0), fd, 2)   # right wall - I set the y (tangential) component of the velocity to zero
-        top_wall = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , fd, 3) # top
-        bottom_wall = DirichletBC(W.sub(0), Constant((0.0, 0.0)) , fd, 4) # bottom
+        # Conditions for velocity
+        left_wall = DirichletBC(VQ.sub(0).sub(1), Constant(0.0), fd, 1)   # left wall - I set the y (tangential) component of the velocity to zero
+        right_wall = DirichletBC(VQ.sub(0).sub(1), Constant(0.0), fd, 2)   # right wall - I set the y (tangential) component of the velocity to zero
+        top_wall = DirichletBC(VQ.sub(0), Constant((0.0, 0.0)) , fd, 3) # top
+        bottom_wall = DirichletBC(VQ.sub(0), Constant((0.0, 0.0)) , fd, 4) # bottom
         # Neumann condition: sigma.n = 1        on the inlet
         # Neumann condition: sigma.n = 0        on the outlet
         
+        # Conditions for mesh movement    # ALE
+        left_wall_w = DirichletBC(W, Constant((0.0, 0.0)), fd, 1)   
+        right_wall_w = DirichletBC(W, Constant((0.0, 0.0)), fd, 2)  
+        top_wall_w = DirichletBC(W, w_move, fd, 3) # top
+        bottom_wall_w = DirichletBC(W, Constant((0.0, 0.0)) , fd, 4)
+        
+        
         bcu = [left_wall, right_wall, top_wall, bottom_wall]
+        bcw = [left_wall_w, right_wall_w, top_wall_w, bottom_wall_w]   # ALE
         
         F = rho * Constant(dt**-1) * inner(u-u0, v) * dx
-        F += rho * inner(grad(u_mid)*u0, v) * dx
+        F += rho * inner(grad(u_mid)*(u0-w0), v) * dx
         F += Constant(mu) * inner(grad(u_mid), grad(v)) * dx
         F -= p * div(v) * dx
         F -= q * div(u) * dx
@@ -91,21 +107,32 @@ for N in NN:
         #F -= inner(p_in * n, v)*ds(2)
         F += inner(p_out * n, v)*ds(2)
         F -= inner(f_mid,v)*dx
-        
+    
         a0, L0 = lhs(F), rhs(F)
+        
+        # ALE
+        a1 = inner(grad(w), grad(z))*dx
+        L1 = dot(Constant((0.0,0.0)),z)*dx
+        
+        W_ = Function(W)
+        # Y is the adding displacement (what we add in order to move the mesh)
+        Y = Function(W)  # by default this is 0 in all the components
+        X = Function(W)  # in here I will put the displacement X^(n+1) = X^n + dt*(w^n)
         
     
         
         t = 0.0
         
-        U = Function(W)   # I want to store my solution here
+        U = Function(VQ)   # I want to store my solution here
         solver = PETScLUSolver()
         
         #while (t - T) <= DOLFIN_EPS:
         while t <= T + 1E-9:
              
             print "solving for t = {}".format(t)
-    
+            
+
+            
             # I need to reassemble the system
             A = assemble(a0)
             b = assemble(L0)
@@ -118,13 +145,38 @@ for N in NN:
             # Ax=b, where U is the x vector    
             solver.solve(A, U.vector(), b)
             
+            ####### ALE #########
+            
+            # Solving the Poisson problem
+            A1 = assemble(a1)
+            b1 = assemble(L1)
+            
+            for bc in bcw:
+               bc.apply(A1, b1)
+            
+            solve(A1, W_.vector(), b1)
+            
+            # Compute the mesh displacement
+            Y.vector()[:] = w0.vector()[:]*dt
+            X.vector()[:] += Y.vector()[:]
+            
+            # Move the mesh
+            ALE.move(mesh, Y)
+            mesh.bounding_box_tree().build(mesh)
+            
+            ####### ALE #########
+        
+            
             # I need to assign up0 because u0 and p0 are not "proper" functions
             up0.assign(U)   # the first part of U is u0, and the second part is p0
+            w0.assign(W_)   # ALE
             
             u0, p0 = up0.split() 
             ufile << u0
             pfile << p0
                 
+            p_in.t = t    # only for oscillating p_inlet
+            w_move.t = t   # ALE
             t += dt
             
         # These are the errors for a certain dt

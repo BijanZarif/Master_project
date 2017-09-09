@@ -114,6 +114,11 @@ for n in N :
 
     solver = PETScLUSolver()
     t = dt
+
+
+    ufile = File("results_ns_ale_elastic1/velocity_elastic1.pvd")
+    pfile = File("results_ns_ale_elastic1/pressure_elastic1.pvd")
+
     while t <= T + 1E-9:
         
         w_move.t = t
@@ -154,7 +159,9 @@ for n in N :
         w0.assign(W_)
         
         u0, p0 = VP_.split()
+        ufile << u0
+        pfile << p0
         #plot(u0)
-        plot(mesh)
+        #plot(mesh)
         
         t += dt
