@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from dolfin import *
 
 #N = [2**2, 2**3, 2**4, 2**5, 2**6]
-N = [2**3]
+N = [2**2]
 #dt = 0.1
 #dt = 0.05
 dt = 0.025
@@ -33,9 +33,7 @@ for n in N :
     # Taylor-Hood elements
     V = VectorFunctionSpace(mesh, "Lagrange", 2)
     Q = FunctionSpace(mesh, "Lagrange", 1)
-    # TH = V * Q
     W = V * Q
-    # W = FunctionSpace(mesh, TH)
     
     u, p = TrialFunctions(W)   # u is a trial function of V somehow, while p a trial function of Q
     v, q = TestFunctions(W)
@@ -43,20 +41,19 @@ for n in N :
     up0 = Function(W)
     u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
     
-    # T = 5 
-    T = 20      # only for oscillating p_inlet
+    T = 5      # only for oscillating p_inlet
     mu = 0.700e-3  # [g/(mm * s)]
     rho = 1e-3     # [g/mm^3] 
     theta = 0.5 
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
-    #ufile = File("results/velocity_8_0.025.pvd")
-    #pfile = File("results/pressure_8_0.025.pvd")
+    ufile = File("results/pressure_driven_Neumann_oscillatory_SAS/velocity_8_0.025.pvd")
+    pfile = File("results/pressure_driven_Neumann_oscillatory_SAS/pressure_8_0.025.pvd")
+    outfile = open('out.txt','w')
     
     #p_in  = Constant(1.0)
-    amplitude = Constant(12.0)
-    #amplitude = Constant(6.0)  # [kPa]
+    amplitude = Constant(9.0)  # [kPa]
     p_in = Expression("a*sin(2*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
     p_out = Constant(0.0) 
     
@@ -124,10 +121,13 @@ for n in N :
         # I need to assign up0 because u0 and p0 are not "proper" functions
         up0.assign(U)   # the first part of U is u0, and the second part is p0
         
-        u0, p0 = up0.split() 
-        #plot(u0, key="u0", title = str("velocity at time t= ") + str(t))
-        #plot(p0, key="p0", title = str("pressure at time t= ") + str(t))
-        #interactive()
+        u0, p0 = up0.split()
+        
+        flux = assemble(inner(u0,n)*ds(2))
+        u_x0_x = u0(x_0)[0]
+        outfile.write('%g, %g, %g\n'%(t,flux, u_x0_x))
+        #outfile.write('%g, %g\n'%(t,flux))
+        
         
         ufile << u0
         pfile << p0
@@ -143,9 +143,9 @@ for n in N :
         
     print "t_final = {}".format(t - dt)    
     print "dt = {}".format(dt)   
-    #print "T = {}".format(t)
-    print "u(1, 0.5, t = 0.5) = {}".format(U(Point(1, 0.5))[0])
     print("------")
+    
+    outfile.close()
     
     #print time
     #print values_x0
@@ -156,13 +156,4 @@ for n in N :
     #plt.plot(time, values_x1, label = "Velocity in the point over time")
     #plt.plot(time, values_x2, label = "Velocity in the point over time")
     #plt.show()
-    
-    
-    #plot(u0)
-    #plot(p0)
-    #interactive()
-    
-    #u0, p0 = U.split()
-    #ufile = File("velocity_64_0.0125.pvd")
-    #ufile << u0
     

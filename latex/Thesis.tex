@@ -1,6 +1,6 @@
 %My thesis!
-\documentclass[11pt,a4paper,titlepage]{report}
-%\documentclass[a4paper,11pt,openright,twoside]{book}
+%\documentclass[11pt,a4paper,titlepage]{report}
+\documentclass[a4paper,11pt,openright,twoside]{book}
 \usepackage{amsmath}
 \usepackage{ amssymb }
 \usepackage{calligra}
@@ -31,6 +31,7 @@
 % I'm reading this.
 %\setlength\parindent{0pt} % toglie identazione ovunque
 \usepackage[sc]{mathpazo}
+\usepackage{tikz}
 
 \newcommand{\mesh}{\mathcal{T}_t}
 
@@ -51,14 +52,12 @@
 {\Large DEPARTMENT OF MATHEMATICS}
 \\[0.35cm]
 {\Large MASTER DEGREE IN MATHEMATICS}
-\\[2.3cm]
-{\Large THESIS}
-\\[1.5cm]
-\textsc{\huge \textbf{Modeling and simulation of craniovertebral decompression}}
+\\[3.5cm]
+\textsc{\huge \textbf{Simulating CSF flow in an idealized geometry of the subarachnoid space}}
 %\\[0.4cm]
 %{\Large March 25th, 2015}
 %\\[3cm]
-\\[4.5cm]
+\\[4cm]
 \begin{minipage}{0.5\textwidth}
 \flushleft {
 \large Advisors: \\
@@ -70,6 +69,7 @@
  \normalsize Simula Research Laboratory\\[0.4cm] \rule{0pt}{2.5ex}}\\
 \end{minipage}
 \begin{minipage}{0.45\textwidth}
+\vspace{-3.2cm}
 \flushright {\large
 Student: \\
 \rule{0pt}{2.5ex} \textbf{Carlo Cisale}\\
@@ -77,7 +77,7 @@ Student: \\
 \end{minipage}
 
 \vspace*{\fill}
-{\Large ACADEMIC YEAR 2016-2017}
+{\textsc{\normalsize October $25^{th}, 2017$}}
 \rule{\textwidth}{1pt}
 
 
@@ -90,16 +90,30 @@ Student: \\
 \newpage
 \thispagestyle{empty}
 
-%--------------------------
-
-\tableofcontents
 \pagenumbering{roman}
+\chapter*{\LARGE Acknowledgments}
+jyfufuyhfh
+jhgcghk
+jgchgc
+gchghgcgh
+
+
+\chapter*{\LARGE List of acronyms}
+
+
+%--------------------------
+\newpage
+\tableofcontents
+
 
 \newpage
-
 \pagenumbering{arabic}
 
 \chapter{Introduction}
+% wiki
+% article martin, kalata, loth,...
+
+The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a clear fluid that has almost same viscosity as water and, in an healthy person, is composed of dilute amounts of proteins and monoamines. It provides nutrients and remove waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur. The CSF moves in a pulsatile way through the subarachnoid space (SAS), a space between the arachnoid mater and the pia mater. The CSF flow is passive and its pulsatile nature has been associated with changes in blood volume within the cranial cavity due to the cardiac cycle [reference].
 
 \chapter{Medical background}
 
@@ -138,6 +152,7 @@ The constant $\mu$ represents the fluid viscosity, while $\mathbf{f}$ denotes a 
 Since $\mu$ is constant, we have
 
 \begin{align}
+\label{eq:ns:3}
 \rho \dot{\mathbf{u}} + \rho \nabla \mathbf{u} \cdot \mathbf{u} - \mu \Delta \mathbf{u} +  \nabla p &= \mathbf{f}, \\
 \nabla \cdot \mathbf{u} &= 0.
 \end{align}
@@ -822,12 +837,29 @@ where $\partial \Omega_{inflow}$, $\partial \Omega_{outflow}$, and $\partial \Om
 \end{cases}
 \]
 
+
+
 As a first example, we use the following manufactured solution:
 
 \[
 \mathbf{u}_{exact} = \left[ \begin{array}{c} 0 \\ x(1-x) \end{array} \right], \quad
 p_{exact} = \frac{1}{2}-y.
 \]
+
+
+\begin{center}
+\begin{tikzpicture}
+\node[
+      draw,
+      minimum height=3cm,
+      minimum width=3cm,
+      label=0:$\mathbf{u=0}$,%< -- This uses angle zero degree on the border for the location
+      label=west:$\mathbf{u=0}$, %< -- This uses an anchor of the node for the location
+      label=north:$\mathbf{u=u_{exact}}$,
+      label=south:$\mathbf{u=u_{exact}}$
+] at (0,1.5) {$\Omega$};
+\end{tikzpicture}
+\end{center}
 
 Let $\mathbf{u}_h$ and $p_h$ be two two approximate solutions obtained from the simulation, we now want compute the errors
 
@@ -926,7 +958,48 @@ $ 64 $ & $ 8.0070 \times 10^{-9} $ & $3.4440$ \\
 
 
 \subsection{MMS for Navier-Stokes equations with parabolic inlet velocity}
-\todo[inline]{Do the same as in Stokes,  but using NS}
+\label{parabolic inlet}
+We now want to verify our Navier-Stokes solver using MMS. We start from Navier-Stokes equations written in the form (\ref{eq:ns:3}), with $\mu = 1/8$.  Let $\Omega$ be the unit square $\Omega = [0,1]^2$. We want to solve the N-S equation in the domain $\Omega$ applying the following boundary conditions:
+
+\begin{center}
+\begin{tikzpicture}
+\node[
+      draw,
+      minimum height=3cm,
+      minimum width=3cm,
+      label=0:$\sigma \cdot \mathbf{n}$ \text{=}$ -p_{out} \mathbf{n}$,%< -- This uses angle zero degree on the border for the location
+      label=west:$\sigma \cdot \mathbf{n}$ \text{=}$ -p_{in} \mathbf{n}$, %< -- This uses an anchor of the node for the location
+      label=north:$\mathbf{u=0}$,
+      label=south:$\mathbf{u=0}$
+] at (0,1.5) {$\Omega$};
+\end{tikzpicture}
+\end{center}
+
+i.e. $\mathbf{u=0}$ on the top and bottom boundaries, and we apply a pressure difference on the sides, so the fluid can move from left to right. The exact solution for this problem is $\mathbf{u}(y) = [\frac{1}{2\mu} y (1-y), 0]$ and $p(x) = 1-x$. Comparing the numerical solution from our solver with the exact solution, the error is 0:
+
+\begin{center}
+\begin{tabular}{| c | c | c | c | c |}
+\hline
+$\mathbf{N}$ & $\mathbf{dt (= \frac{1}{N})}$ & $\mathbf{|| u_{exact} - u_h ||_{L^2}}$ & $ \mathbf{ | u_{exact} - u_h |_{H^1}}$ & $  \mathbf{ || p_{exact} - p_h ||_{L^2}}$ \\
+\hline
+$ 4 $ & $ 0.25 $ & $2.5488 \times 10^{-10}$ & $8.0081 \times 10^{-10}$ &  $ 3.7574 \times 10^{-13}$ \\
+\hline
+$ 8$ & $ 0.125 $ & $6.8121  \times 10^{-11}$ & $2.1401 \times 10^{-10}$ &  $ 1.3412  \times 10^{-14}$ \\
+\hline
+$ 16 $ & $ 0.0625 $ & $ 3.1065 \times 10^{-11}$ & $9.7595 \times 10^{-11}$ & $ 9.0360 \times 10^{-15}$ \\
+\hline
+$ 32$ & $ 0.03125 $ & $1.6841 \times 10^{-11}$ & $5.2914 \times 10^{-11}$ &  $ 1.5517 \times 10^{-14}$ \\
+\hline
+$ 64$ & $ 0.015625 $ & $1.2541 \times 10^{-12}$ & $1.6649 \times 10^{-11}$ &  $ 3.5736 \times 10^{-13}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/velocity_fixed.png}
+\caption{caption}
+\end{figure}
 
 \subsection{Pressure-driven channel flow (2D)}
 % References:
@@ -1067,8 +1140,17 @@ A $128 \times 128$ number of elements was used with $dt = 0.0125$ as time step. 
 \caption{Driven cavity with Nitsche. The plot shows the stream function, and its minimum value $-0.05978$.}
 \end{figure}
 
+\newpage
+
 \section{Navier-Stokes equations on a moving mesh}
 \subsection{Parabolic inlet velocity with fixed mesh motion}
+In this section we add a fixed mesh motion to the test case in section \ref{parabolic inlet}. We start from the NS equations with ALE term written in the form (\ref{eq:ns:1})-(\ref{eq:ns:2}) with $\mu = 1/8$. In our case, the rigid motion will be given by the vector $\mathbf{w} = [0.05, 0.05]^T$. The solution is qualitatively the same as in section \ref{parabolic inlet}, as shown by the following plot, where we plotted the velocity profile between the points $(0.5, 0)$ and $(0.5, 1)$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/velocity_moving.png}
+\caption{caption}
+\end{figure}
 
 \chapter{SAS simulations}
 

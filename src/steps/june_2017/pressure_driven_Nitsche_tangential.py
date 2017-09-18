@@ -55,7 +55,7 @@ for n in N :
     vt = dot(v, tangent)
     
     # T = 5 
-    T = 3      # only for oscillating p_inlet
+    T = 5      # only for oscillating p_inlet
     mu = 0.700e-3  # [g/(mm * s)]
     rho = 1e-3     # [g/mm^3] 
     theta = 0.5 
@@ -64,14 +64,14 @@ for n in N :
     
     # For Nitsche method
     nitsche_value = Constant(0.0)
-    gamma = 1000.0
+    gamma = 10.0
     h = CellSize(mesh)
     
-    ufile = File("results/v_Nitsche_tang_8_0.025.pvd")
-    pfile = File("results/p_Nitsche_tang_8_0.025.pvd")
+    ufile = File("results/results_pressure_driven_Nitsche_tangential/v_Nitsche_tang_8_0.025.pvd")
+    pfile = File("results/results_pressure_driven_Nitsche_tangential/p_Nitsche_tang_8_0.025.pvd")
     
     #p_in  = Constant(1.0)
-    amplitude = Constant(12.0)
+    amplitude = Constant(7.0)
     #amplitude = Constant(6.0)  # [kPa]
     p_in = Expression("a*sin(2*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
     p_out = Constant(0.0) 

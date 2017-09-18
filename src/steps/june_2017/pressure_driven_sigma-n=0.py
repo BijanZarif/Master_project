@@ -51,11 +51,11 @@ for n in N :
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
-    ufile = File("results/v_sigma-n=0_8_0.025.pvd")
-    pfile = File("results/p_sigma-n=0_8_0.025.pvd")
+    ufile = File("results/results_pressure_driven_sigma.n=0/v_sigma-n=0_8_0.025.pvd")
+    pfile = File("results/results_pressure_driven_sigma.n=0/p_sigma-n=0_8_0.025.pvd")
     
     #p_in  = Constant(1.0)
-    amplitude = Constant(12.0)
+    amplitude = Constant(12.0)   # I tried different amplitudes with still unstable
     #amplitude = Constant(6.0)  # [kPa]
     p_in = Expression("a*sin(2*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
     p_out = Constant(0.0) 
@@ -155,9 +155,4 @@ for n in N :
     #plt.plot(time, values_x1, label = "Velocity in the point over time")
     #plt.plot(time, values_x2, label = "Velocity in the point over time")
     #plt.show()
-    
-    
-    #plot(u0)
-    #plot(p0)
-    #interactive()
     

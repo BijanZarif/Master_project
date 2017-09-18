@@ -42,24 +42,27 @@ for N in NN:
     z = TestFunction(W)         # ALE
     w0 = Function(W)            # ALE
     
-    T = 5     # only for oscillating p_inlet
+    T = 15     # only for oscillating p_inlet
     mu = 0.700e-3  # [g/(mm * s)]
     rho = 1e-3     # [g/mm^3] 
     theta = 0.5 
     f0 = Constant((0.0, 0.0))
     f = Constant((0.0, 0.0))
     
-    ufile = File("results/pressure_driven_prescribed_move/velocity_8_0.0625.pvd")
-    pfile = File("results/pressure_driven_prescribed_move/pressure_8_0.0625.pvd")
+    ufile = File("results/pressure_driven_move_gauss/velocity_8_0.0625.pvd")
+    pfile = File("results/pressure_driven_move_gauss/pressure_8_0.0625.pvd")
     outfile = open('fluxes.txt','w')
     
     #p_in  = Constant(1.0)
-    amplitude = Constant(9.0)  #[kPa]
-    p_in = Expression("a*sin(2*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
+    amplitude = Constant(10.0)  #[kPa]
+    p_in = Expression("a*cos(2*pi*t)", a=amplitude, t=0.0, degree=2)   # only for oscillating p_inlet
     p_out = Constant(0.0)
     #amplitude_move = Constant(0.001)   # the smaller the value, the smaller the deformation
-    amplitude_move = Constant(0.0001)
-    w_move = Expression(("0.0", "-a*cos(2*pi*t)*x[0]*(x[0] - 60)"), a=amplitude_move, degree = 2, t=0.0)   # ALE
+    amplitude_move = Constant(25)
+    #w_move = Expression(("0.0", "-a*cos(2*pi*t)*x[0]*(x[0] - 60)"), a=amplitude_move, degree = 2, t=0.0)   # ALE
+    w_move = Expression(("0.0", "a*sin(4*pi*t)*(1./sqrt(2*pi*s*s))*exp((-0.5*(x[0]-m)*(x[0]-m))/(s*s))"), pi=pi, s=3, m=6, a=amplitude_move, degree = 4, t=0.0)   # ALE
+
+    
     
     u_mid = (1.0-theta)*u0 + theta*u
     f_mid = (1.0-theta)*f0 + theta*f
@@ -173,7 +176,12 @@ for N in NN:
         pfile << p0
         
         flux = assemble(inner(u0,n)*ds(2))   # flux through the outlet
-        outfile.write('%g, %g\n'%(t, flux))
+        sigma = -p0*Identity(2) + 2*mu*sym(grad(u0))  # stress tensor, here p0 is at time t/2!! fix this
+        stress = dot(sigma, n)
+        n_stress = assemble(dot(stress, n)*ds(2))
+        t_stress = assemble(dot(stress, Constant((0.0, 1.0)) )*ds(2))
+        
+        outfile.write('%g, %g, %g, %g\n'%(t, flux, n_stress, t_stress))
         
         t += dt
         p_in.t = t    # only for oscillating p_inlet

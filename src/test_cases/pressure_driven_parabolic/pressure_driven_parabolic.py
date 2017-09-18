@@ -6,9 +6,10 @@
 from matplotlib import pyplot as plt
 from dolfin import *
 
-NN = [2**2, 2**3, 2**4, 2**5, 2**6]
-h = [1./i for i in NN]
-h = [1./NN[4]]
+#NN = [2**2, 2**3, 2**4, 2**5, 2**6]
+NN = [2**5]
+#h = [1./i for i in NN]
+h = [1./NN[0]]
 errsL2_velocity = []
 errsH1_velocity = []
 errsL2_pressure = []
@@ -42,7 +43,7 @@ for N in NN:
         u0, p0 = split(up0)  # u0 is not a function but "part" of a function, just a "symbolic" splitting?
         
         
-        T = 20 
+        T = 15 
         mu = 1.0/8.0  # [g/(mm * s)]
         rho = 1     # [g/mm^3] 
         theta = 1 
