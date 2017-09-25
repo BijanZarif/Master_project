@@ -97,8 +97,10 @@ jhgcghk
 jgchgc
 gchghgcgh
 
+\newpage
 
-\chapter*{\LARGE List of acronyms}
+{\Large \textbf{List of acronyms}}
+
 
 
 %--------------------------
@@ -154,6 +156,7 @@ Since $\mu$ is constant, we have
 \begin{align}
 \label{eq:ns:3}
 \rho \dot{\mathbf{u}} + \rho \nabla \mathbf{u} \cdot \mathbf{u} - \mu \Delta \mathbf{u} +  \nabla p &= \mathbf{f}, \\
+\label{eq:ns:3bis}
 \nabla \cdot \mathbf{u} &= 0.
 \end{align}
 
@@ -196,30 +199,316 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 
 
 \section{Navier-Stokes on a moving domain}
+% From Donea, Duarte, Vegard
 
+Numerical simulation of two-dimensional viscous incompressible fluid with free boundaries is getting a lot of attention in the past decades for the several applications in industry and medicine. An important consideration when coding problems in this class is the use of an appropriate \emph{kinematical description} of the continuum. Such a choice determines the relationship between the deforming continuum and the finite mesh of the computing zones, and the ability of the numerical method to deal with large distortions. \\
+The algorithm of continuum mechanics usually make use of two classical descriptions of motion: the \emph{Lagrangian} description and the \emph{Eulerian} description. The arbitrary Lagrangian-Eulerian description (or ALE) has the advantage to combine the classical kinematical descriptions, while reducing their drawbacks [Donea, Duarte, Vegard]. \\
+In Lagrangian algorithms, each individual node of the computational mesh follows the associated material particle during motion, and they are mostly used in structural mechanics.
+In Eulerian algorithms the computational mesh is fixed and the continuum moves with the respect to the grid. These algorithms are widely used in fluid dynamics problems.
+In order to combine the best features of both algorithms, the ALE description was developed. We are going to talk about it later. Now let us focus on the classical descriptions of motion.
+
+
+\subsection{Lagrangian and Eulerian descriptions of motion}
+Let us consider a domain $\Omega_{\mathbf{X}} \in \mathbb{R}^3$ consisting of material particles $\mathbf{X}$. The domain can undergo deformations, and the deformed domain $\Omega_\mathbf{x}$ is the current configuration at time $t$.
+
+\todo[inline]{Put image from Vegard}
+
+We define one-to-one mapping:
+
+\todo[inline]{Put mapping}
+
+which takes any point $\mathbf{X}$ in the reference configuration to a new position $\mathbf{x} = \beta(\mathbf{X},t)$ at time $t$. As the mapping is one-to-one, it is also possible to keep track of the history of the motion by the inverse $\beta^{-1}$. Time is measured with the same variable $t$ in both domains. The gradient of $\beta$ with respect to $(\mathbf{X},t)$ can be written in the matrix forms as
+
+\begin{equation}
+\frac{\partial \beta}{\partial(\mathbf{X}, t)} = 
+\begin{pmatrix}
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v} \\
+\mathbf{0}^T & 1
+\end{pmatrix}
+\end{equation}
+
+where the material velocity
+
+\begin{equation}
+\mathbf{v}(\mathbf{X}, t) = \frac{\partial \mathbf{x}}{\partial t}|_\mathbf{x},
+\end{equation}
+
+is the temporal change in the spatial variable $\mathbf{x}$ while holding $\mathbf{X}$ fixed, while $\mathbf{0}^T$ denotes a null vector. \\
+In the Lagrangian description all the quantities are expressed in terms of the reference configuration $\Omega_{\mathbf{X}}$ and time, i.e. even though the material is deformed, we can still compute displacements and particle velocities using the material coordinates $\mathbf{X}$.
+Since the grid coincides with the material coordinates, there are no convective term in the Lagrangian description, and it coincides with a moving control volume consisting of the same material points at all time. When a material undergoes large deformations, or for instance vortices or turbulences occur, the material velocity becomes difficult to handle in the Lagrangian approach.
+
+In fluid mechanics, the \emph{Eulerian} approach describes the flow of a fluid through a fixed region in space and in each point we can measures its properties and quantities, such as velocity, pressure, temperature. The conservation equations in the Eulerian description are expressed in terms of the spatial coordinates $\mathbf{x}$ and time, and are neither connected to a reference configuration nor the material coordinates. Hence, large deformations are not an issue, since the material can enter and leave the fixed domain. The movement of a material through a fixed region results in convective effects, and convective operators can often be problematic in computational fluid dynamics since they are not symmetric.
+
+
+\subsection{The Arbitrary-Eulerian Lagrangian formulation}
+The ALE formulation is common is fluid-structure interaction problems and it provides a referential system which is neither attached to the material points nor totally fixed in space, i.e. the nodes of the computational mesh may be moved with the continuum in normal Lagrangian fashion, or be held fixed in Eulerian manner, or be moved in some arbitrarily specified way.
+
+The following derivation is taken from [Donea, Vegard].
+
+Since we need a new set of coordinates, an independent referential system with reference coordinates $\chi$ is introduced. Hence, we have two new mappings to relate all the configurations as shown in the picture below.
+
+\todo[inline]{Put picture of mapping of the 3 from Vegard}
+
+The mappings are defined similarly to $\beta$:
+
+\todo[inline]{Put mapping}
+
+and the gradient of $\gamma$ is 
+
+\begin{equation}
+\frac{\partial \gamma}{\partial(\chi, t)} = 
+\begin{pmatrix}
+\frac{\partial \mathbf{x}}{\partial \chi} & \mathbf{w} \\
+\mathbf{0}^T & 1
+\end{pmatrix}
+\end{equation}
+
+where we define $\mathbf{w}$ as the mesh velocity, i.e.
+
+\begin{equation}
+\mathbf{w}(\chi, t) = \frac{\partial \mathbf{X}}{\partial t}|_\chi,
+\end{equation}
+
+Hence, the fluid moves with velocity $\mathbf{v}$ and the domain moves with velocity $\mathbf{w}$.
+
+To complete the relation between the different velocities, we define the inverse of $\alpha$ as
+
+\todo[inline]{Put mapping}
+
+Its gradient is given by
+
+\begin{equation}
+\frac{\partial \alpha^{-1}}{\partial(\mathbf{X}, t)} = 
+\begin{pmatrix}
+\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{v}}\\
+\mathbf{0}^T & 1
+\end{pmatrix}
+\end{equation}
+
+where the velocity
+
+\begin{equation}
+\label{eq:ale:4}
+\hat{\mathbf{v}} (\mathbf{X},t) = \frac{\partial \chi}{\partial t}_{|_{\mathbf{X}}}
+\end{equation}
+
+denotes the temporal change in the reference system while keeping the material particle $\mathbf{X}$ fixed. Therefore, the velocity $\mathbf{\hat{v}}$ can be interpreted as the particle velocity in the referential domain.
+
+Since $\beta = \alpha \cdot \alpha^{-1} = \gamma(\alpha^{-1}(\mathbf{X},t))$ and obtain a relation between the different velocities by differentiating $\beta$:
+
+\begin{align*}
+\frac{\partial \beta}{\partial (\mathbf{X},t)} (\mathbf{X},t)
+& = \frac{\gamma}{\partial (\chi, t)}(\alpha^{-1}(\mathbf{X},t)) \frac{\partial \alpha^{-1}}{\partial(\mathbf{X},t)}(\mathbf{X},t) \\
+& = \frac{\partial \gamma}{\partial (\chi, t)}(\chi,t)) \frac{\partial \alpha^{-1}}{\partial(\mathbf{X},t)}(\mathbf{X},t).
+\end{align*}
+
+In matrix form, the previous equation reads
+
+\begin{equation}
+\begin{pmatrix}
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v}\\
+\mathbf{0}^T & 1
+\end{pmatrix} = 
+\begin{pmatrix}
+\frac{\partial \mathbf{x}}{\partial \chi} & \mathbf{w}\\
+\mathbf{0}^T & 1
+\end{pmatrix}
+\begin{pmatrix}
+\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{v}}\\
+\mathbf{0}^T & 1
+\end{pmatrix}
+\end{equation}
+
+Multiplying the matrices on the right hand side, we obtain the following equation
+
+\begin{equation}
+\mathbf{v} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{v}} + \mathbf{w}
+\end{equation}
+
+that relates the different velocities. We define the \emph{convective velocity} as
+
+\begin{equation}
+\mathbf{c} := \mathbf{v-w} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{v}}
+\end{equation}
+
+which is the relative velocity between the material and the mesh.
+
+In order to obtain relations between quantities to formulate the balance equations, let us define the scalar quantity $Q$ defines as $Q^{*}(\mathbf{x},t)$, $Q(\chi,t)$, and $Q^{**}(\mathbf{X},t)$ in the spatial, reference, and material domain respectively.
+To obtain a relation between the spatial description $Q$, and the material description $Q^{**}$ we use the previous the mapping $\beta$ that we have previously used:
+
+\begin{equation}
+Q^{**}(\mathbf{X},t) = Q(\beta(\mathbf{X},t),t) = Q \cdot \beta.
+\end{equation}
+
+The gradient of $Q^{**}$ can then be computed as
+
+\begin{equation}
+\label{eq:ale:1}
+\frac{\partial Q^{**}}{\partial (\mathbf{X}, t)} (\mathbf{X},t) = 
+\frac{\partial Q}{\partial (\mathbf{x}, t)} (\mathbf{x},t)
+\frac{\partial \beta}{\partial (\mathbf{X}, t)} (\mathbf{X},t),
+\end{equation}
+
+or in the matrix form
+
+\begin{equation}
+\label{eq:ale:2}
+\begin{pmatrix}
+\frac{\partial Q^{**}}{\partial \mathbf{X}} & \frac{\partial Q^{**}}{\partial t}
+\end{pmatrix} = 
+\begin{pmatrix}
+\frac{\partial Q}{\partial \mathbf{x}} & \frac{\partial Q}{\partial t}
+\end{pmatrix}
+\begin{pmatrix}
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v}\\
+\mathbf{0}^T & 1
+\end{pmatrix} 
+\end{equation}
+
+Multiplying the matrices, we bbtain the equation that relates material and spatial derivatives:
+
+\begin{equation}
+\label{eq:ale:3}
+\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q}{\partial t}
++ \frac{\partial Q}{\partial \mathbf{x}} \cdot \mathbf{v}
+\end{equation}
+
+To ease notation we now recognize the material and spatial time derivatives $\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q}{\partial t}_{|_\mathbf{X}}, \,  \frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t}_{|_\mathbf{x}}$, and define the material and spatial derivatives in the following way
+
+\begin{equation}
+\frac{d}{dt} := 	\frac{\partial}{\partial t}_{|_\mathbf{X}} \qquad
+\frac{\partial}{\partial t} := \frac{\partial}{\partial t}_{|_\mathbf{x}}
+\end{equation}
+
+Now we can rewrite the relation (\ref{eq:ale:3}) can be written in the form
+
+\begin{equation}
+\label{eq:ale:6}
+\frac{d Q}{d t} = \frac{\partial Q}{\partial t} + (\mathbf{v} \cdot \nabla) Q.
+\end{equation}
+
+The next step is to relate the material and the reference description, respectively $Q^{**} and Q^{*}$, by the mapping $\alpha$. This relation is the following
+
+\begin{equation}
+Q^{**} = Q^{*} \cdot \alpha^{-1}.
+\end{equation}
+
+By proceeding as in (\ref{eq:ale:1})-(\ref{eq:ale:2}), we obtain the relation between material and reference time derivatives:
+
+\begin{equation}
+\label{eq:ale:3}
+\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q^{*}}{\partial t}
++ \frac{\partial Q}{\partial \chi} \cdot \hat{\mathbf{v}}.
+\end{equation}
+
+To express the spatial derivative of $Q^{*}$ in the spatial domain, we use the definition of $\hat{\mathbf{v}}$ from equation (\ref{eq:ale:4}) and obtain
+
+\begin{equation}
+\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q^{*}}{\partial t}
++ \frac{\partial Q}{\partial \mathbf{x}} \cdot \mathbf{c}.
+\end{equation}
+
+This equation can be rewritten in the more common notation
+
+\begin{equation}
+\label{eq:ale:5}
+\frac{d Q}{d t} = \frac{\partial Q}{\partial t}_{|_\chi} + (\mathbf{c} \cdot \nabla) Q
+\end{equation}
+
+and it is called the \emph{fundamental ALE equation}, which states that the time derivative in the material configuration is equal to its local (reference) derivative plus a convective term, taking into account the relative difference in velocity between the two systems. These relations also hold for vector quantities.
+
+By combining equations (\ref{eq:ale:5})-(\ref{eq:ale:6}) we have
+
+\begin{equation}
+\label{eq:ale:7}
+\frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t}_{|_\chi} - (\mathbf{w} \cdot \nabla) Q.
+\end{equation}
+
+which relates the spatial time derivative to the reference time derivative.
+
+The momentum equation [PUT SOME REFERENCE FOR DERIVATION OF NAVIER STOKES] can be written in terms of the material derivatives as
+
+\begin{equation}
+\rho \frac{d \mathbf{v}}{d t} = \rho (\frac{\partial \mathbf{v}}{\partial t} + (\mathbf{v} \cdot \nabla)\mathbf{v}) = \nabla \cdot \sigma
+\end{equation}
+
+Using equation (\ref{eq:ale:7}), the spatial time derivatives can be replaced to obtain its ALE formulation
+
+\begin{equation}
+\rho (\frac{\partial \mathbf{v}}{\partial t}_{|_\chi} + (\mathbf{c} \cdot \nabla)\mathbf{v}) = \nabla \cdot \sigma. 
+\end{equation}
+
+The previous equation holds in \emph{any} time-dependent domain which does not necessarily need to coincide with the movement of material particles. The latter also shows that in order to obtain the ALE formulation of the momentum equation from the Eulerian formulation is to replace the convective velocity with the relative velocity between the material and the mesh.
+
+
+\section{Modelling the idealized geometry of the SAS}
+We now want to model the flow of cerebrospinal fluid in the subarachnoid space, using the previous informations. In the first section, we will use Navier-Stokes equation in a fixed domain, while in the second one we will use the ALE formulation of Navier-Stokes equations. Since CSF consists of $99 \% $ of water [REFERENCE], it is modeled as water at $37 \deg C$, i.e. the fluid density will be $\rho = 10^{-3} \frac{g}{mm^3}$, while the fluid viscosity is $\mu = 0.700 \frac{mm^2}{s}$. 
+
+
+\subsection{Fixed boundary}
+Let us consider a two-dimensional rectangular (fixed) domain $\Omega^0 = [0, 2]
+\times [0, 60]$, representing the right portion of the subarachnoid space, between the spinal cord and the surrounding tissue from C1 to C7 vertebrae, approximately. We define the
+\begin{itemize}
+\item
+  top boundary: $\partial \Omega_{\rm top}^0 = \{ (x, y) | y = 60\}$;
+\item
+  bottom boundary: $\partial \Omega_{\rm bottom}^0 = \{ (x, y) | y = 0\}$;
+\item
+  tissue boundary: $\partial \Omega_{\rm tissue}^0 = \{ (x, y) | x = 2\}$;
+\item
+  cord boundary: $\partial \Omega_{\rm cord}^0 = \{ (x, y) | x = 0\}$;
+\end{itemize}
+and thus $\partial \Omega^0 = \partial \Omega_{\rm top}^0 \cup
+\partial \Omega_{\rm bottom}^0 \cup \partial \Omega_{\rm cord}^0 \cup
+\partial \Omega_{\rm tissue}^0$.
+
+\begin{figure}
+
+\todo[inline]{put two images: left spinal cord. right: rectangle with boundary labels.}
+
+  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
+    of computational domain}
+\end{figure}
+
+We set the following boundary condition on $\partial \Omega^0$: on the boundaries $\partial \Omega_{\rm cord}^0$ and $\partial \Omega_{\rm tissue}^0$ we set the so called \emph{no-slip condition} $\mathbf{u = 0}$, i.e. the fluid velocity on those boundaries is zero. This condition does not allow the fluid to flow through the boundaries.
+In order to simulate an oscillatory fluid flow, we set a pressure difference on the top and bottom boundaries, as follows:
+
+\begin{align}
+\label{eq:bc:6}
+\sigma \cdot \mathbf{n} &= \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = -\bar{p} \mathbf{n} && \text { on } \partial \Omega_{\rm top}^0 \\
+\label{eq:bc:6bis}
+\sigma \cdot \mathbf{n} &= \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = \mathbf{0}  && \text { on } \partial \Omega_{\rm bottom}^0.
+\end{align}
+
+where $\bar{p}(t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 9kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
+
+\begin{figure}
+
+\todo[inline]{put the rectangle with the corresponding boundary conditions.}
+
+  \caption{Boundary conditions applied on $\partial \Omega^0$}
+\end{figure}
+
+
+\subsection{Moving boundary}
 Our next step is to allow the domain and its boundary to move, and
-solve the Navier-Stokes equations on this deforming domain. Let
-$\Omega^t$ denote the fluid domain which depends on time $t$. Let
+solve the Navier-Stokes equations on this deforming domain. Let $\Omega^t$ denote the fluid domain which depends on time $t$, and
 $\Omega^0$ denote the fixed fluid domain at $t = 0$. In
 fluid-structure interaction, the fluid domain $\Omega^t$ consists of
 the same material particles at all times, and moves with the material
 points within the structure. Also assume that we have a mesh $\mesh$
-of the domain $\Omega^t$. Let $\mathbf{w}$ denote the \emph{mesh
-  velocity}, and $\mathbf{y}$ the \emph{mesh displacement} with
-respect to the reference domain $\Omega^0$, and thus by definition
-$\dot{\mathbf{y}} = \mathbf{w}$ where the superposed dot denotes the
-time derivative. The mesh velocity can be chosen arbitrarily in
-principle, but this choice could effect the accuracy of the
-solution~\cite{}.
+of the domain $\Omega^t$. Let $\mathbf{w}$ denote the \emph{mesh velocity}.
+  
+%and $\mathbf{y}$ the \emph{mesh displacement} with respect to the reference domain $\Omega^0$, and thus by definition $\dot{\mathbf{y}} = \mathbf{w}$ where the superposed dot denotes the time derivative. 
 
-The movement of the domain $\Omega^t$ is governed by the mesh
-displacement, i.e.~for all $x(t) \in \Omega^t$, each corresponding to
-a point $x_0 \in \Omega^0$, we have that
-\begin{equation}
-  x(t) = x_0 + \mathbf{y}(t)(x_0).
-\end{equation}
-\todo[inline]{Check the precise formulation carefully in Donea
-  reference e.g.}
+%The movement of the domain $\Omega^t$ is governed by the mesh
+%displacement, i.e.~for all $x(t) \in \Omega^t$, each corresponding to
+%a point $\mathbf{X}_0 \in \Omega^0$, we have that
+%\begin{equation}
+%  \mathbf{X}(t) = \mathbf{X}_0 + \mathbf{y}(t)(X_0).
+%\end{equation}
+%\todo[inline]{Check the precise formulation carefully in Donea
+%  reference e.g.}
 
 An ALE formulation of the Navier-Stokes equations on the deforming
 domain $\Omega^t$ reads: find the velocity $\mathbf{u}$ and the
@@ -233,118 +522,57 @@ pressure $p$ such that
   \label{eq:ns:2}
   \nabla \cdot \mathbf{u} &= 0, & \text{in } \Omega^t,
 \end{align}
-for $t \in (0, T]$ where $\mathbf{f}$ is a given body force, $\rho$ is
-  the fluid density, $\mu$ is the fluid viscosity. The
-  system~\eqref{eq:ns:1}--\eqref{eq:ns:2} must be closed by
-  appropriate boundary and initial conditions.
-
+for $t \in (0, T]$, where $T=15$ is the final time (and the number of cardiac cycles of our simulations, that we need in order for the flow to fully develop). The quantity $\mathbf{f}$ is a given body force.
 We will let the fluid domain boundary follow the changes on the
 fluid-structure interface. Moreover, to move the entire domain, we
 will use a \emph{Laplacian smoothing}
 algorithm~\cite{Winslow1963}. More precisely, our mesh smoothing
-equation reads: given a boundary velocity $\mathbf{u}_0$ (that will be defined later), find
+equation reads: given some boundary velocity $\mathbf{w}_0$, find
 $\mathbf{w}$ that satisfies
 \begin{align}
 \label{eq:bc:2}
 - \Delta \mathbf{w} &= 0 	&& \text{in } \Omega^t, \\
-\mathbf{w} &= \mathbf{u}_0 && \text{on } \partial \Omega^t .
+\mathbf{w} &= \mathbf{w}_0 && \text{on } \partial \Omega^t .
 \end{align}
 \\
-for each $t \in [0, T]$
+for each $t \in [0, T]$.
 
 
-\section{Modelling the SAS with elastic surroundings}
+%Further,
+%\begin{equation}
+%  \partial \Omega^t_{\rm i} = \partial \Omega^0_{\rm i} + \mathbf{y}(t)(\partial \Omega^0_{\rm i}),
+%\end{equation}
+%for each $i$.
 
-\begin{figure}
-  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
-    of computational domain}
-\end{figure}
-
-We will consider a fluid domain $\Omega^t$ representing a section of
-the subarachnoid space between the spinal cord and the surrounding
-tissue.
-
-Assuming axial symmetry along the spinal cord length axes, we consider
-a two-dimensional rectangular reference domain $\Omega^0 = [0, L_x]
-\times [0, L_y]$. We define the
-\begin{itemize}
-\item
-  top boundary: $\partial \Omega_{\rm top}^0 = \{ (x_0, x_1) | x_1 = L_y\}$;
-\item
-  bottom boundary: $\partial \Omega_{\rm bottom}^0 = \{ (x_0, x_1) | x_1 = 0\}$;
-\item
-  tissue boundary: $\partial \Omega_{\rm tissue}^0 = \{ (x_0, x_1) | x_0 = L_x\}$;
-\item
-  cord boundary: $\partial \Omega_{\rm cord}^0 = \{ (x_0, x_1) | x_0 = 0\}$;
-\end{itemize}
-and thus $\partial \Omega^0 = \partial \Omega_{\rm top}^0 \cup
-\partial \Omega_{\rm bottom}^0 \cup \partial \Omega_{\rm cord}^0 \cup
-\partial \Omega_{\rm tissue}^0$. Further,
-\begin{equation}
-  \partial \Omega^t_{\rm i} = \partial \Omega^0_{\rm i} + \mathbf{y}(t)(\partial \Omega^0_{\rm i}),
-\end{equation}
-for each $i$.
-
-We are interested in studying the effect of craniovertebral
+As what concerns the boundary conditions for the velocity $\mathbf{u}$, they remain the same also in the moving domain.
+Now we have also to specify boundary conditions for the mesh velocity. We are interested in studying the effect of craniovertebral
 decompression on the fluid flow and pressure dynamics in the
 subarachnoid space. In particular, we assume that craniovertebral
 decompression induces a change in the compliance of the tissue
 surrounding the spinal canal~\cite{}. For simplicity, we aim to model
 the compliance of the surrounding tissue via a boundary condition for
-the fluid flow. We will assume that the tissue boundary $\partial
-\Omega_{\rm tissue}$ is elastic with stiffness $k > 0$ and in particular
-allowed to move. To this end, we introduce the boundary conditions
-\begin{align}
-\label{eq:bc:1}
-(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n}) \cdot \mathbf{n} = k \mathbf{y} \cdot \mathbf{n} \qquad \text{ on } \partial \Omega_{\rm tissue},\\
-\label{eq:bc:3}
-u^t = g = 0 \qquad \text{ on } \partial \Omega_{\rm tissue},
-\end{align}
+the fluid flow. 
 
-%\begin{equation}
-%  \left ( \mu \nabla \mathbf{u} - p I
-%  \right ) \cdot \mathbf{n} = \pm k \mathbf{y}
-%  \qquad \text{ on }  \partial \Omega_{\rm tissue},
-%\end{equation}
-
-where $\mathbf{n}$ is the outward pointing boundary normal and
-$\mathbf{y}$ still denotes the mesh displacement, and $u^t$ is the tangential component of the velocity field $\mathbf{u}$, i.e. $u^t = \mathbf{u} \cdot \mathbf{t}$. For simplicity, on
-the spinal cord tissue, we assume that the cord is rigid and fixed,
-i.e.:
-\begin{equation}
-  \mathbf{u} = \mathbf{0} \quad \text { on } \partial \Omega_{\rm cord}.
-\end{equation}
-% MER: Hmmm... This means that if y = 0, the wall is free to move.
-
-To induce a fluid flow in the subarachnoid space, we set a pressure difference on $\partial \Omega_{\rm tb} = \partial \Omega_{\rm top} \cup \partial \Omega_{\rm bottom}$. We set on $\partial \Omega_{\rm top}$ and $\partial \Omega_{\rm bottom}$ the following boundary conditions
-
-\begin{align}
-\label{eq:bc:6}
-\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = -\bar{p} \mathbf{n} &\quad \text { on } \partial \Omega_{\rm top} \\
-\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = 0  &\quad \text { on } \partial \Omega_{\rm bottom}.
-\end{align}
-
-where $\bar{p}(y,t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 20kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
-
-\todo[inline]{Vegard said I should choose the amplitude $A$ so it produces velocities of the order of $1-5 cm/s$. $A$ should be around $15-20kPa$.}
-
-
-
-For the mesh equation, we let the mesh velocity follow the fluid
-velocity on the tissue boundary, while the mesh velocity is assumed to
+For the mesh equation, we let the mesh velocity follow a gaussian profile on the tissue boundary, while the mesh velocity is assumed to
 be zero (i.e.~the mesh boundary is fixed) on the remaining boundary:
 \begin{align}
 \label{eq:bc:5}
-\mathbf{w} &= \mathbf{u}  \qquad \text{ on } \partial \Omega_{\rm tissue},\\
-\mathbf{w} &= \mathbf{0}  \qquad \text{ on } \partial \Omega^t \setminus \partial \Omega_{\rm tissue}
+\mathbf{w} &= \bar{\mathbf{w}}  \qquad \text{ on } \partial \Omega_{\rm tissue}^t,\\
+\mathbf{w} &= \mathbf{0}  \qquad \text{ on } \partial \Omega^t \setminus \partial \Omega_{\rm tissue}^t
 \end{align}
 
-In order to simplify the notation, in the following sections we are going to denote the moving domain $\Omega^t$ simply as $\Omega$. Moreover, note that $\partial \Omega_{\rm cord}$ and $\partial \Omega_{\rm
-  tissue}$ are \textit{physical} boundaries, i.e.~they model portions
-of the spinal cord and surrounding tissue. This means that
-$\mathbf{u}$ and $\mathbf{w}$ should have the same value on these
-boundaries, since the fluid follows the movement (if any) of the
-walls.
+where $\bar{\mathbf{w}} = (B \cdot sin(4\pi t) \cdot \frac{1}{\sqrt{2 \pi s^2}} \, e^{- \frac{1}{2} \, \frac{(y - m)^2}{s^2}}  , 0)$, and $s = 3$ and $m = 6$ are respectively the variance and the mean value of the gaussian function. We multiplied the gaussian function by a sine in order to simulate oscillatory movement of the mesh, and the quantity $B$ is the amplitude of the movement. In our simulations we will use different amplitudes of the movement, in order to compare quantities to understand if the movement of the mesh plays a role in the CSF flow.
+
+\begin{figure}
+
+\todo[inline]{put the rectangle with the corresponding boundary conditions for the mesh velocity}
+
+\end{figure}
+
+
+In order to simplify the notation, in the following sections we are going to drop the $t$ when we talk about a moving boundary (e.g. $\partial \Omega^t$ will simply be $\partial \Omega$).
+
+%Moreover, note that $\partial \Omega_{\rm cord}$ and $\partial \Omega_{\rm tissue}$ are \textit{physical} boundaries, i.e.~they model portions of the spinal cord and surrounding tissue. This means that $\mathbf{u}$ and $\mathbf{w}$ should have the same value on these boundaries, since the fluid follows the movement (if any) of the walls.
 
 
 
@@ -353,8 +581,8 @@ walls.
 \section{Finite element formulation}
 
 \section{Weak formulation of N-S on fixed domain}
-\subsection{Navier-Stokes formulation of pressure driven channel flow with $u=0$ on Tissue}
-In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
+
+In order to obtain the weak formulation of the system~\eqref{eq:ns:3}--~\eqref{eq:ns:3bis}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
 We obtain:
 
 \begin{align}
@@ -373,122 +601,88 @@ Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{
 - \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega}  \underbrace{ (\mu \nabla \mathbf{u} - pI)}_{= \sigma} \cdot \mathbf{n} \, \mathbf{v} \, ds.
 \end{equation}
 
-The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary were the solution is known. The term $\int_{\partial \Omega} \sigma \cdot \mathbf{n} \,  \mathbf{v} \, ds$ can be divided into four integrals since $\partial \Omega = \partial \Omega_{inlet} \cup \partial \Omega_{outlet} \cup \partial \Omega_{tissue} \cup \partial \Omega_{cord}$. Since on the $\partial \Omega_{cord}$ boundary we assume Dirichlet boundary condition $u=0$ for the velocity, that portion of the integral is zero, because $\mathbf{v} = 0$ on $\Omega_{cord}$. Since 
-
-\[
-\int_{\partial \Omega}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
-= \int_{\partial \Omega_{inlet}}  \underbrace{ \sigma \cdot \mathbf{n}}_{-p_{in}} \, \mathbf{v} \, ds
-+ \int_{\partial \Omega_{outlet}}  \underbrace{ \sigma \cdot \mathbf{n}}_{-p_{out}} \, \mathbf{v} \, ds
-+ \int_{\partial \Omega_{tissue}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
-\]
-
-we want to apply the Dirichlet boundary condition on $\partial \Omega_{tissue}$ weakly using Nitsche's method:
-
-
-\begin{align}
-\int_{\partial \Omega_{tissue}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
-&= \int_{\partial \Omega_{tissue}}  (\mu \nabla \mathbf{u} - p I) \cdot \mathbf{n} \, \mathbf{v} \, ds \\
-&= \int_{\partial \Omega_{tissue}}  \mu \nabla \mathbf{u} \cdot \mathbf{n} \mathbf{v} \, ds
-- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
-&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
-- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
-&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
-+ \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{(u-g)} \, ds \\
-&+ \frac{\gamma}{h} \int_{\partial \Omega_{tissue}}  \mathbf{(u-g)} \, \mathbf{v} \, ds
-- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds
-\end{align}
-
-where we are weakly setting $\mathbf{u} = \mathbf{g} = \mathbf{0}$. The final variational form reads
+The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary where the solution is known. If $\Gamma_D$ is the portion of the boundary where we set Dirichlet conditions, we can define
 
 \begin{equation}
+\hat{V} = \set{\mathbf{v} \in [H^1(\Omega)]^2 | \mathbf{v}_{|_{\Gamma_D}} = \mathbf{0}} 
+\end{equation}
+\\
+and we can choose $Q = L^2(\Omega)$. 
+
+Since we are assuming $\Gamma_D = \partial  \Omega_{\rm tissue} \cup  \partial \Omega_{\rm cord}$, the test function $\mathbf{v}$ will be zero on this boundary. The term $\int_{\partial \Omega} \sigma \cdot \mathbf{n} \,  \mathbf{v} \, ds$ can be divided into four integrals since
+
+\begin{equation}
+\partial \Omega = \partial \Omega_{top} \cup \partial \Omega_{bottom} \cup \partial \Omega_{tissue} \cup \partial \Omega_{cord}.
+\end{equation}
+
+Since $\mathbf{v} \in \hat{V}$, the integral on $\Gamma_D$ is zero. Hence we have
+
+\begin{equation}
+\int_{\partial \Omega}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+= \int_{\partial \Omega_{top}}   \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
++ \int_{\partial \Omega_{bottom}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds.
+\end{equation}
+
+From the boundary conditions (\ref{eq:bc:6})-(\ref{eq:bc:6bis}) we have
+
+\begin{equation}
+\int_{\partial \Omega}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+= \int_{\partial \Omega_{top}}  - \bar{p} \, \mathbf{v} \, ds.
+\end{equation}
+
+%% Nitsche's method
+%\begin{align}
+%\int_{\partial \Omega_{tissue}}  \sigma \cdot \mathbf{n} \, \mathbf{v} \, ds
+%&= \int_{\partial \Omega_{tissue}}  (\mu \nabla \mathbf{u} - p I) \cdot \mathbf{n} \, \mathbf{v} \, ds \\
+%&= \int_{\partial \Omega_{tissue}}  \mu \nabla \mathbf{u} \cdot \mathbf{n} \mathbf{v} \, ds
+%- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
+%&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
+%- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds \\
+%&= \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds
+%+ \int_{\partial \Omega_{tissue}}  \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{(u-g)} \, ds \\
+%&+ \frac{\gamma}{h} \int_{\partial \Omega_{tissue}}  \mathbf{(u-g)} \, \mathbf{v} \, ds
+%- \int_{\partial \Omega_{tissue}} pI \cdot \mathbf{n} \mathbf{v} \, ds
+%\end{align}
+%
+%where we are weakly setting $\mathbf{u} = \mathbf{g} = \mathbf{0}$.
+
+The final variational form reads
+
+\begin{equation}
+\label{eq:ns:4}
 \begin{split}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho \nabla \mathbf{u} \cdot \mathbf{u} \, \mathbf{v} \, dx
 + \int_{\Omega} \mu \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx 
 - \int_{\Omega} p \, div(\mathbf{v}) \, dx \\
-+ \int_{\partial \Omega_{inlet}} p_{in} \mathbf{n} \cdot \mathbf{v} \, ds
-+ \int_{\partial \Omega_{outlet}} p_{out} \mathbf{n} \cdot \mathbf{v} \, ds 
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} \, ds \\
-- \int_{\partial \Omega_{tissue}} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \mathbf{(u-g)} \, ds
-+ \frac{\gamma}{h} \int_{\partial \Omega_{tissue}}  \mathbf{(u-g)} \, \mathbf{v} \, ds =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx \\
++ \int_{\partial \Omega_{top}} \bar{p} \mathbf{n} \cdot \mathbf{v} \, ds
+ =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx \\
 \int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0.
 \end{split}
 \end{equation}
 
 
 \section{Weak formulation of N-S on moving domain}
-In order to obtain the weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2}, we multiply the first equation by a test function $\mathbf{v}$ in a space $\hat{V}$ to be specified, and the second equation by a test function $q$ in a space $Q$, and integrate over $\Omega$. 
-We obtain:
-
-\begin{align}
-\label{eq:ns:9}
-\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx
-&= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx, \\
-\int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx &= 0.
-\end{align}
-\\
-Integrating by parts the term $- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx$, and applying the Green formula, we have
-
-\begin{equation}
-\label{eq:green}
-- \int_{\Omega} \nabla \cdot (\mu \nabla \mathbf{u} - pI)\mathbf{v} \, dx =  \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx - \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
-\end{equation}
-
-The space $\hat{V}$ is usually chosen such that the test function will be zero in the portion of the boundary were the solution is known. If $\Gamma_D$ is the portion of the boundary where we set Dirichlet conditions, we can define
-
-\begin{equation}
-\hat{V} = \set{\mathbf{v} \in [H^1(\Omega)]^2 | \mathbf{v}_{|_{\Gamma_D}} = \mathbf{0}} 
-\end{equation}
-\\
-and we can choose $Q = L^2(\Omega)$. In our setup, the boundary $\partial \Omega$ is divided in the four boundaries:
-
-\begin{equation}
-\partial \Omega= \partial \Omega_{\rm top} \cup
-\partial \Omega_{\rm bottom} \cup
-\partial \Omega_{\rm cord} \cup
-\partial \Omega_{\rm tissue}.
-\end{equation}
-
-Since we are assuming $\Gamma_D = \partial \Omega_{\rm cord}$, the test function $\mathbf{v}$ will be zero on this boundary. The boundary term becomes
-
-\begin{equation}
-\label{eq:bc:7}
-\begin{split}
-- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx =
--\int_{\partial \Omega_{\rm tb}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx \\
-- \int_{\partial \Omega_{\rm tissue}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx.
-\end{split}
-\end{equation}
-\\
-
-From the boundary condition (\ref{eq:bc:6}), the term on the top and bottom boundaries in (\ref{eq:bc:7}) becomes
-
-\begin{equation}
-- \int_{\partial \Omega_{\rm tb}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx = 
-- \int_{\partial \Omega_{\rm tb}} (-\bar{p} \mathbf{n}) \cdot \, \mathbf{v} \, dx = 
-\int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, dx
-\end{equation}
-
-Hence, the variational formulation reads:
+The procedure to obtain weak formulation of the system~\eqref{eq:ns:1}--~\eqref{eq:ns:2} is the same as for the fixed domain case, only substituting the convective term $\nabla \mathbf{u} \cdot \mathbf{u}$ with the ALE term $\nabla \mathbf{u} \cdot \mathbf{(u - w)}$. The variational formulation reads
 
 \begin{equation}
 \label{eq:ns:5}
 \begin{split}
 \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
 + \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds
-- \int_{\partial \Omega_{\rm tissue}} (\mu \nabla \mathbf{u} - p I) \cdot \, \mathbf{n} \, \mathbf{v} \, dx
-=  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
++ \int_{\Omega} \mu \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx 
+- \int_{\Omega} p \, div(\mathbf{v}) \, dx \\
++ \int_{\partial \Omega_{top}} \bar{p} \mathbf{n} \cdot \mathbf{v} \, ds
+ =  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx \\
+\int_{\Omega}  (\nabla \cdot \mathbf{u}) q \, dx = 0.
 \end{split}
 \end{equation}
+
 
 As we are solving a Poisson equation for the mesh velocity $\mathbf{w}$, we need to discretize the problem. According to the boundary conditions~\eqref{eq:bc:5}, the function $\mathbf{w}$ belongs to the space
 
 \begin{equation}
-W = \set{\mathbf{w} \in [H^1(\Omega)]^2 | \mathbf{w}_{|_{\partial \Omega \setminus \Omega_{\rm tissue}}} = \mathbf{0}, \mathbf{w}_{|_{\partial \Omega_{\rm tissue} } }  = \mathbf{u} }.
+W = \set{\mathbf{w} \in [H^1(\Omega)]^2 | \mathbf{w}_{|_{\partial \Omega \setminus \Omega_{\rm tissue}}} = \mathbf{0}, \mathbf{w}_{|_{\partial \Omega_{\rm tissue} } }  = \bar{\mathbf{w}} }.
 \end{equation}
 
 Let $\mathbf{z}$ be a test function in the space
@@ -496,8 +690,6 @@ Let $\mathbf{z}$ be a test function in the space
 \begin{equation}
 \hat{W} = \set{\mathbf{z} \in [H^1(\Omega)]^2 | \mathbf{z}_{|_{\partial \Omega}} = \mathbf{0}}.
 \end{equation}
-
-\todo[inline]{Maybe somewhere I should say that the boundary $\partial \Omega$ depends on time and then I drop the $t$, otherwise I have too many t}
 
 
 We multiply equation~\eqref{eq:bc:2} by $\mathbf{z}$ and integrate on the entire domain $\Omega$ to obtain
@@ -512,168 +704,167 @@ We multiply equation~\eqref{eq:bc:2} by $\mathbf{z}$ and integrate on the entire
 Since $\mathbf{z} \in \hat{W}$, the term $\int_{\partial \Omega} \frac{\partial \mathbf{w}}{\partial \mathbf{n}} \, \mathbf{z} \, dx  = 0$. The final problem reads: find $\mathbf{w} \in W$ such that
 
 \begin{align}
--  \int_{\Omega} \nabla \mathbf{w} \cdot \nabla \mathbf{z} \, dx &= 0, && \text{in } \Omega, \\
- \mathbf{w} &= \mathbf{u}, && \text{on } \partial \Omega_{\rm tissue}
+-  \int_{\Omega} \nabla \mathbf{w} \cdot \nabla \mathbf{z} \, dx &= 0, && \text{in } \Omega
 \end{align}
 for all $ \mathbf{z} \in \hat{W}$.
 
 
-\subsection{The Nitsche method}
-Our next step is to set the boundary conditions~\eqref{eq:bc:1} on the boundary $\partial \Omega_{\rm tissue}$. As we allow the tissue to move just in the normal direction, we need a way to set the tangential component of velocity field $\mathbf{u}$ to zero. In order to do so, we now give a brief introduction of a tool that allows us to impose boundary conditions in a weak way.
-
-The Nitsche method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domain $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
-
-\begin{equation}
-- \Delta \mathbf{u} = \mathbf{f} \qquad \text{ in } \Omega,
-\label{eq:nitsche:1}
-\end{equation}
-subject to the boundary condition
-
-\begin{equation}
-\mathbf{u} = \mathbf{g} \qquad \text{ on } \Gamma.
-\label{eq:nitsche:2}
-\end{equation}
-
-Generally, Dirichlet boundary conditions as~\eqref{eq:nitsche:2} are strongly imposed by seeking the solution $\mathbf{u}$ in some function space $V_g$, consisting of functions that already satisfy ~\eqref{eq:nitsche:2}. The idea of Nitsche's method~\cite{Nitsche1977} is to introduce a function space $V$ that does not satisfy that requirement, while 'weakly' enforcing the boundary condition. In order to derive the weak formulation, let us multiply equation~\eqref{eq:nitsche:1} by a test function $\mathbf{v}$ and integrate by parts. We obtain 
-
-\begin{equation}
-\label{eq:nitsche:3}
-\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} \, ds
-= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx. 
-\end{equation}
-We now want to enforce the boundary condition~\eqref{eq:nitsche:2} by adding a new term 
-
-\begin{equation}
-\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, dx 
-+ \int_{\Gamma} \mu (\mathbf{u} - \mathbf{g}) \cdot \mathbf{v} \, ds
-= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx,
-\end{equation}
-
-where $\mu$ is a  weight to adjust the penalty of the jump. Nitsche in ~\cite{Nitsche1977} proved that the choice $\mu = \gamma h^{-1}$, with $\gamma > 0$ a penalty parameter, and $h$ being the local mesh size, gives an optimally convergent method. In order to make the variational form symmetric, we can add the term $\int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}}(\mathbf{u}-\mathbf{g}) \, ds$. Hence, the final Nitsche method reads:
-
-\begin{equation}
-\begin{split}
-\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} \, ds
-& - \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{u} \, ds 
-+ \gamma \int_{\Gamma} h^{-1} \mathbf{u} \cdot \mathbf{v} \, ds = \\
-	\int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx
-&- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{g} \, ds
-+ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \cdot \mathbf{v} \, ds.
-\end{split}
-\end{equation}
-
-We want to use the previous method to weakly set boundary conditions on the normal and the tangential components of the velocity field $\mathbf{u}$. The problem is to find $\mathbf{u}$ such that
-\begin{align}
-- \Delta \mathbf{u} &= \mathbf{f} \quad \text{ in } \Omega, \\
-\label{eq:nitsche:4}
-\frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} &= l \quad \text{ on } \Gamma, \\ 
-u^t &= g \quad \text{ on } \Gamma.
-\end{align}
-\\
-where $\mathbf{u} = u^n \mathbf{n} + u^t \mathbf{t}$, and $\mathbf{n}$ and $\mathbf{t}$ are respectively the normal and tangential vectors. By substituting the test function $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$ in~\eqref{eq:nitsche:3}, we obtain
-
-\begin{equation}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} (v^n \mathbf{n} + v^t \mathbf{t} ) \, ds
- = \int_\Omega \mathbf{fv} \, dx,
-\end{equation}
-\\
-which leads to
-
-\begin{equation}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma}  \underbrace{ \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} }_{= l \text{ from} ~\eqref{eq:nitsche:4} }  v^n \, ds
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} v^t \, ds
-= \int_\Omega \mathbf{f \cdot v} \, dx.
-\end{equation}
-\\
-Applying the boundary condition~\eqref{eq:nitsche:4}, we have
-
-\begin{equation}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
--  \underbrace{ \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds }_\text{Nitsche's method}
-=  \int_{\Gamma} l \, v^n \, ds 
-+ \int_\Omega \mathbf{f \cdot v} \, dx.
-\end{equation}
-\\
-Applying the Nitsche method on the boundary term in the left hand side, we get
-
-\begin{equation}
-\begin{split}
-\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds 
-- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t \, ds
-&+ \frac{\gamma}{h} \int_{\Gamma} u^t \, v^t \, ds \\
-=  \int_{\Gamma} l \, v^n \, ds
-+ \int_\Omega \mathbf{fv} \, dx.
-- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g \, ds
-&+ \frac{\gamma}{h} \int_{\Gamma} g \, v^t \, ds
-\end{split}
-\end{equation}
-
-\subsection{Navier-Stokes formulation with the Nitsche method (constant $k$)}
-Finally, we apply what said earlier to the Navier-Stokes equations. Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, the boundary term in~\eqref{eq:ns:5} can be written as
-
-\begin{equation}
-\label{eq:ns:6}
-\int_{\partial \Omega_{\rm tissue}} (\mu \nabla \mathbf{u} -  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds
-= \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds \\ 
-\end{equation}
-\\
-The vector $\mathbf{v}$ can be split in its normal and tangential components, i.e. $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$. Substituting it in the term $(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}$, we have the following equalities:
-
-\begin{align}
-(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}
-& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} - p \, \mathbf{n} \cdot \mathbf{v} \\
-& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot (v^n \mathbf{n} + v^t \mathbf{t}) - p \, v^n \\
-& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} \, v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t   - p \, v^n \\
-\label{eq:ns:7}
-& = (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n}) \cdot \mathbf{n} v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t. 
-\end{align}
-
-By integrating~\eqref{eq:ns:7} over $\partial \Omega_{\rm tissue}$, and from boundary condition~\eqref{eq:bc:1}, we obtain
-
-\begin{equation}
-\int_{\partial \Omega_{\rm tissue}} k \mathbf{y} \cdot \mathbf{n} \, v^n \, ds 
-+ \underbrace{ \int_{\partial \Omega_{\rm tissue}} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds }_{(\star)}
-\end{equation}
-\\
-The last step is to apply Nitsche's method to the term $(\star)$, as shown in the previous section. Hence, the weak formulation of Navier-Stokes equations with Nitsche's method reads
-
-\begin{equation}
-\begin{split}
-\label{eq:nitsche:6}
- \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
-- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
-- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
-- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds
-+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
-- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g) \, ds 
-+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} g \, v^t \, ds
-\end{split}
-\end{equation}
-
-Moreover, since we are assuming $u^t = g = 0$, the final form reads
-\begin{equation}
-\begin{split}
- \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
-- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
-- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
-- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds 
-+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
-\end{split}
-\end{equation}
+%\subsection{The Nitsche method}
+%Our next step is to set the boundary conditions~\eqref{eq:bc:1} on the boundary $\partial \Omega_{\rm tissue}$. As we allow the tissue to move just in the normal direction, we need a way to set the tangential component of velocity field $\mathbf{u}$ to zero. In order to do so, we now give a brief introduction of a tool that allows us to impose boundary conditions in a weak way.
+%
+%The Nitsche method was proposed as a way for treating boundary conditions in finite element method. In particular, it is used to weakly impose boundary and interface conditions, and it is applicable to a wide class of problems. Let us use Poisson's equation as a model problem. Given a domain $\Omega$ with boundary $\Gamma = \partial \Omega$, the problem is to find $\mathbf{u}$ such that
+%
+%\begin{equation}
+%- \Delta \mathbf{u} = \mathbf{f} \qquad \text{ in } \Omega,
+%\label{eq:nitsche:1}
+%\end{equation}
+%subject to the boundary condition
+%
+%\begin{equation}
+%\mathbf{u} = \mathbf{g} \qquad \text{ on } \Gamma.
+%\label{eq:nitsche:2}
+%\end{equation}
+%
+%Generally, Dirichlet boundary conditions as~\eqref{eq:nitsche:2} are strongly imposed by seeking the solution $\mathbf{u}$ in some function space $V_g$, consisting of functions that already satisfy ~\eqref{eq:nitsche:2}. The idea of Nitsche's method~\cite{Nitsche1977} is to introduce a function space $V$ that does not satisfy that requirement, while 'weakly' enforcing the boundary condition. In order to derive the weak formulation, let us multiply equation~\eqref{eq:nitsche:1} by a test function $\mathbf{v}$ and integrate by parts. We obtain 
+%
+%\begin{equation}
+%\label{eq:nitsche:3}
+%\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} \, ds
+%= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx. 
+%\end{equation}
+%We now want to enforce the boundary condition~\eqref{eq:nitsche:2} by adding a new term 
+%
+%\begin{equation}
+%\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, dx 
+%+ \int_{\Gamma} \mu (\mathbf{u} - \mathbf{g}) \cdot \mathbf{v} \, ds
+%= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx,
+%\end{equation}
+%
+%where $\mu$ is a  weight to adjust the penalty of the jump. Nitsche in ~\cite{Nitsche1977} proved that the choice $\mu = \gamma h^{-1}$, with $\gamma > 0$ a penalty parameter, and $h$ being the local mesh size, gives an optimally convergent method. In order to make the variational form symmetric, we can add the term $\int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}}(\mathbf{u}-\mathbf{g}) \, ds$. Hence, the final Nitsche method reads:
+%
+%\begin{equation}
+%\begin{split}
+%\int_{\Omega} \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} \, ds
+%& - \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{u} \, ds 
+%+ \gamma \int_{\Gamma} h^{-1} \mathbf{u} \cdot \mathbf{v} \, ds = \\
+%	\int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx
+%&- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{g} \, ds
+%+ \gamma \int_{\Gamma} h^{-1} \mathbf{g} \cdot \mathbf{v} \, ds.
+%\end{split}
+%\end{equation}
+%
+%We want to use the previous method to weakly set boundary conditions on the normal and the tangential components of the velocity field $\mathbf{u}$. The problem is to find $\mathbf{u}$ such that
+%\begin{align}
+%- \Delta \mathbf{u} &= \mathbf{f} \quad \text{ in } \Omega, \\
+%\label{eq:nitsche:4}
+%\frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} &= l \quad \text{ on } \Gamma, \\ 
+%u^t &= g \quad \text{ on } \Gamma.
+%\end{align}
+%\\
+%where $\mathbf{u} = u^n \mathbf{n} + u^t \mathbf{t}$, and $\mathbf{n}$ and $\mathbf{t}$ are respectively the normal and tangential vectors. By substituting the test function $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$ in~\eqref{eq:nitsche:3}, we obtain
+%
+%\begin{equation}
+%\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} (v^n \mathbf{n} + v^t \mathbf{t} ) \, ds
+% = \int_\Omega \mathbf{fv} \, dx,
+%\end{equation}
+%\\
+%which leads to
+%
+%\begin{equation}
+%\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+%- \int_{\Gamma}  \underbrace{ \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} }_{= l \text{ from} ~\eqref{eq:nitsche:4} }  v^n \, ds
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} v^t \, ds
+%= \int_\Omega \mathbf{f \cdot v} \, dx.
+%\end{equation}
+%\\
+%Applying the boundary condition~\eqref{eq:nitsche:4}, we have
+%
+%\begin{equation}
+%\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+%-  \underbrace{ \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds }_\text{Nitsche's method}
+%=  \int_{\Gamma} l \, v^n \, ds 
+%+ \int_\Omega \mathbf{f \cdot v} \, dx.
+%\end{equation}
+%\\
+%Applying the Nitsche method on the boundary term in the left hand side, we get
+%
+%\begin{equation}
+%\begin{split}
+%\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+%- \int_{\Gamma} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds 
+%- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t \, ds
+%&+ \frac{\gamma}{h} \int_{\Gamma} u^t \, v^t \, ds \\
+%=  \int_{\Gamma} l \, v^n \, ds
+%+ \int_\Omega \mathbf{fv} \, dx.
+%- \int_{\Gamma} \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g \, ds
+%&+ \frac{\gamma}{h} \int_{\Gamma} g \, v^t \, ds
+%\end{split}
+%\end{equation}
+%
+%\subsection{Navier-Stokes formulation with the Nitsche method (constant $k$)}
+%Finally, we apply what said earlier to the Navier-Stokes equations. Since $\nabla \mathbf{u} \cdot \mathbf{n} = \frac{\partial \mathbf{u}}{\partial \mathbf{n}}$, the boundary term in~\eqref{eq:ns:5} can be written as
+%
+%\begin{equation}
+%\label{eq:ns:6}
+%\int_{\partial \Omega_{\rm tissue}} (\mu \nabla \mathbf{u} -  pI) \cdot \mathbf{n} \, \mathbf{v} \, ds
+%= \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds \\ 
+%\end{equation}
+%\\
+%The vector $\mathbf{v}$ can be split in its normal and tangential components, i.e. $\mathbf{v} = v^n \mathbf{n} + v^t \mathbf{t}$. Substituting it in the term $(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}$, we have the following equalities:
+%
+%\begin{align}
+%(\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v}
+%& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{v} - p \, \mathbf{n} \cdot \mathbf{v} \\
+%& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot (v^n \mathbf{n} + v^t \mathbf{t}) - p \, v^n \\
+%& = \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{n} \, v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t   - p \, v^n \\
+%\label{eq:ns:7}
+%& = (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p\mathbf{n}) \cdot \mathbf{n} v^n + \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t. 
+%\end{align}
+%
+%By integrating~\eqref{eq:ns:7} over $\partial \Omega_{\rm tissue}$, and from boundary condition~\eqref{eq:bc:1}, we obtain
+%
+%\begin{equation}
+%\int_{\partial \Omega_{\rm tissue}} k \mathbf{y} \cdot \mathbf{n} \, v^n \, ds 
+%+ \underbrace{ \int_{\partial \Omega_{\rm tissue}} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t \, ds }_{(\star)}
+%\end{equation}
+%\\
+%The last step is to apply Nitsche's method to the term $(\star)$, as shown in the previous section. Hence, the weak formulation of Navier-Stokes equations with Nitsche's method reads
+%
+%\begin{equation}
+%\begin{split}
+%\label{eq:nitsche:6}
+% \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
+%- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
+%- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
+%- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds
+%+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
+%= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+%- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, g) \, ds 
+%+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} g \, v^t \, ds
+%\end{split}
+%\end{equation}
+%
+%Moreover, since we are assuming $u^t = g = 0$, the final form reads
+%\begin{equation}
+%\begin{split}
+% \int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%+ \int_{\partial \Omega_{\rm tb}} \bar{p} \, \mathbf{n} \cdot \, \mathbf{v} \, ds  % tob&bottom term
+%- \int_{\partial \Omega_{\rm tissue}} (k \mathbf{y}) \cdot \mathbf{n} v^n \, ds 
+%- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \cdot \mathbf{t} \, v^t) \, ds \\
+%- \int_{\partial \Omega_{\rm tissue}} (\mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}} \cdot \mathbf{t} \, u^t) \, ds 
+%+ \frac{\gamma}{h} \int_{\partial \Omega_{\rm tissue}} u^t \, v^t \, ds \\
+%= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx
+%\end{split}
+%\end{equation}
 
 
 
@@ -688,7 +879,7 @@ Moreover, since we are assuming $u^t = g = 0$, the final form reads
 \section{Numerical scheme}
 
 \subsection{Time discretization}
-In the following we present a discretization of the Navier-Stokes equations, that was used in the numerical simulations. Starting from equations~\eqref{eq:ns:1}--\eqref{eq:ns:2}, we want to use the so called Crank-Nicolson discretization to solve them. Let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be a time interval, and $\Delta t = t_{i+1} - t_i$ the time step. We apply a backward Euler discretization to the time derivative $\partial \mathbf{u}/ \partial t$
+In the following we present a discretization of the Navier-Stokes equations, that was used in the numerical simulations. Starting from N-S equations in the fixed domain ~\eqref{eq:ns:3}--\eqref{eq:ns:3bis}, we want to use the so called Crank-Nicolson discretization to solve them. Let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be a time interval, and $\Delta t = t_{i+1} - t_i$ the time step. We apply a backward Euler discretization to the time derivative $\partial \mathbf{u}/ \partial t$
 
 \begin{equation}
 \frac{\partial \mathbf{u}}{\partial t} \approx \frac{\mathbf{u}^{i+1} -\mathbf{u}^i }{\Delta t},
@@ -697,7 +888,7 @@ In the following we present a discretization of the Navier-Stokes equations, tha
 where $\mathbf{u}^i$ is an approximation of $\mathbf{u}(t_i)$ at the time level $i$. A midpoint Crank-Nicolson scheme may be written as:
 
 \begin{align}
-\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w})]^{i+1/2} - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - p^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
+\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u} \cdot \mathbf{u}]^{i+1/2} - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - p^{i+1/2}I) &= \mathbf{f}^{i+1/2}, \\
 \nabla \mathbf{u}^{i+1} &= 0,
 \end{align}
 \\
@@ -705,83 +896,72 @@ where we set $\mathbf{u}^{\rm i+1/2} = \frac{\mathbf{u}^i + \mathbf{u}^{i+1}}{2}
 The convective term may be written as
 
 \begin{equation}
-\rho [\nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w})]^{i+1/2} = \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^{i+1/2} - \mathbf{w}^{i+1/2})].
+\rho [\nabla \mathbf{u} \cdot \mathbf{u}]^{i+1/2} = \rho \, \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^{i+1/2}.
 \end{equation}
-We linearize the term above with
+As in [PUT REFERENCE], we linearize the term above with
 
 \begin{equation}
-\rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^{i+1/2} - \mathbf{w}^{i+1/2})] \approx \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)].
+\rho \, \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^{i+1/2} \approx \rho \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^i.
 \end{equation}
-Moreover, the stress tensor $\sigma$ is discretized as follows 
 
-\begin{equation}
-\nabla \cdot \sigma \approx \nabla \cdot \sigma^i = \nabla \cdot (\mu \Delta \mathbf{u}^{\rm i+1/2} - p^{\rm i+1/2} I).
-\end{equation}
 The resulting discretization yields to
 
 \begin{align}
-\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho [\nabla \mathbf{u}^{i+1/2} \cdot (\mathbf{u}^i - \mathbf{w}^i)] - \nabla \cdot (\mu \Delta \mathbf{u}^{\rm  i+1/2} - p^{\rm i+1/2}I) &= \mathbf{f}^{\rm i+1/2}, \\
-\nabla \mathbf{u}^{i+1} &= 0,
+\label{eq:ns:10}
+\rho \frac{\mathbf{u}^{i+1} - \mathbf{u}^i}{\Delta t} + \rho \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^i - \mu \Delta \mathbf{u}^{i+1/2} + \nabla p^{i+1/2}I &= \mathbf{f}^{i+1/2}, \\
+\label{eq:ns:10bis}
+\nabla \cdot \mathbf{u}^{i+1} &= 0,
 \end{align}
-\\
-By defining the inner products
+
+First we define the inner products
 
 \[
-\langle f, g \rangle_\Omega = \int_\Omega f \cdot g \, dx, \quad
-\langle f, g \rangle_{\Gamma_{\rm tissue}} = \int_{\partial \Omega_{\rm tissue}} f \cdot g \, ds, \quad
-\langle f, g \rangle_{\Gamma_{\rm tb}} = \int_{\partial \Omega_{\rm tb}} f \cdot g \, ds
+\langle \mathbf{f}, \mathbf{g} \rangle_\Omega = \int_\Omega \mathbf{f} \cdot \mathbf{g} \, dx, \quad
+\langle \mathbf{f}, \mathbf{g} \rangle_{\Gamma_{\rm top}} = \int_{\partial \Omega_{\rm top}} \mathbf{f} \cdot \mathbf{g} \, ds
 \]
-\\
-the numerical scheme reads
+
+Multiplying the equation (\ref{eq:ns:10}) by the test function $\mathbf{v} \in \hat{V}$, and the equation (\ref{eq:ns:10bis}) by the trial function $q \in Q$, and integrating as we did in (\ref{eq:bc:4}), we obtain 
+
+\begin{equation}
+\label{eq:ns:6}
+\begin{split}
+\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle_\Omega
++ \rho \langle \nabla \mathbf{u}^{\rm i+1/2} \cdot \mathbf{u}^{\rm i}, \mathbf{v} \rangle_\Omega
++ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega \\
+- \langle p , div(\mathbf{v}) \rangle_\Omega 
++ \langle \bar{p} \mathbf{n}, \mathbf{v} \rangle_{\Gamma_{\rm top}}
+= \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega \\
+\langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega = 0.
+\end{split}
+\end{equation}
+
+Subtracting $\langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega = 0$ from the first equation in (\ref{eq:ns:6}) we have
+
+\begin{equation}
+\begin{split}
+\rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle_\Omega
++ \rho \langle \nabla \mathbf{u}^{\rm i+1/2} \cdot \mathbf{u}^{\rm i}, \mathbf{v} \rangle_\Omega
++ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega
+- \langle p , div(\mathbf{v}) \rangle_\Omega \\
+- \langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega 
++ \langle \bar{p} \mathbf{n}, \mathbf{v} \rangle_{\Gamma_{\rm top}}
+= \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega.
+\end{split}
+\end{equation}
+
+Repeating the same procedure but starting from the N-S equations in the moving domain ~\eqref{eq:ns:1}--\eqref{eq:ns:2}, we obtain
 
 \begin{equation}
 \begin{split}
 \rho \langle \frac{\mathbf{u}^{\rm i+1} - \mathbf{u}^{\rm i}}{\Delta t}, \mathbf{v} \rangle_\Omega
 + \rho \langle \nabla \mathbf{u}^{\rm i+1/2} \cdot (\mathbf{u}^{\rm i} - \mathbf{w}^{\rm i}), \mathbf{v} \rangle_\Omega
-+ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega
-& - \langle p , div(\mathbf{v}) \rangle_\Omega \\
-- \langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega
-+ \langle \bar{p} \mathbf{n}, \mathbf{v} \rangle_{\Gamma_{\rm tb}}
-- \mu \langle (\nabla \mathbf{u}^{i+1} \cdot \mathbf{n}) \cdot \mathbf{t} , v^t \rangle_{\Gamma_{\rm tissue}} \\
-- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t} , u^t \rangle_{\Gamma_{\rm tissue}} 
-&+ \frac{\gamma}{h} \langle u^t , v^t \rangle_{\Gamma_{\rm tissue}} \\
-= \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega
-- k \langle (\mathbf{Y} + dt \cdot \mathbf{u}^{\rm i+1}) \cdot \mathbf{n}, v^n \rangle_{\Gamma_{\rm tissue}}
-- \mu \langle (\nabla \mathbf{v} \cdot \mathbf{n}) \cdot \mathbf{t}, g \rangle_{\Gamma_{\rm tissue}}
-&+ \frac{\gamma}{h} \langle g, v^t \rangle_{\Gamma_{\rm tissue}}
++ \mu \langle \nabla \mathbf{u}^{i+1/2} , \nabla \mathbf{v} \rangle_\Omega \\
+- \langle p , div(\mathbf{v}) \rangle_\Omega
+- \langle q , div \, \mathbf{u}^{\rm i+1} \rangle_\Omega 
++ \langle \bar{p} \mathbf{n}, \mathbf{v} \rangle_{\Gamma_{\rm top}}
+= \langle \mathbf{f}^{\rm i + 1/2}, \mathbf{v} \rangle_\Omega.
 \end{split}
 \end{equation}
-\\
-where $\mathbf{Y}$ is the mesh displacement.
-
-\todo[inline]{Note that in the program I have defined $\frac{\mathbf{X}^{i+1} - \mathbf{X}^i}{dt} = \mathbf{w}^{i+1} = \mathbf{u}^{i+1}$, hence $\mathbf{X}^{i+1} = \mathbf{X}^i + dt* \mathbf{u}^{i+1}$. So instead of $\mathbf{Y} + dt \mathbf{u}$ I should have $\mathbf{X} + dt \mathbf{u}$ in Python program, where $\mathbf{X}$ and $\mathbf{Y}$ are defined in the program.}
-
-\subsection{Spatial discretization}
-Starting from the scheme~\eqref{eq:ns:3}--\eqref{eq:ns:4} for the Navier-Stokes equations, the unknown velocity $\mathbf{u}^{\rm i + 1}$ and the pressure $\mathbf{p}^{\rm i + 1}$ are denoted as the trial functions in the trial spaces $V$ and $Q$ given by
-
-\begin{align*}
-V &= \set{\mathbf{u} \in [H^1(\Omega)]^2 | \mathbf{u}_|{_{\partial \Omega_{\rm top} \cup \Omega_{\rm bottom}}} = \mathbf{0}} \\
-Q &= \set{\mathbf{u} \in [H^1(\Omega)]^2 | \mathbf{u}_|{_{\partial \Omega_{\rm top} \cup \Omega_{\rm bottom}}} = \mathbf{0}}
-\end{align*}
-
-
-
-We multiply the Navier-Stokes equations, respectively, by the test functions $v$ and $q$. We choose $v \in \hat{V} = \set{v \in [H^1(\Omega)]^2 | v_|{_{\partial \Omega_{\rm top} \cup \Omega_{\rm bottom}}} = 0}$, and $q \in \hat{Q}$ (SPECIFY $\hat{Q}$).
-
-\todo[inline]{Write precisely the spaces, this is a mess}
-
-Let us use the inner product $\langle f,g \rangle = \int_{\Omega} fg \, d\Omega$. Thus, from the weak formulation~\eqref{eq:nitsche:5}
-
-Problem: find $(\mathbf{u}^{i+1}, \mathbf{p}^{i+1}) \in \hat{V} \times \hat{Q}$ such that
-
-\begin{align}
-\langle \rho \frac{u^{i+1} - u^i}{\Delta t},v \rangle_\Omega
-+ \langle \rho \nabla u^{mid} \cdot u^i  ,v \rangle_\Omega
-- \langle v \nabla \cdot (\nabla u^{mid}) ,v \rangle_\Omega
-+ \langle \nabla p^{mid} ,v \rangle_\Omega & = \langle f^{mid} ,v \rangle_\Omega \\
-\langle \nabla \cdot u^{i+1},q \rangle_\Omega &=0 .
-\end{align}
-
 
 
 \chapter{Verification}
