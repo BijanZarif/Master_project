@@ -16,6 +16,7 @@
 \usepackage{lmodern}
 \usepackage{braket}
 \usepackage{todonotes}
+\usepackage{subcaption}
 
 \usepackage[font=small,labelfont=bf]{caption}  %per la didascalia delle immagini
 \usepackage{mathrsfs}  %per fare le lettere calligrafiche
@@ -77,7 +78,7 @@ Student: \\
 \end{minipage}
 
 \vspace*{\fill}
-{\textsc{\normalsize October $25^{th}, 2017$}}
+{\textsc{\normalsize October $25^{th},$ $2017$}}
 \rule{\textwidth}{1pt}
 
 
@@ -114,10 +115,89 @@ gchghgcgh
 \chapter{Introduction}
 % wiki
 % article martin, kalata, loth,...
+The field of computational fluid dynamics (or CFD) is helping medical doctors unveil mysteries of the human body, providing informations without the use of invasive procedures. For instance, nowadays it is possible to analyze a patients' blood flow in arteries or aneurysms, in order to get important informations on how to predict  aneurysms' rupture, or to study the effects of stenosis in arteries. The following study is an application of CFD to advance our understanding on Chiari I malformation.
 
-The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a clear fluid that has almost same viscosity as water and, in an healthy person, is composed of dilute amounts of proteins and monoamines. It provides nutrients and remove waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur. The CSF moves in a pulsatile way through the subarachnoid space (SAS), a space between the arachnoid mater and the pia mater. The CSF flow is passive and its pulsatile nature has been associated with changes in blood volume within the cranial cavity due to the cardiac cycle [reference].
+The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a clear fluid that in an healthy person, is composed of dilute amounts of proteins and monoamines. It provides nutrients and remove waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur. The CSF moves in a pulsatile way through the subarachnoid space (SAS), a space between the arachnoid mater and the pia mater. The CSF flow is passive and its pulsatile nature has been associated with changes in blood volume within the cranial cavity due to the cardiac cycle [PUT REFERENCE].
+
+More specifically, this thesis will focus on CSF flow in the domain of Chiari I malformation. Chiari I is a neurological disorder, where the bottom part of the brain, the cerebellum, descends out of the skull and crowds the spinal cord, putting pressure on both the brain and spine and causing many symptoms like severe headaches, balance problems, respiratory problems. Chiari symptoms are often complicated by related conditions like intracranial hypertension, tethered cord, or syringomyelia, a neurological condition where a fluid filled cyst, or syrinx, forms in the spinal cord. These syrinxes expand the spinal cord and stretch the nerve tissue paper thin. This could cause permanent nerve damage and paralysis [\emph{http://conquerchiari.org}].
+
+Since advances in magnetic resonance imaging (MRI), the number of people affected by Chiari I malformation has increased. It is currently estimated that $1$ in $1000$ people have Chiari, which means $300000$ people in the United States alone. If left untreated, the progressing of the symptoms may have a lethal outcome (Stephany et a., 2008). The only treatment which addresses the problem is surgery. Alternatively, some doctors monitor the situation and treat individual symptoms, but since surgery is the primary treatment option, most patients see a neurosurgeon for a better opinion. This surgical procedures is known as \textit{craniovertebral decompression}, which has the goal to create more room around the malformation and restore the flow of spinal fluid. During this procedure, typically a part of the skull is removed (\textit{craniectomy}), or parts of the vertebrae are removed (\textit{laminectomy}). After this first step, a \textit{duraplasty} is carried out, where the \textit{dura mater}, i.e. the covering of the brain, is opened and a patch is sewn in to make it bigger, increasing the movement of the tissue.
+In the $40 \%$ of cases the surgical outcome is good, with no symptoms or limitations. In some other cases (around the $10-20 \%$), the procedure has poor improvements. 
+
+In recent studies [Sivaramakrishnan et al., 2005], medical doctors have studied the effect of compliance in the intracranial compartment, and concluded that an increase in the compliance is the most significant and consistent change measured after decompression surgery. 
+
+The purpose of our study is to simulate CSF flow in an idealized geometry of the spinal cord. First, we assume that the walls of the spinal cord are rigid, to mimic the pre-operative case before the decompression surgery.  Afterwards, we introduce a prescribed movement on one of the boundaries, the tissue boundary, which will mimic the post-operative case and the increase in compliance of that portion of the spinal cord. This has been done solving Navier-Stokes equations using the finite element method library FEniCS for the simulations. Our final goal is to compare the different models and movements of the boundary, and study how changes in the fluid velocities, pressure, and stresses are affected by the compliance of the tissue. 
+
+This thesis has the following outline. Chapter 2 yields an introduction to the medical background on the anatomy of the central nervous system, and on Chiari I malformation. Chapter 3 gives a description of the mathematical models that were used. In Chapter 4 we show the discretization of Navier-Stokes equations, and the numerical methods used to solve them. In Chapter 5 test cases on the verification of the N-S solvers are presented. Finally, in Chapter 6 and 7 we show the results of the simulations in an idealized geometry of subarachnoid space, and the conclusions on the study.
 
 \chapter{Medical background}
+In this chapter, a short description of medical background necessary to the understanding of the mathematical problem is presented. If not specified, the informations given below are based on the textbook ``\emph{Human Physiology}", by D.U. Silverthorn, and the \emph{Conquer Chiari} website, a <<non-profit organization dedicated to improving the experiences and outcomes of Chiari and syringomyelia patients through education, awareness, and research>>  (\emph{http://conquerchiari.org}).
+
+\section{Anatomy of the Central Nervous System}
+The human nervous system consists of the central nervous system (CNS), which includes the brain and the spinal cord, and the peripherical nervous system (PNS), which consists of sensory neurons.  The importance of CNS is due to the fact that it integrates informations that arrive from the sensory division of the PNS and determine whether a response is needed. 
+
+\subsection{The Spinal Cord}
+In vertebrates, the brain is encased in a bony skull, or cranium, and the spinal cord runs through a canal in the vertebral column. The body segmentation that is characteristic of many invertebrates is the bony \emph{vertebrae}, which are "piled up" on top of one another and separated by disks of connective tissue. 
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/spinal_cord}
+\label{img:cns:1}
+\end{figure}
+
+\newpage
+
+The spinal cord is the major pathway for information flowing back and forth between the brain and the skin, joints, and muscles of the body. Moreover, in the spinal cord are present neural networks responsible for locomotion. It is divided into four regions (\emph{cervical, thoracic, lumbar} and \emph{sacral}), named to the corresponding adjacent vertebrae (see Fig. \ref{img:cns:1}). Each spinal region is subdivided into segments, and each segment gives rise to a bilateral pair of spinal nerves. Just before a spinal nerve joins the spinal cord, it divides into two branches called roots. Along the cord, there are 31 pairs of nerves: 8 in the cervical region, 12 in the thoracic region, 5 in the lumbar region, 5 in the sacral region. The first four segments of the cord are usually referred to as C1-C8, T1-T12, L1-L5, S1-S5 (Fig. \ref{img:cns:2}).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=.3\textwidth]{images/spine}
+\caption{The segments of the spinal cord.}
+\label{img:cns:2}
+\end{figure}
+
+
+The three layers covering the brain and the spinal cord are known as \emph{meninges}, that lie between the bones and tissue of the central nervous system. These membranes help stabilize the neural tissue and protect it from bruising against the bones. Starting from the bones towards the neural tissue, the membranes are the \emph{dura mater}, the \emph{arachnoid membrane}, and the \emph{pia mater}.
+
+The \emph{cerebrospinal fluid}, or CSF, is a salty solution that is continuously secreted by a specialized region in the brain. From the brain, CSF flows into the \emph{subarachnoid space} (or SAS) between the pia mater and the arachnoid membrane, surrounding the entire brain and the spinal cord in fluid (see Fig. \ref{img:cns:3}). It provides nutrients and removes waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur.
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=.6\textwidth]{images/sas}
+\caption{The SAS lies between the pia mater and the arachnoid membrane.}
+\label{img:cns:3}
+\end{figure}
+
+
+
+\section{The Chiari I malformation}
+Chiari I malformation is a neurological disorder where part of the brain, the cerebellum (or more specifically the cerebellar tonsils), descends out of the skull into the spinal area, obstructing the normal flow of the CSF. Chiari patients have a wide range of symptoms: severe headaches, pain in the neck, loos of motor control, respiratory problems, weakness. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=.6\textwidth]{images/chiari}
+\caption{Difference between an healthy patient (on the left) and a Chiari I patient (on the right) (\emph{http://conquerchiari.org}).}
+\label{img:cns:4}
+\end{figure}
+
+In some cases, Chiari patients develop a neurological disorder known as \emph{syringomyelia}, where a fluid-filled cyst, a \emph{syrinx}, develops inside the spinal cord. This cyst can grow over time, causing the spinal cord to expand and stretch nerve tissue. Eventually, the syrinx can cause permanent nerve damage and paralysis. About $30\%-50\%$ of people with Chiari also have syringomyelia, but it can also form after a spinal cord injury, such as a car accident.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=.6\textwidth]{images/syrinx}
+\caption{How a syrinx appears the spinal cord (\emph{http://www.mayoclinic.org}).}
+\label{img:cns:5}
+\end{figure}
+
+Because of the risk of permanent nerve damage, if symptoms are significant and progressing, most surgeons with recommend a surgery known as \emph{craniovertebral decompression} or \emph{posterior fossa decompression} surgery. The goal of this operation is to create more room around the malformation and restore the flow of spinal fluid. 
+
+Typically, during the procedure a part of the skull is removed (\textit{craniectomy}), or parts of the vertebrae are removed (\textit{laminectomy}). After this first step, a \textit{duraplasty} is carried out, where the dura mater is opened and a patch is sewn in to make it bigger, increasing the movement of the tissue.
+In the $40 \%$ of cases the surgical outcome is good, with no symptoms or limitations. In some other cases (around the $10-20 \%$), the procedure has poor improvements. 
+
+
 
 \chapter{Mathematical models}
 
@@ -128,7 +208,7 @@ The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a
 % - Vegard
 % - Drosdal
 
-The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. They describe the motion of a fluid with constant density $\rho$ in a domain $\Omega \subset \mathbb{R}^d$ (where $d=2,3$). They read
+The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. They describe the motion of a fluid with constant density $\rho$ in a domain $\Omega \subset \mathbb{R}^2$. They read
 
 \begin{align}
 \label{eq:ns:0}
@@ -440,9 +520,40 @@ Using equation (\ref{eq:ale:7}), the spatial time derivatives can be replaced to
 
 The previous equation holds in \emph{any} time-dependent domain which does not necessarily need to coincide with the movement of material particles. The latter also shows that in order to obtain the ALE formulation of the momentum equation from the Eulerian formulation is to replace the convective velocity with the relative velocity between the material and the mesh.
 
+\newpage
 
 \section{Modelling the idealized geometry of the SAS}
-We now want to model the flow of cerebrospinal fluid in the subarachnoid space, using the previous informations. In the first section, we will use Navier-Stokes equation in a fixed domain, while in the second one we will use the ALE formulation of Navier-Stokes equations. Since CSF consists of $99 \% $ of water [REFERENCE], it is modeled as water at $37 \deg C$, i.e. the fluid density will be $\rho = 10^{-3} \frac{g}{mm^3}$, while the fluid viscosity is $\mu = 0.700 \frac{mm^2}{s}$. 
+
+\begin{figure}[h!]
+\todo[inline]{put two images: left spinal cord. right: rectangle with boundary labels.}
+
+  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
+    of computational domain}
+\end{figure}
+
+The simulations carried out in this thesis imitate the CSF flow through a region $\Omega \subset \mathbb{R}^2$ throughout time $t \in [0, t_{\rm end}]$. Since cerebrospinal fluid consists of $99 \% $ of water [REFERENCE], it can modeled as water at $37 \deg C$ [Hentschel et al., 2010]. The region surrounding the fluid is modelled as impermeable.
+In the first section, we will use Navier-Stokes equation in a fixed domain to simulate the case with no movement of the boundary, while in the second one we will use the ALE formulation of Navier-Stokes equations and allow one of the boundaries to move. The table below describes the units and values used for the different parameters.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+\textbf{Symbol} & \textbf{Meaning} & \textbf{Unit} & \textbf{Chosen value} \\
+\hline
+$\mathbf{u}$ & fluid velocity & $\frac{cm}{s}$ & to be computed \\
+\hline
+$p$ & pressure & $Pa$ & to be computed \\
+\hline
+$\rho$ & density & $\frac{kg}{cm^3}$ & $10^{-3}$ \\
+\hline
+$\mu$ & fluid viscosity & $\frac{cm^2}{s}$ & $0.700 \cdot 10^{-2 \, [\rm a] \, }$ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Variables and parameters of our models. See (Linge et. al. 2011) for $[a]$.}
+\end{table}
+
+
 
 
 \subsection{Fixed boundary}
@@ -462,13 +573,7 @@ and thus $\partial \Omega^0 = \partial \Omega_{\rm top}^0 \cup
 \partial \Omega_{\rm bottom}^0 \cup \partial \Omega_{\rm cord}^0 \cup
 \partial \Omega_{\rm tissue}^0$.
 
-\begin{figure}
 
-\todo[inline]{put two images: left spinal cord. right: rectangle with boundary labels.}
-
-  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
-    of computational domain}
-\end{figure}
 
 We set the following boundary condition on $\partial \Omega^0$: on the boundaries $\partial \Omega_{\rm cord}^0$ and $\partial \Omega_{\rm tissue}^0$ we set the so called \emph{no-slip condition} $\mathbf{u = 0}$, i.e. the fluid velocity on those boundaries is zero. This condition does not allow the fluid to flow through the boundaries.
 In order to simulate an oscillatory fluid flow, we set a pressure difference on the top and bottom boundaries, as follows:
