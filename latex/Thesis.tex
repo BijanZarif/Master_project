@@ -93,14 +93,19 @@ Student: \\
 
 \pagenumbering{roman}
 \chapter*{\LARGE Acknowledgments}
-jyfufuyhfh
-jhgcghk
-jgchgc
-gchghgcgh
+There are many people I need to thank for this work. First of all, I want to thank Prof. Eleuterio F. Toro for being such a passionate instructor, who inspired me in going further and start this thesis. \\
+I want to thank my supervisor Dr. Marie E. Rognes, who could always put me on the right path whenever I felt lost, or when something did not work. Thank you for giving me the opportunity to join Simula Research Laboratory, an experience that has taught me a lot, and that made me grow professionally and personally. \\
+I thank Dr. Victor Haughton, for always being so optimistic and for having faith in math students like me. Collaborating with you has given me insights of mathematics that I have never thought of. \\
+
+I would also like to thank Eleonora Piersanti, Vegard Vinje, Magne Nordaas, Øyvind Evju for their important help, and for always having the right answer to my questions. I feel very lucky to have had talented students like you around me, and I have certainly learned a lot thanks to you. \\
+
+My stay in Norway  wouldn't have been the same without the Simula gang. I miss you guys all very much, and you made my six months in Oslo one of the best times of my life. \\
+I thank all the beautiful people I met in Trento. All of you in different ways turned this city into my home, and I will never forget about it. \\
+Last but not least, I thank my family for their constant support, for believing in me, and for making me the person I am now.
 
 \newpage
 
-{\Large \textbf{List of acronyms}}
+%{\Large \textbf{List of acronyms}}
 
 
 
@@ -201,6 +206,94 @@ In the $40 \%$ of cases the surgical outcome is good, with no symptoms or limita
 
 \chapter{Mathematical models}
 
+\section{Derivation of the Navier-Stokes equations}
+Navier-Stokes equations describe the motion of viscous fluid substances. They describe many phenomena, and may be used to model weather, water flow in pipes, air flow around a wing, and blood flow in arteries. In this section we give an overview on how these equations are derived. 
+
+\subsection{Reynolds transport theorem}
+The general conservation law from \cite{reynolds} states that any change in the quantity of any entity within a closed surface can only be affected in two different ways: it may be affected by the production or destruction of the entity within the surface, or by the passage of the entity across the surface. \\
+The transport theorem can be approached in two ways. One is starting from a fixed set of spatial coordinates, a fixed \emph{control volume}, where fluid can enter and exit the boundaries of the defined body. The other is a control volume which consists of the same material particles at all times. Therefore, the body follows the flow, and no fluid will cross the boundary. In this approach, one has to take into account the movement of the boundary of the body, and the fact that body could change its volume. 
+
+Let us consider a fixed control volume $\mathbf{V_0}$ and a fluid property $Q(\mathbf{x}, t)$, function of the position of the particle and time. The rate of change of $Q$ within the control volume can be written as
+
+\begin{equation}
+\frac{d}{dt} \int_{V_0} Q(\mathbf{x}, t) \, dV.
+\end{equation}
+
+The net change of $Q$ must be equal to the rate of change within the control volume plus the net rate of mass flow out of the volume. Hence,
+
+
+\begin{equation}
+\label{eq:rey:1}
+\frac{d}{dt} \int_{V_0} Q(\mathbf{x}, t) \, dV = 
+\int_{V_0} \frac{\partial Q(\mathbf{x}, t}{\partial t} \, dV +
+\int_{S_0} Q(\mathbf{x}, t) \mathbf{v} \cdot \mathbf{n} \, dV
+\end{equation}
+
+where $\mathbf{u}$ denotes the fluid velocity, $\mathbf{n}$ is the outward pointing unit normal, and $S_0$ is the closed surface which bounds $V_0$. The previous equation is known as Reynolds transport theorem. The right hand side of (\ref{eq:rey:1}) can be rewritten using the divergence theorem on the last term, obtaining
+
+\begin{equation}
+\label{eq:rey:2}
+\frac{d}{dt} \int_{V_0} Q(\mathbf{x}, t) \, dV = 
+\int_{V_0} \Big[ \frac{\partial Q(\mathbf{x}, t) }{\partial t} + \nabla \cdot (Q(\mathbf{x}, t) \mathbf{\mathbf{u}})   \Big] \, d V.
+\end{equation}
+
+\subsection{The conservation of mass and momentum}
+Let us set $Q(\mathbf{x}, t) = \rho(\mathbf{x}, t)$, where $\rho$ is the fluid density which we will denote simply with $\rho$. The conservation of mass the mass of the system must remain constant over time. This means
+
+\begin{equation}
+\label{eq:rey:3}
+\frac{d}{dt} \int_{V_0} \rho  \, dV = 0.
+\end{equation}
+
+This equation can be rewritten using the transport theorem (\ref{eq:rey:2}):
+
+\begin{equation}
+\label{eq:rey:4}
+\frac{d}{dt} \int_{V_0} \Big[ \frac{\partial \rho}{\partial t	} + \nabla \cdot (\rho \mathbf{u}) \Big] \, dV = 0.
+\end{equation}
+
+This equation holds for any volume $V_0$, hence the integrand has to be zero. Therefore, 
+
+\begin{equation}
+\label{eq:rey:5}
+\frac{\partial \rho}{\partial t	} + \nabla \cdot (\rho \mathbf{u}) = 0.
+\end{equation}
+
+Equation (\ref{eq:rey:5}) is known as the \emph{continuity equation}. \\
+
+In order to derive a similar equation for momentum, Newton's second law of motion is used. The net change of momentum must be equal to the applied forces which act on the system. The forces can be of two types: volume forces, acting on the entire control volume, and surface force, which act on the control volume surface. The forces acting on the forces are denoted by $\sigma_f \cdot \mathbf{n}$, where $\sigma_f = \sigma_f (\mathbf{u}, p)$ is the symmetric tensor denoting the total stress.
+
+The balance of momentum requires that
+
+\begin{equation}
+\frac{d}{dt} \int_{V_0} \rho \mathbf{u} (\mathbf{x}, t) dV =
+\int_{\partial V_0} \sigma_f \cdot \mathbf{n} dS + \int_{\partial V_0} \mathbf{F}_v dV,
+\end{equation}
+
+where $\mathbf{F}_v$ denote the volume forces. By applying the transport theorem to the left hand side, and the divergence theorem to the surface integral on the right hand side, we have
+
+\begin{equation}
+\frac{d}{dt} \int_{V_0} \Big[ \frac{\partial \rho \mathbf{u}}{\partial t} + \nabla \cdot (\rho \mathbf{v \cdot v}) - \nabla \cdot \sigma_f - \mathbf{F}_v \Big] dV = 0.
+\end{equation}
+
+As before, the integrand has to be zero. Rearranging we obtain 
+
+\begin{equation}
+\label{eq:rey:6}
+\frac{\partial \rho \mathbf{u}}{\partial t} + \nabla \cdot (\rho \mathbf{u} \cdot \mathbf{u}) = 
+\nabla \cdot \sigma_f + \mathbf{F}_v.
+\end{equation}
+
+If we assume that the density $\rho$ is constant, equation (\ref{eq:rey:6}) becomes
+
+\begin{equation}
+\label{eq:rey:7}
+\rho \frac{\partial \mathbf{u}}{\partial t} + \rho \nabla \mathbf{u} \cdot \mathbf{u} - \nabla \cdot \sigma_f = \mathbf{F}_v.
+\end{equation}
+
+Equation (\ref{eq:rey:7}) is known as the \emph{momentum equation}.
+
+
 \section{The Navier-Stokes equations on a fixed domain}
 
 % References:
@@ -208,7 +301,7 @@ In the $40 \%$ of cases the surgical outcome is good, with no symptoms or limita
 % - Vegard
 % - Drosdal
 
-The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. They describe the motion of a fluid with constant density $\rho$ in a domain $\Omega \subset \mathbb{R}^2$. They read
+The flow in the SAS and in the spinal cord can be described by the incompressible Navier-Stokes equations for Newtonian fluids. In the future, we are going to assume that the density $\rho$ of the fluid is constant. The equations read
 
 \begin{align}
 \label{eq:ns:0}
@@ -219,7 +312,7 @@ The flow in the SAS and in the spinal cord can be described by the incompressibl
 \nabla \cdot \mathbf{u} &= 0, && \mathbf{x} \in \Omega, \, t>0
 \end{align}
 
-We are going to solve the problem for the velocity field $\mathbf{u}(\mathbf{x},t)$, and the pressure field $p(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
+where $\Omega$ is our domain, and $\Omega \subset \mathbb{R}^2$.  We are going to solve the problem for the velocity field $\mathbf{u}(\mathbf{x},t)$, and the pressure field $p(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$. The quantity $\sigma(\mathbf{u}, p)$, is the Cauchy stress tensor for a Newtonian fluid, given by
 
 \begin{equation}
 \sigma(\mathbf{u}, p) = \mu \nabla \mathbf{u} - p \mathbb{I}.
@@ -240,7 +333,7 @@ Since $\mu$ is constant, we have
 \nabla \cdot \mathbf{u} &= 0.
 \end{align}
 
-The term $(\mathbf{u} \cdot \nabla)\mathbf{u}$ describes the process of convective transport (	QUARTERONI). ~\cite{}.\\
+The term $(\mathbf{u} \cdot \nabla)\mathbf{u}$ describes the process of convective transport \cite{quarteroni1}.\\
 In order for the problem to be well posed, it is necessary to assign an initial condition
 
 \begin{equation}
@@ -282,27 +375,35 @@ where $\phi$ and $\psi$ are given vector functions, while $\Gamma_D$ and $\Gamma
 % From Donea, Duarte, Vegard
 
 Numerical simulation of two-dimensional viscous incompressible fluid with free boundaries is getting a lot of attention in the past decades for the several applications in industry and medicine. An important consideration when coding problems in this class is the use of an appropriate \emph{kinematical description} of the continuum. Such a choice determines the relationship between the deforming continuum and the finite mesh of the computing zones, and the ability of the numerical method to deal with large distortions. \\
-The algorithm of continuum mechanics usually make use of two classical descriptions of motion: the \emph{Lagrangian} description and the \emph{Eulerian} description. The arbitrary Lagrangian-Eulerian description (or ALE) has the advantage to combine the classical kinematical descriptions, while reducing their drawbacks [Donea, Duarte, Vegard]. \\
+The algorithm of continuum mechanics usually make use of two classical descriptions of motion: the \emph{Lagrangian} description and the \emph{Eulerian} description. The arbitrary Lagrangian-Eulerian description (or ALE) has the advantage to combine the classical kinematical descriptions, while reducing their drawbacks. \\
 In Lagrangian algorithms, each individual node of the computational mesh follows the associated material particle during motion, and they are mostly used in structural mechanics.
 In Eulerian algorithms the computational mesh is fixed and the continuum moves with the respect to the grid. These algorithms are widely used in fluid dynamics problems.
-In order to combine the best features of both algorithms, the ALE description was developed. We are going to talk about it later. Now let us focus on the classical descriptions of motion.
+In order to combine the best features of both algorithms, the ALE description was developed. We are going to talk about it later. Now let us focus on the classical descriptions of motion. \\
+If not specified, the informations given below are based on Donea et al. \cite{donea}, Doarte et al. \cite{duarte}, and Vinje V. \cite{vegard}. 
 
 
 \subsection{Lagrangian and Eulerian descriptions of motion}
 Let us consider a domain $\Omega_{\mathbf{X}} \in \mathbb{R}^3$ consisting of material particles $\mathbf{X}$. The domain can undergo deformations, and the deformed domain $\Omega_\mathbf{x}$ is the current configuration at time $t$.
 
-\todo[inline]{Put image from Vegard}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/ALE1}
+\caption{Lagrangian description of motion. The mapping $\beta$ maps the reference coordinates into the spatial ones.}
+\end{figure}
 
 We define one-to-one mapping:
 
-\todo[inline]{Put mapping}
+\begin{align*}
+\beta : \Omega_{\mathbf{X}} \times [0, T]  \rightarrow \Omega_\mathbf{x} \times [0, T] \\
+(\mathbf{X} , t)  \rightarrow \beta(\mathbf{X}, t) = (\mathbf{x}, t),
+\end{align*}
 
 which takes any point $\mathbf{X}$ in the reference configuration to a new position $\mathbf{x} = \beta(\mathbf{X},t)$ at time $t$. As the mapping is one-to-one, it is also possible to keep track of the history of the motion by the inverse $\beta^{-1}$. Time is measured with the same variable $t$ in both domains. The gradient of $\beta$ with respect to $(\mathbf{X},t)$ can be written in the matrix forms as
 
 \begin{equation}
 \frac{\partial \beta}{\partial(\mathbf{X}, t)} = 
 \begin{pmatrix}
-\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v} \\
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{u} \\
 \mathbf{0}^T & 1
 \end{pmatrix}
 \end{equation}
@@ -310,7 +411,7 @@ which takes any point $\mathbf{X}$ in the reference configuration to a new posit
 where the material velocity
 
 \begin{equation}
-\mathbf{v}(\mathbf{X}, t) = \frac{\partial \mathbf{x}}{\partial t}|_\mathbf{x},
+\mathbf{u}(\mathbf{X}, t) = \frac{\partial \mathbf{x}}{\partial t} {\Big |}_\mathbf{x},
 \end{equation}
 
 is the temporal change in the spatial variable $\mathbf{x}$ while holding $\mathbf{X}$ fixed, while $\mathbf{0}^T$ denotes a null vector. \\
@@ -327,11 +428,19 @@ The following derivation is taken from [Donea, Vegard].
 
 Since we need a new set of coordinates, an independent referential system with reference coordinates $\chi$ is introduced. Hence, we have two new mappings to relate all the configurations as shown in the picture below.
 
-\todo[inline]{Put picture of mapping of the 3 from Vegard}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/ALE2}
+\caption{The three domains needed in the ALE formulation.}
+\end{figure}
 
 The mappings are defined similarly to $\beta$:
 
-\todo[inline]{Put mapping}
+\begin{align*}
+\gamma : \Omega_{\chi} \times [0, T]  \rightarrow \Omega_\mathbf{x} \times [0, T] \\
+(\chi , t)  \rightarrow \gamma(\chi, t) = (\mathbf{x}, t),
+\end{align*}
+
 
 and the gradient of $\gamma$ is 
 
@@ -346,21 +455,25 @@ and the gradient of $\gamma$ is
 where we define $\mathbf{w}$ as the mesh velocity, i.e.
 
 \begin{equation}
-\mathbf{w}(\chi, t) = \frac{\partial \mathbf{X}}{\partial t}|_\chi,
+\mathbf{w}(\chi, t) = \frac{\partial \mathbf{X}}{\partial t} {\Big |}_\chi,
 \end{equation}
 
-Hence, the fluid moves with velocity $\mathbf{v}$ and the domain moves with velocity $\mathbf{w}$.
+Hence, the fluid moves with velocity $\mathbf{u}$ and the domain moves with velocity $\mathbf{w}$.
 
 To complete the relation between the different velocities, we define the inverse of $\alpha$ as
 
-\todo[inline]{Put mapping}
+\begin{align*}
+\alpha^{-1} : \Omega_{\mathbf{X}} \times [0, T]  \rightarrow \Omega_\chi \times [0, T] \\
+(\mathbf{X} , t)  \rightarrow \alpha^{-1}(\mathbf{X}, t) = (\chi, t),
+\end{align*}
+
 
 Its gradient is given by
 
 \begin{equation}
 \frac{\partial \alpha^{-1}}{\partial(\mathbf{X}, t)} = 
 \begin{pmatrix}
-\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{v}}\\
+\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{u}}\\
 \mathbf{0}^T & 1
 \end{pmatrix}
 \end{equation}
@@ -369,12 +482,12 @@ where the velocity
 
 \begin{equation}
 \label{eq:ale:4}
-\hat{\mathbf{v}} (\mathbf{X},t) = \frac{\partial \chi}{\partial t}_{|_{\mathbf{X}}}
+\hat{\mathbf{u}} (\mathbf{X},t) = \frac{\partial \chi}{\partial t} {\Big |}_{\mathbf{X}}
 \end{equation}
 
 denotes the temporal change in the reference system while keeping the material particle $\mathbf{X}$ fixed. Therefore, the velocity $\mathbf{\hat{v}}$ can be interpreted as the particle velocity in the referential domain.
 
-Since $\beta = \alpha \cdot \alpha^{-1} = \gamma(\alpha^{-1}(\mathbf{X},t))$ and obtain a relation between the different velocities by differentiating $\beta$:
+Since $\beta = \gamma \circ \alpha^{-1} = \gamma(\alpha^{-1}(\mathbf{X},t))$ and obtain a relation between the different velocities by differentiating $\beta$:
 
 \begin{align*}
 \frac{\partial \beta}{\partial (\mathbf{X},t)} (\mathbf{X},t)
@@ -386,7 +499,7 @@ In matrix form, the previous equation reads
 
 \begin{equation}
 \begin{pmatrix}
-\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v}\\
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{u}\\
 \mathbf{0}^T & 1
 \end{pmatrix} = 
 \begin{pmatrix}
@@ -394,7 +507,7 @@ In matrix form, the previous equation reads
 \mathbf{0}^T & 1
 \end{pmatrix}
 \begin{pmatrix}
-\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{v}}\\
+\frac{\partial \chi}{\partial \mathbf{X}} & \hat{\mathbf{u}}\\
 \mathbf{0}^T & 1
 \end{pmatrix}
 \end{equation}
@@ -402,13 +515,13 @@ In matrix form, the previous equation reads
 Multiplying the matrices on the right hand side, we obtain the following equation
 
 \begin{equation}
-\mathbf{v} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{v}} + \mathbf{w}
+\mathbf{u} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{u}} + \mathbf{w}
 \end{equation}
 
 that relates the different velocities. We define the \emph{convective velocity} as
 
 \begin{equation}
-\mathbf{c} := \mathbf{v-w} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{v}}
+\mathbf{c} := \mathbf{v-w} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{u}}
 \end{equation}
 
 which is the relative velocity between the material and the mesh.
@@ -417,7 +530,7 @@ In order to obtain relations between quantities to formulate the balance equatio
 To obtain a relation between the spatial description $Q$, and the material description $Q^{**}$ we use the previous the mapping $\beta$ that we have previously used:
 
 \begin{equation}
-Q^{**}(\mathbf{X},t) = Q(\beta(\mathbf{X},t),t) = Q \cdot \beta.
+Q^{**}(\mathbf{X},t) = Q(\beta(\mathbf{X},t),t) = Q \circ \beta.
 \end{equation}
 
 The gradient of $Q^{**}$ can then be computed as
@@ -440,37 +553,37 @@ or in the matrix form
 \frac{\partial Q}{\partial \mathbf{x}} & \frac{\partial Q}{\partial t}
 \end{pmatrix}
 \begin{pmatrix}
-\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{v}\\
+\frac{\partial \mathbf{x}}{\partial \mathbf{X}} & \mathbf{u}\\
 \mathbf{0}^T & 1
 \end{pmatrix} 
 \end{equation}
 
-Multiplying the matrices, we bbtain the equation that relates material and spatial derivatives:
+Multiplying the matrices, we obtain the equation that relates material and spatial derivatives:
 
 \begin{equation}
 \label{eq:ale:3}
 \frac{\partial Q^{**}}{\partial t} = \frac{\partial Q}{\partial t}
-+ \frac{\partial Q}{\partial \mathbf{x}} \cdot \mathbf{v}
++ \frac{\partial Q}{\partial \mathbf{x}} \cdot \mathbf{u}
 \end{equation}
 
-To ease notation we now recognize the material and spatial time derivatives $\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q}{\partial t}_{|_\mathbf{X}}, \,  \frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t}_{|_\mathbf{x}}$, and define the material and spatial derivatives in the following way
+To ease notation we now recognize the material and spatial time derivatives $\frac{\partial Q^{**}}{\partial t} = \frac{\partial Q}{\partial t} {\Big |}_\mathbf{X}, \,  \frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t} {\Big |}_\mathbf{x}$, and define the material and spatial derivatives in the following way
 
 \begin{equation}
-\frac{d}{dt} := 	\frac{\partial}{\partial t}_{|_\mathbf{X}} \qquad
-\frac{\partial}{\partial t} := \frac{\partial}{\partial t}_{|_\mathbf{x}}
+\frac{d}{dt} := 	\frac{\partial}{\partial t} {\Big |}_\mathbf{X} \qquad
+\frac{\partial}{\partial t} := \frac{\partial}{\partial t} {\Big |}_\mathbf{x}
 \end{equation}
 
 Now we can rewrite the relation (\ref{eq:ale:3}) can be written in the form
 
 \begin{equation}
 \label{eq:ale:6}
-\frac{d Q}{d t} = \frac{\partial Q}{\partial t} + (\mathbf{v} \cdot \nabla) Q.
+\frac{d Q}{d t} = \frac{\partial Q}{\partial t} + (\mathbf{u} \cdot \nabla) Q.
 \end{equation}
 
 The next step is to relate the material and the reference description, respectively $Q^{**} and Q^{*}$, by the mapping $\alpha$. This relation is the following
 
 \begin{equation}
-Q^{**} = Q^{*} \cdot \alpha^{-1}.
+Q^{**} = Q^{*} \circ \alpha^{-1}.
 \end{equation}
 
 By proceeding as in (\ref{eq:ale:1})-(\ref{eq:ale:2}), we obtain the relation between material and reference time derivatives:
@@ -478,10 +591,10 @@ By proceeding as in (\ref{eq:ale:1})-(\ref{eq:ale:2}), we obtain the relation be
 \begin{equation}
 \label{eq:ale:3}
 \frac{\partial Q^{**}}{\partial t} = \frac{\partial Q^{*}}{\partial t}
-+ \frac{\partial Q}{\partial \chi} \cdot \hat{\mathbf{v}}.
++ \frac{\partial Q}{\partial \chi} \cdot \hat{\mathbf{u}}.
 \end{equation}
 
-To express the spatial derivative of $Q^{*}$ in the spatial domain, we use the definition of $\hat{\mathbf{v}}$ from equation (\ref{eq:ale:4}) and obtain
+To express the spatial derivative of $Q^{*}$ in the spatial domain, we use the definition of $\hat{\mathbf{u}}$ from equation (\ref{eq:ale:4}) and obtain
 
 \begin{equation}
 \frac{\partial Q^{**}}{\partial t} = \frac{\partial Q^{*}}{\partial t}
@@ -492,7 +605,7 @@ This equation can be rewritten in the more common notation
 
 \begin{equation}
 \label{eq:ale:5}
-\frac{d Q}{d t} = \frac{\partial Q}{\partial t}_{|_\chi} + (\mathbf{c} \cdot \nabla) Q
+\frac{d Q}{d t} = \frac{\partial Q}{\partial t} {\Big |}_\chi + (\mathbf{c} \cdot \nabla) Q
 \end{equation}
 
 and it is called the \emph{fundamental ALE equation}, which states that the time derivative in the material configuration is equal to its local (reference) derivative plus a convective term, taking into account the relative difference in velocity between the two systems. These relations also hold for vector quantities.
@@ -501,37 +614,35 @@ By combining equations (\ref{eq:ale:5})-(\ref{eq:ale:6}) we have
 
 \begin{equation}
 \label{eq:ale:7}
-\frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t}_{|_\chi} - (\mathbf{w} \cdot \nabla) Q.
+\frac{\partial Q}{\partial t} = \frac{\partial Q}{\partial t} {\Big |}_\chi - (\mathbf{w} \cdot \nabla) Q.
 \end{equation}
 
 which relates the spatial time derivative to the reference time derivative.
 
-The momentum equation [PUT SOME REFERENCE FOR DERIVATION OF NAVIER STOKES] can be written in terms of the material derivatives as
 
-\begin{equation}
-\rho \frac{d \mathbf{v}}{d t} = \rho (\frac{\partial \mathbf{v}}{\partial t} + (\mathbf{v} \cdot \nabla)\mathbf{v}) = \nabla \cdot \sigma
-\end{equation}
+To write appropriate balance equations in the ALE framework we start by the balance equations written in terms of the material derivatives
+
+\begin{align}
+\frac{d \rho}{d t} &= \frac{\partial \rho}{\partial t} + \mathbf{u} \cdot \nabla \rho = - \rho \cdot \nabla \mathbf{u}, \\
+\rho \frac{d \mathbf{u}}{d t} &= \rho (\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla)\mathbf{u}) = \nabla \cdot \sigma
+\end{align}
 
 Using equation (\ref{eq:ale:7}), the spatial time derivatives can be replaced to obtain its ALE formulation
 
-\begin{equation}
-\rho (\frac{\partial \mathbf{v}}{\partial t}_{|_\chi} + (\mathbf{c} \cdot \nabla)\mathbf{v}) = \nabla \cdot \sigma. 
-\end{equation}
+\begin{align}
+\frac{\partial \rho}{\partial t} {\Big |}_\chi + \mathbf{c} \cdot \nabla \rho = - \rho \nabla \cdot \mathbf{u}, \\
+\rho (\frac{\partial \mathbf{u}}{\partial t} {\Big |}_\chi + (\mathbf{c} \cdot \nabla)\mathbf{u}) = \nabla \cdot \sigma. 
+\end{align}
 
-The previous equation holds in \emph{any} time-dependent domain which does not necessarily need to coincide with the movement of material particles. The latter also shows that in order to obtain the ALE formulation of the momentum equation from the Eulerian formulation is to replace the convective velocity with the relative velocity between the material and the mesh.
+The previous equations hold in \emph{any} time-dependent domain which does not necessarily coincide with the movement of material particles. The latter also shows that in order to obtain the ALE formulation from the Eulerian formulation is to replace the convective velocity with the relative velocity between the material and the mesh.
 
 \newpage
 
 \section{Modelling the idealized geometry of the SAS}
 
-\begin{figure}[h!]
-\todo[inline]{put two images: left spinal cord. right: rectangle with boundary labels.}
 
-  \caption{Left: spinal cord in the SAS. Right: Schematic illustration
-    of computational domain}
-\end{figure}
 
-The simulations carried out in this thesis imitate the CSF flow through a region $\Omega \subset \mathbb{R}^2$ throughout time $t \in [0, t_{\rm end}]$. Since cerebrospinal fluid consists of $99 \% $ of water [REFERENCE], it can modeled as water at $37 \deg C$ [Hentschel et al., 2010]. The region surrounding the fluid is modelled as impermeable.
+The simulations carried out in this thesis imitate the CSF flow through a region $\Omega \subset \mathbb{R}^2$ throughout time $t \in [0, t_{\rm end}]$. Since cerebrospinal fluid consists of $99 \% $ of water \cite{linge1}, it can modeled as water at $37^{\circ} C$ [Hentschel et al., 2010]. The region surrounding the fluid is modelled as impermeable.
 In the first section, we will use Navier-Stokes equation in a fixed domain to simulate the case with no movement of the boundary, while in the second one we will use the ALE formulation of Navier-Stokes equations and allow one of the boundaries to move. The table below describes the units and values used for the different parameters.
 
 \begin{table}[h!]
@@ -557,15 +668,15 @@ $\mu$ & fluid viscosity & $\frac{cm^2}{s}$ & $0.700 \cdot 10^{-2 \, [\rm a] \, }
 
 
 \subsection{Fixed boundary}
-Let us consider a two-dimensional rectangular (fixed) domain $\Omega^0 = [0, 2]
-\times [0, 60]$, representing the right portion of the subarachnoid space, between the spinal cord and the surrounding tissue from C1 to C7 vertebrae, approximately. We define the
+Let us consider a two-dimensional rectangular (fixed) domain $\Omega^0 = [0, 4]
+\times [0, 40]$, representing the right portion of the subarachnoid space, between the spinal cord and the dura mater from C1 to C5 vertebrae, approximately. We define the
 \begin{itemize}
 \item
-  top boundary: $\partial \Omega_{\rm top}^0 = \{ (x, y) | y = 60\}$;
+  top boundary: $\partial \Omega_{\rm top}^0 = \{ (x, y) | y = 40\}$;
 \item
   bottom boundary: $\partial \Omega_{\rm bottom}^0 = \{ (x, y) | y = 0\}$;
 \item
-  tissue boundary: $\partial \Omega_{\rm tissue}^0 = \{ (x, y) | x = 2\}$;
+  tissue boundary: $\partial \Omega_{\rm tissue}^0 = \{ (x, y) | x = 4\}$;
 \item
   cord boundary: $\partial \Omega_{\rm cord}^0 = \{ (x, y) | x = 0\}$;
 \end{itemize}
@@ -573,6 +684,32 @@ and thus $\partial \Omega^0 = \partial \Omega_{\rm top}^0 \cup
 \partial \Omega_{\rm bottom}^0 \cup \partial \Omega_{\rm cord}^0 \cup
 \partial \Omega_{\rm tissue}^0$.
 
+
+
+\begin{figure}[h!]
+\begin{minipage}[b]{.5\textwidth}
+\centering
+\includegraphics[width=.9\textwidth]{images/sas2}
+\caption{Spinal cord in the SAS.}
+\label{img:cns:3}
+\end{minipage}
+\begin{minipage}[b]{.4\textwidth}
+\centering
+\begin{tikzpicture}
+\node[
+      draw,
+      minimum height=5cm,
+      minimum width=1.5cm,
+      label=0:$\partial \Omega^0_{\rm tissue}$,%< -- This uses angle zero degree on the border for the location
+      label=west:$\partial \Omega^0_{\rm cord}$, %< -- This uses an anchor of the node for the location
+      label=north:$\partial \Omega^0_{\rm top}$,
+      label=south:$\partial \Omega^0_{\rm bottom}$
+] at (0,1.5) {$\Omega$};
+\end{tikzpicture}
+\caption{Schematic illustration of computational domain.}
+\label{img:cns:4}
+\end{minipage}
+\end{figure}
 
 
 We set the following boundary condition on $\partial \Omega^0$: on the boundaries $\partial \Omega_{\rm cord}^0$ and $\partial \Omega_{\rm tissue}^0$ we set the so called \emph{no-slip condition} $\mathbf{u = 0}$, i.e. the fluid velocity on those boundaries is zero. This condition does not allow the fluid to flow through the boundaries.
@@ -587,12 +724,26 @@ In order to simulate an oscillatory fluid flow, we set a pressure difference on 
 
 where $\bar{p}(t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 9kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
 
-\begin{figure}
-
-\todo[inline]{put the rectangle with the corresponding boundary conditions.}
-
-  \caption{Boundary conditions applied on $\partial \Omega^0$}
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\node[
+      draw,
+      minimum height=5cm,
+      minimum width=1.5cm,
+      label=0:$\mathbf{u = 0}$,%< -- This uses angle zero degree on the border for the location
+      label=west:$\mathbf{u = 0}$, %< -- This uses an anchor of the node for the location
+      label=north:$\sigma \cdot \mathbf{n} \equiv - \bar{p} \, \mathbf{n}$,
+      label=south:$\sigma \cdot \mathbf{n} \equiv \mathbf{0} $
+] at (0,1.5) {$\Omega$};
+\end{tikzpicture}
+\caption{Boundary conditions on the spinal cord for both fixed and moving domain.}
+\label{img:cns:4}
 \end{figure}
+
+%\caption{Boundary conditions applied on $\partial \Omega^0$}
+
+\newpage
 
 
 \subsection{Moving boundary}
@@ -668,10 +819,21 @@ be zero (i.e.~the mesh boundary is fixed) on the remaining boundary:
 
 where $\bar{\mathbf{w}} = (B \cdot sin(4\pi t) \cdot \frac{1}{\sqrt{2 \pi s^2}} \, e^{- \frac{1}{2} \, \frac{(y - m)^2}{s^2}}  , 0)$, and $s = 3$ and $m = 6$ are respectively the variance and the mean value of the gaussian function. We multiplied the gaussian function by a sine in order to simulate oscillatory movement of the mesh, and the quantity $B$ is the amplitude of the movement. In our simulations we will use different amplitudes of the movement, in order to compare quantities to understand if the movement of the mesh plays a role in the CSF flow.
 
-\begin{figure}
-
-\todo[inline]{put the rectangle with the corresponding boundary conditions for the mesh velocity}
-
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\node[
+      draw,
+      minimum height=5cm,
+      minimum width=1.5cm,
+      label=0:$\mathbf{w = \bar{w}}$,%< -- This uses angle zero degree on the border for the location
+      label=west:$\mathbf{w = 0}$, %< -- This uses an anchor of the node for the location
+      label=north:$\mathbf{w \equiv 0}$,
+      label=south:$\mathbf{w \equiv 0}$
+] at (0,1.5) {$\Omega$};
+\end{tikzpicture}
+\caption{Boundary conditions for the mesh velocity in the moving domain.}
+\label{img:cns:5}
 \end{figure}
 
 
@@ -684,6 +846,117 @@ In order to simplify the notation, in the following sections we are going to dro
 \chapter{Numerical methods}
 
 \section{Finite element formulation}
+The Finite Element Method, or FEM, is a popular discretization technique for engineering design and analysis. In this section a brief overview on the topic will be given. In order to solve numerically Navier-Stokes equations using FEM, we used the finite element library FEniCS, a popular open-source computing platform for solving partial differential equations (PDEs). FEniCS enables users to quickly translate scientific models into efficient finite element code. For a complete and detailed description, we invite the reader to consult \cite{quarteroni1} and \cite{logg}. \\
+
+Let us start from the Poisson problem
+\begin{align}
+\label{eq:fem:1}
+- \Delta \mathbf{u} &= \mathbf{f} &&\text{in } \Omega \\
+\mathbf{u} &= \mathbf{u}_0 &&\text{on } \partial \Omega
+\end{align}
+
+where $\mathbf{u}(x,y)$ is the unknown function, $\mathbf{f} = \mathbf{f}(x,y)$ is a prescribed function, $\Delta$ is the Laplace operator (also written as $\nabla^2$), $\Omega$ is the spatial domain, and $\partial \Omega$ is the boundary of $\Omega$. This problem, with a complete set of boundary conditions, is called a \emph{boundary-value problem}.
+
+The Poisson equation (\ref{eq:fem:1}) arises in many physical contexts, like heat conduction, diffusion of substances, and inviscid fluid flow. In order to solve a physical problem using FEniCS we first need to identify the PDE and its boundary conditions. Then write the PDE problem in its \emph{variational formulation}, and then make a program where we translates the mathematical problem in Python code.
+
+A variational formulation is obtained multiplying the PDE by a function $\mathbf{v}$, integrate the resulting equation over $\Omega$, and perform integration by parts of terms with second-order derivatives. The function $\mathbf{v}$ is called a \emph{test function}. The unknown function $\mathbf{u}$ to be approximated is called a \emph{trial function}. These functions lie in function spaces that we will define later. First, let us multiply the Poisson equation by the test function $\mathbf{v}$ and integrate
+
+\begin{equation}
+\label{eq:fem:2}
+- \int_\Omega (\Delta \mathbf{u}) \mathbf{v} dx = \int_\Omega \mathbf{f} \mathbf{v} dx.
+\end{equation}
+
+Then we integrate by parts the integrand with the second-order derivative
+
+\begin{equation}
+\label{eq:fem:3}
+- \int_\Omega (\Delta \mathbf{u}) \mathbf{v} dx =
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
+- \int_\partial \Omega \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} ds.
+\end{equation}
+
+where $\partial \mathbf{u}/\partial \mathbf{n}$ is the derivative of $\mathbf{u}$ in the outward normal direction on the boundary. The test function $\mathbf{v}$ is required to vanish on the parts of the boundary where $\mathbf{u}$ is known, which in the current problem means that $\mathbf{v} = \mathbf{0}$ on the whole boundary $\Omega$. The second term on the right-hand side of (\ref{eq:fem:3}) therefore vanishes. From (\ref{eq:fem:2}) and (\ref{eq:fem:3}) follows that
+
+\begin{equation}
+\label{eq:fem:4}
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx = \int_\Omega \mathbf{f} \mathbf{v} \, dx. 
+\end{equation}
+
+This equation has to hold for all $\mathbf{v}$ in some function space $\hat{V}$. The trial function $\mathbf{u}$ lies in some function space $V$. We refer to (\ref{eq:fem:4}) as the \emph{weak form} of the original boundary-value problem (\ref{eq:fem:1}).
+Hence, we want to find $\mathbf{u} \in V$ such that
+
+\begin{equation}
+\label{eq:fem:5}
+\int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx = \int_\Omega \mathbf{f} \mathbf{v} \, dx \qquad \forall \mathbf{v} \in \hat{V}.
+\end{equation}
+
+The trial and test space $V$ and $\hat{V}$ are in the present problem defined as
+
+\begin{align}
+V &= \set{\mathbf{v} \in [H^1(\Omega)]^2 | \mathbf{v} = \mathbf{u}_0 \text{ on } \partial \Omega}  \\
+\hat{V} &= \set{\mathbf{v} \in [H^1(\Omega)]^2 | \mathbf{v} = \mathbf{0} \text{ on } \partial \Omega}, 
+\end{align}
+
+where $H^1(\Omega)$ is the Sobolev space
+
+\begin{equation}
+H^1(\Omega) = \set {v: \Omega \rightarrow \mathbb{R}  | \int_\Omega [v^2 + (\nabla v)^2]dx < \infty }. 
+\end{equation}
+
+In other words, using functions from these spaces, we are guaranteed that the integrals involved in the variational form are bounded. \\
+
+To solve the Poisson equation numerically, we need to transform the continuous variational problem (\ref{eq:fem:5}) to a discrete variational problem. This is done by introducing the finite-dimensional test and trial spaces, often denoted as $V_h \subset V$ and $\hat{V}_h \subset \hat{V}$. The discrete variational problem reads: find $\mathbf{u}_h \in V_h \subset V$ such that 
+
+\begin{equation}
+\label{eq:fem:6}
+\int_\Omega \nabla \mathbf{u}_h \cdot \nabla \mathbf{v}_h \, dx = \int_\Omega \mathbf{f} \, \mathbf{v}_h \, dx \qquad \forall \mathbf{v}_h \in \hat{V}_h \subset \hat{V}.
+\end{equation}
+
+The choice of $V_h$ and $\hat{V}_h$ depends on the kind of finite elements we want to apply to our problem. For example, choosing the linear triangular element with three nodes implies that $V_h$ and $\hat{V}_h$ are the spaces of all piecewise linear function over a mesh of triangles, where the functions in $\hat{V}_h$ are zero on the boundary and those in $V_h$ equal $\mathbf{u}_0$ on the boundary.
+
+The mathematics literature on the variational problems writes $\mathbf{u}_h$ for the solution of the discrete problem and $\mathbf{u}$ for the solution of the continuous problem. We introduce a notation for a linear weak form like (\ref{eq:fem:6}):
+
+\begin{equation}
+a(\mathbf{u}, \mathbf{v}) = L(\mathbf{v}),
+\end{equation}
+
+where in our case we have
+
+\begin{align}
+a(\mathbf{u}, \mathbf{v}) &= \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} \, dx, \\ 
+L(\mathbf{v}) &= \int_\Omega \mathbf{f} \mathbf{v} dx.
+\end{align}
+
+The term $a(\mathbf{u}, \mathbf{v})$ is known as \emph{bilinear form} and $L(\mathbf{v})$ as a \emph{linear form}. In every linear problem we solve we shall identify the terms with the unknown $\mathbf{u}$ and collect them in $a(\mathbf{u}, \mathbf{v})$, and collect all the terms with only known functions in $L(\mathbf{v})$. The approximate version $a(\mathbf{u}_h, \mathbf{v}_h) = L(\mathbf{v}_h)$ is also called \emph{Galerkin problem}.
+
+Let us now denote with $N_h = \text{dim } V_h $ the dimension of $V_h$ and let $\set{\phi_j, j = 1,2, \ldots, N_h }$ be a basis of $V_h$. In order for (\ref{eq:fem:6}) to be valid, it suffices that it holds for each function of the basis, as all the functions in the space $V_h$ are a combination of the $\phi_j$. We will then require that
+
+\begin{equation}
+\label{eq:fem:7}
+a(\mathbf{u}_h, \phi_i) = L(\phi_i), \quad i = 1,2, \ldots, N_h.
+\end{equation}
+
+Since $\mathbf{u}_h = V_h$,
+
+\begin{equation}
+\mathbf{u}_h = \sum_{j=1}^{N_h} u_j \phi_j,
+\end{equation}
+
+where the $u_j, j=1, \ldots, N_h$ are unknown coefficients. Equation $\ref{eq:fem:7}$ then becomes
+
+\begin{equation}
+\sum_{j=1}^{N_h} u_j a(\phi_j, \phi_i) = L(\phi_i), \quad i = 1,2, \ldots, N_h.
+\end{equation}
+
+By setting $a_{ij} = a(\phi_j, \phi_i)$ and $f_i = L(\phi_i)$ we write the linear system
+
+\begin{equation}
+A \mathbf{x} = \mathbf{b},
+\end{equation}
+
+where $\mathbf{x}$ is the vector having as components the unknown coefficients $u_j$, $\mathbf{b}$ is the vector with components $f_i$, and A is the \emph{stiffness matrix} with coefficients $a_{ij}$.
+
+
 
 \section{Weak formulation of N-S on fixed domain}
 
@@ -974,13 +1247,6 @@ for all $ \mathbf{z} \in \hat{W}$.
 
 
 
-
-
-
-
-\section{FEniCS}
-\todo[inline]{Something about FEniCS}
-
 \section{Numerical scheme}
 
 \subsection{Time discretization}
@@ -1003,13 +1269,13 @@ The convective term may be written as
 \begin{equation}
 \rho [\nabla \mathbf{u} \cdot \mathbf{u}]^{i+1/2} = \rho \, \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^{i+1/2}.
 \end{equation}
-As in [PUT REFERENCE], we linearize the term above with
+We can linearize the term above with
 
 \begin{equation}
 \rho \, \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^{i+1/2} \approx \rho \nabla \mathbf{u}^{i+1/2} \cdot \mathbf{u}^i.
 \end{equation}
 
-The resulting discretization yields to
+as also done in \cite{logg}. The resulting discretization yields to
 
 \begin{align}
 \label{eq:ns:10}
@@ -1073,8 +1339,6 @@ Repeating the same procedure but starting from the N-S equations in the moving d
 
 \section{Navier-Stokes equations on a fixed mesh}
 
-\todo[inline]{Say something about difference verification/validation and MMS}
-
 % References:
 % Haga
 % FEniCS book page 390
@@ -1083,10 +1347,10 @@ Repeating the same procedure but starting from the N-S equations in the moving d
 A test problem for which we can easily check the answer is performed using the method of \textit{manufactured solutions} (MMS). The idea behind MMS is the following: we use an exact solution to some PDE that has been constructed by solving the problem \textit{backwards}. Let us suppose we want to solve a differential equation of the form
 
 \[
-Du = g,
+D \mathbf{u} = \mathbf{g},
 \]
 
-where $D$ is the differential operator, $u$ is the solution, and $g$ is a source term. In the method of exact solution (MES), one chooses the function $g$ and then inverts the operator in order to solve for $u$. In MMS, one first manufactures a solution $u$, and then applies $D$ to $u$ to find $g$. \\
+where $D$ is the differential operator, $\mathbf{u}$ is the solution, and $\mathbf{g}$ is a source term. In the method of exact solution (MES), one chooses the function $\mathbf{g}$ and then inverts the operator in order to solve for $\mathbf{g}$. In MMS, one first manufactures a solution $\mathbf{u}$, and then applies $D$ to $\mathbf{u}$ to find $\mathbf{g}$. \\
 
 
 
@@ -1293,7 +1557,7 @@ $ 64$ & $ 0.015625 $ & $1.2541 \times 10^{-12}$ & $1.6649 \times 10^{-11}$ &  $ 
 
 % Should I add some theory on this?
 
-A typical test problem is finding the solution of the Navier-Stokes equations in a two-dimensional pressure-driven channel. We consider a viscous flow between parallel plates, where the geometry is the unit square $[0,1]^2$, and the kinematic viscosity is $\nu = 1/8$. We assume that both plates are fixed, i.e. no-slip boundary conditions are applied to the velocity at the upper and lower walls, and Neumann boundary conditions $\sigma \cdot \vec{n} = 0$ are applied at the inlet and outlet. Dirichlet boundary conditions are applied to the pressure at the inlet and outlet, with $p = 1$ at the inlet and $p = 0$ at the outlet. The initial condition for the velocity is $\mathbf{u} = (0,0)$. As a reference value in order to verify the agreement of our solution, we use the $x$-component of the velocity at the point $(x, y) = (1, 0.5)$ at final time $T = 0.5 $. The value reported on the FEniCS book [PUT REFERENCE] is $u_x(1, 0.5, T=0.5) \approx 0.44321183655681595$, while the one obtained in our results is $0.443217320106$.
+A typical test problem is finding the solution of the Navier-Stokes equations in a two-dimensional pressure-driven channel. We consider a viscous flow between parallel plates, where the geometry is the unit square $[0,1]^2$, and the kinematic viscosity is $\nu = 1/8$. We assume that both plates are fixed, i.e. no-slip boundary conditions are applied to the velocity at the upper and lower walls, and Neumann boundary conditions $\sigma \cdot \vec{n} = 0$ are applied at the inlet and outlet. Dirichlet boundary conditions are applied to the pressure at the inlet and outlet, with $p = 1$ at the inlet and $p = 0$ at the outlet. The initial condition for the velocity is $\mathbf{u} = (0,0)$. As a reference value in order to verify the agreement of our solution, we use the $x$-component of the velocity at the point $(x, y) = (1, 0.5)$ at final time $T = 0.5 $. The value reported on the FEniCS book \cite{logg} is $u_x(1, 0.5, T=0.5) \approx 0.44321183655681595$, while the one obtained in our results is $0.443217320106$.
 
 \begin{figure}[h!]
 \centering
@@ -1340,90 +1604,90 @@ where $\omega$ is the vorticity given by
 \]
 
 
-As a reference value, we use the one reported on the FEniCS book [REFERENCE], where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$.
+As a reference value, we use the one reported on the FEniCS book \cite{logg}, where the solution at the final time $T = 2.5$ was computed using the spectral element code Semtex with up to $80 \times 80$ $10^{th}$ order elements, heavily refined in the area in the vicinity of the minimum of the stream function. The time-stepping for computing the reference solution was handled by a third order implicit discretization, and a very short time step was used to minimize temporal errors.  The obtained reference value was $min(\psi) = -0.061 077$.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{images/oyvind.png}
 \vspace{-1cm}
-\caption{Driven cavity. The plot shows the stream function, and its minimum value $-0.06097$. This reference solution is taken from an already validated code (reference to OASIS).}
+\caption{Driven cavity. The plot shows the stream function, and its minimum value $-0.06097$. This reference solution is taken from an already validated code \cite{mortensen}.}
 \end{figure}
 
 
 In our case, a Crank-Nicolson (second order) discretization was used, with $\theta = 0.5$. A $64 \times 64$ number of elements was used, with $dt = 0.0125$ as time step. Hence, the obtained value was $min(\psi) = -0.061 121$, in fair agreement with the reference one. \\
 
 \vspace{-.3cm}
-\begin{figure}[ht]
+\begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{images/mine.png}
 \vspace{-1cm}
 \caption{Driven cavity. The plot shows the stream function, and its minimum value $-0.061 121$.}
 \end{figure}
 
-
-\subsection{Nitsche's method}
-Now we want to use the Nitsche method to the driven cavity test case, in order to apply Dirichlet boundary conditions in a weak way. We consider a square cavity $\Omega$ with sides of unit length, i.e. $\Omega = [0,1] \times [0,1]$, kinematic viscosity $\nu = 1/1000$, and density $\rho = 1$. No-slip boundary conditions are imposed on left and bottom edges of the square, except at the upper edge where the velocity is set to $\mathbf{u} = (1,0)^T$, as follows
-
-\[
-\begin{cases}
-\mathbf{u} = (0, 0)^T, & \mbox{on } \partial \Omega \backslash (\Gamma_1 \cup \Gamma_2) \\
-\mathbf{u} = (1, 0)^T, & \mbox{on } \Gamma_1
-\end{cases}
-\]
-
-where $ \Gamma_1 = \set{ (x,y)^T \in \partial \Omega | y = 1}$ and
-$ \Gamma_2 = \set{ (x,y)^T \in \partial \Omega | x = 1}$. On the boundary $\Gamma_2$ we will apply the condition $\mathbf{u} = \mathbf{g} = (0,0)^T$ in a weakly way using Nitsche's method. Substituting (\ref{eq:green}) in (\ref{eq:ns:9}) we have
-
-\begin{align}
-\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
-\end{align}
-
-Since we are applying Dirichlet boundary conditions on $\partial \Omega \backslash \Gamma_2$, $\mathbf{v} = (0,0)$, hence 
-
-\begin{align}
-\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-- \int_{\Gamma_2} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
-\end{align}
-
-and from (\ref{eq:bc:5}), the latter can be written as
-
-\begin{align}
-\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-- \int_{\Gamma_2} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds
-= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
-\end{align}
-
-We now apply the Nitsche method on the boundary term $\Gamma_2$, that leads to
-
-\begin{align}
-\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
-+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
-+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
-- \int_{\Gamma_2} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, ds
-- \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{u} \, ds
-+ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{u \, v} ds \\
-= - \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{g} \, ds
-+ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{g \, v} ds
-+  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
-\end{align}
-
-A $128 \times 128$ number of elements was used with $dt = 0.0125$ as time step. The obtained value was $min(\psi) = -0.0597826179273$. 
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{images/stream_function_nitsche.png}
-\vspace{-1cm}
-\caption{Driven cavity with Nitsche. The plot shows the stream function, and its minimum value $-0.05978$.}
-\end{figure}
+%
+%\subsection{Nitsche's method}
+%Now we want to use the Nitsche method to the driven cavity test case, in order to apply Dirichlet boundary conditions in a weak way. We consider a square cavity $\Omega$ with sides of unit length, i.e. $\Omega = [0,1] \times [0,1]$, kinematic viscosity $\nu = 1/1000$, and density $\rho = 1$. No-slip boundary conditions are imposed on left and bottom edges of the square, except at the upper edge where the velocity is set to $\mathbf{u} = (1,0)^T$, as follows
+%
+%\[
+%\begin{cases}
+%\mathbf{u} = (0, 0)^T, & \mbox{on } \partial \Omega \backslash (\Gamma_1 \cup \Gamma_2) \\
+%\mathbf{u} = (1, 0)^T, & \mbox{on } \Gamma_1
+%\end{cases}
+%\]
+%
+%where $ \Gamma_1 = \set{ (x,y)^T \in \partial \Omega | y = 1}$ and
+%$ \Gamma_2 = \set{ (x,y)^T \in \partial \Omega | x = 1}$. On the boundary $\Gamma_2$ we will apply the condition $\mathbf{u} = \mathbf{g} = (0,0)^T$ in a weakly way using Nitsche's method. Substituting (\ref{eq:green}) in (\ref{eq:ns:9}) we have
+%
+%\begin{align}
+%\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%- \int_{\partial \Omega} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
+%= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+%\end{align}
+%
+%Since we are applying Dirichlet boundary conditions on $\partial \Omega \backslash \Gamma_2$, $\mathbf{v} = (0,0)$, hence 
+%
+%\begin{align}
+%\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%- \int_{\Gamma_2} (\mu \nabla \mathbf{u} - pI) \cdot \mathbf{n} \, \mathbf{v} \, ds.
+%= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+%\end{align}
+%
+%and from (\ref{eq:bc:5}), the latter can be written as
+%
+%\begin{align}
+%\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%- \int_{\Gamma_2} (\mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} -  p \mathbf{n}) \, \mathbf{v} \, ds
+%= \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+%\end{align}
+%
+%We now apply the Nitsche method on the boundary term $\Gamma_2$, that leads to
+%
+%\begin{align}
+%\int_{\Omega} \rho \dot{\mathbf{u}} \, \mathbf{v} \, dx
+%+ \int_{\Omega} \rho \nabla \mathbf{u} \cdot (\mathbf{u} - \mathbf{w}) \, \mathbf{v} \, dx
+%+ \int_{\Omega} (\mu \nabla \mathbf{u} - pI) \cdot \nabla \mathbf{v} \, dx \\
+%- \int_{\Gamma_2} \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \, \mathbf{v} \, ds
+%- \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{u} \, ds
+%+ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{u \, v} ds \\
+%= - \int_{\Gamma_2} \mu \frac{\partial \mathbf{v}}{\partial \mathbf{n}}  \, \mathbf{g} \, ds
+%+ \frac{\gamma}{h} \int_{\Gamma_2} \mathbf{g \, v} ds
+%+  \int_{\Omega} \mathbf{f} \mathbf{v} \, dx.
+%\end{align}
+%
+%A $128 \times 128$ number of elements was used with $dt = 0.0125$ as time step. The obtained value was $min(\psi) = -0.0597826179273$. 
+%
+%\begin{figure}[ht]
+%\centering
+%\includegraphics[width=\textwidth]{images/stream_function_nitsche.png}
+%\vspace{-1cm}
+%\caption{Driven cavity with Nitsche. The plot shows the stream function, and its minimum value $-0.05978$.}
+%\end{figure}
 
 \newpage
 
@@ -1431,7 +1695,7 @@ A $128 \times 128$ number of elements was used with $dt = 0.0125$ as time step. 
 \subsection{Parabolic inlet velocity with fixed mesh motion}
 In this section we add a fixed mesh motion to the test case in section \ref{parabolic inlet}. We start from the NS equations with ALE term written in the form (\ref{eq:ns:1})-(\ref{eq:ns:2}) with $\mu = 1/8$. In our case, the rigid motion will be given by the vector $\mathbf{w} = [0.05, 0.05]^T$. The solution is qualitatively the same as in section \ref{parabolic inlet}, as shown by the following plot, where we plotted the velocity profile between the points $(0.5, 0)$ and $(0.5, 1)$.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{images/velocity_moving.png}
 \caption{caption}
@@ -1439,6 +1703,128 @@ In this section we add a fixed mesh motion to the test case in section \ref{para
 
 \chapter{SAS simulations}
 
+\section{Mesh refinement on the fixed mesh}
+The first step is to ensure that our solution to the Navier-Stokes equations that we solved numerically is grid independent. To this purpose, we did a mesh refinement test on the rectangular mesh, which consists of $N$ elements on shorter boundaries (top and bottom), and $10 \cdot N$ element on the longer one (cord and tissue). We then plotted the $x$ component of the velocity field $\mathbf{v}$ in the point $(x,y) = (2, 60)$ and compared it for different values of $N$. The time step is $\Delta t = 0.00625$. 
+
+\begin{figure}[h!]
+
+\centering
+\includegraphics[width=\textwidth]{images/mesh_refinement}
+\caption{Plot of the $x$ component of the velocity field in the point $(x,y)=(2,60)$.}
+\label{img:sas:1}
+\end{figure}
+
+From the mesh refinement study we decided to use $N=2^3$ for the further simulations since it is a good compromise between accuracy and computational cost.
+We can see that the flow needs several cycles to fully develop, and that is why in the future simulations we will focus only on the last cycle.
+
+
+\section{Comparison between fixed and moving meshes}
+We now want to compare different quantities between the fixed and the moving meshes. 
+
+
+
 \chapter{Conclusions}
+
+
+\begin{thebibliography}{100}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibitem{alperin1} N. Alperin, J. R. Loftus, A. M. Bagci, S. H. Lee, C. J. Oliu, A. H. Shah, B. A. Green, \emph{Magnetic resonance imaging- based methods measures predictive of short-term surgical outcome in patients with Chiari malformation Type I: a pilot study}, J. Neurosurg. Spine, 2016.
+
+\bibitem{alperin2} N. J. Alperin, S. H. Lee, F. Loth, P. B. Raksin, T. Lichtor, \emph{MR-Intracranial Pressure (ICP): a method to measure intracranial elastance and pressure noninvasively by means of MR imaging: baboon and humany study}, Radiology, 2000.
+
+\bibitem{barth} W. L. Barth and G. F. Carey, \emph{On a boundary condition for pressure-driven laminar flow of incompressible fluids}, International journal for numerical methods in fluids, vol. 54, no. 11, pp. 1313–1325, 2007.
+
+
+\bibitem{bejjani} G. K. Bejjani, \emph{Definition of the adult Chiari malformation: a brief historical overview}, Neurosurg Focus, 2001; 11(1).
+
+\bibitem{brenner} S. Brenner and R. Scott, \emph{The mathematical theory of finite element methods}, vol. 15. Springer Science \& Business Media, 2007.
+
+\bibitem{clarke} E. C. Clarke, D. F. Fletcher, M. A. Stoodley, and L. E. Bilston, \emph{Computational fluid dynamics modelling of cerebrospinal fluid pressure in Chiari malformation and syringomyelia}, Journal of biomechanics, vol. 46, no. 11, pp. 1801–1809,
+2013.
+
+\bibitem{dolar} M. T. Dolar, V. M. Haughton, B. J. Iskandar, M. Quigley, \emph{Effect of Craniocervical Decompression on peak CSF velocities in symptomatic patients with Chiari I malformation}, AJNR Am. J. Neuroradiol. 25:142-145, 2004.
+
+\bibitem{donea} J. Donea, A. Huerta, J. Ponthot, A. Rodriguez-Ferran, \emph{Arbitrary Lagrangian-Eulerian Methods} Encyclopedia of Computational Mechanics Vol. 1, Wiley \& Sons, 2004.
+
+\bibitem{drosdal} I. N. Drosdal, \emph{Porous and viscous modeling of cerebrospinal fluid flow in the spinal canal associated with syringomyelia}, 2011.
+
+\bibitem{duarte} F. Duarte, R. Gormaz, S. Natesan, \emph{Arbitrary Lagrangian-Eulerian method for Navier-Stokes equations with moving boundaries}, Comput. Methods Appl. Mech. Engrg, 193 (2004) 4819-4836.
+
+\bibitem{fletcher} T. M. Fletcher, B. Wirthl, A. G. Kolias, H. Adams, P. J. A. Hutchinson, M. P. F. Sutcliffe, \emph{Modelling of brain deformation after decompressive craniectomy}, Annals of Biomedical Engineering, 2016.
+
+\bibitem{goriely} A. Goriely, M. G. D. Geers, G. A. Holzapfel, J. Jayamohan, A. Jérusalem, S. Sivaloganathan, W. Squier, J. A. W. van Dommelen, S. Waters, E. Kuhl., \emph{Mechanics of the brain: perspectives, challenges, and opportunities}, Biomech. Model. Mechanobiol. 14: 931-965, 2015.
+
+
+\bibitem{greitz} D. Greitz, \emph{Unraveling the riddle of syringomyelia}, Neurosurg. Rev. (2006), 29: 251-264.
+
+\bibitem{haughton1} V. M. Haughton, F. R. Korosec, J. E. Medow, M. T. Dolar, and B. J. Iskan- dar, \emph{Peak systolic and diastolic CSF velocity in the foramen magnum in adult patients with Chiari I malformations and in normal control participants},” American Journal of Neuroradiology, vol. 24, no. 2, pp. 169-176, 2003.
+
+\bibitem{haughton2} V. Haughton and K.-A. Mardal, \emph{Spinal fluid biomechanics and imaging: an update for neuroradiologists}, American Journal of Neuroradiology, vol. 35, no. 10, pp. 1864–1869, 2014.
+
+
+\bibitem{he} Y. He, W. Sun, \emph{Stability and convergence of the Crank-Nicolson/Adams-Bashforth scheme for the time-dependent Navier-Stokes equations}, SIAM J. Numer. Anal. Vol. 45, No. 2, 837-869.
+
+\bibitem{heiss} J. D. Heiss, G. Suffredini, K. D. Bakhtian, M. Sarntinoranont, E. H. Oldfield, \emph{Normalization of hindbrain morphology after decompression of Chiari malformation Type I}, J. Neurosurg 117:942:946, 2012.
+
+
+\bibitem{hron} J. Hron, S. Turek, \emph{A monolithic FEM/multigrid solver for an ALE formula- tion of fluid-structure interaction with applications in biomechanics}. Springer, 2006.
+
+\bibitem{iskandar} B. J. Iskandar, M. Quigley, V. M. Haughton, \emph{Foramen magnum cerebrospinal fluid flow characteristics in children with Chiari I malformation before and after craniovertebral decompression}, J. Neurosurg. (Pediatrics 2) 101: 169-178, 2004.
+
+
+\bibitem{linge1}  S. Linge, V. Haughton, A. E. Løvgren, K.-A. Mardal, A. Helgeland, and H. P. Langtangen, \emph{Effect of tonsillar herniation on cyclic CSF flow studied with computational flow analysis}, American Journal of Neuroradiology, vol. 32, no. 8, pp. 1474–1481, 2011.
+
+\bibitem{linge2} S. O. Linge, K.-A. Mardal, A. Helgeland, J. D. Heiss, and V. Haughton, \emph{Effect of craniovertebral decompression on CSF dynamics in chiari malformation type i studied with computational fluid dynamics: Laboratory investigation}, Journal of neurosurgery. Spine, vol. 21, no. 4, p. 559, 2014.
+
+\bibitem{linge3} S. Linge, V. Haughton, A. Løvgren, K. Mardal, and H. Langtangen, \emph{CSF flow dynamics at the craniovertebral junction studied with an idealized model of the subarachnoid space and computational flow analysis}, American Journal of Neuroradiology, vol. 31, no. 1, pp. 185-192, 2010.
+
+
+\bibitem{logg} A. Logg, K.-A. Mardal, and G. Wells, \emph{Automated solution of differential equations by the finite element method: The FEniCS book}, vol. 84. Springer Science \& Business Media, 2012.
+
+
+\bibitem{martin1} B. A. Martin and F. Loth, \emph{The influence of coughing on cerebrospinal fluid pressure in an in vitro syringomyelia model with spinal subarachnoid space stenosis}, Cerebrospinal Fluid Res, vol. 6, no. 1, p. 17, 2009.
+
+\bibitem{martin2} B. A. Martin, R. Labuda, T. J. Royston, J. N. Oshinski, B. Iskandar, and F. Loth, \emph{Spinal subarachnoid space pressure measurements in an in vitro spinal stenosis model: implications on syringomyelia theories}, Journal of Biomechanical Engineering, vol. 132, no. 11, p. 111007, 2010.
+
+\bibitem{martin3} B. A. Martin, W. Kalata, F. Loth, T. J. Royston, and J. N. Oshinski, \emph{Sy ringomyelia hydrodynamics: an in vitro study based on in vivo measurements}, Journal of biomechanical engineering, vol. 127, no. 7, pp. 1110-1120, 2005.
+
+\bibitem{martin4} B. A. Martin, R. Labuda, T. J. Royston, J. N. Oshinski, B. Iskandar, and F. Loth, \emph{Pathological biomechanics of cerebrospinal fluid pressure in syringomyelia: Fluid structure interaction of an in vitro coaxial elastic tube system}, pp. 941-942, 2009.
+
+\bibitem{martin5} B. A. Martin, W. Kalata, F. Loth, T. J. Royston, J. N. Oshinski, \emph{Syringomyelia Hydrodynamics: an in vitro study based on in vivo measurements}, Journal of Biomechanical Engineering, vol. 127, December 2005.
+
+\bibitem{mortensen} M. Mortensen, K. Valen-Sendstad, \emph{Oasis: a high-level/high performance open source Navier-Stokes solver}, Computer Physics Communications, Vol. 188, pp. 177-188, 2016.
+
+\bibitem{quarteroni1} A. Quarteroni, A. Valli, \emph{Numerical approximation of partial differential equations}, Springer, 2008.
+\bibitem{quarteroni2} A. Quarteroni, \emph{Numerical Models for Differential Problems}, Springer, 2014.
+
+\bibitem{raksin} P. B. Raksin, N. Alperin, A. Sivaramakrishnan, S. Surapaneni, T. Lichtor, \emph{Noninvasive intracranial compliace and pressure based on dynamic magnetic resonance imaging of blood flow and cerebrospinal fluid flow}, Neurosurg. Focus 2003; 14(4).
+
+\bibitem{reynolds} O. Reynolds, \emph{Papers on Mechanical and Physical Subjects, The Sub-Mechanics of the Universe}, vol. 3. Cambridge University Press, Cambridge, 1903.
+
+\bibitem{rutkowska1}  G. Rutkowska, V. Haughton, S. Linge, and K.-A. Mardal, \emph{Patient-specific 3d simulation of cyclic CSF flow at the craniocervical region}, American Journal of Neuroradiology, vol. 33, no. 9, pp. 1756–1762, 2012.
+
+\bibitem{rutkowska2} G. Rutkowska, \emph{Computational fluid dynamics in patient-specific models of normal and Chiari I geometries}, 2011.
+
+\bibitem{silverthorn} D.U. Silverthorn, \emph{Human Physiology}, 7th edition.
+
+\bibitem{sivarama} A. Sivaramakrishnan, N. Alperin, S. Surapaneni, T. Lichtor, \emph{Evaluating the effet of decompression surgery on cerebrospinal fluid flow and intracranial compliance in patients with Chiari malformation with magnetic resonance imaging flow studies}, Neurosurgery, 55:1344-1351, 2004.
+
+\bibitem{stoverud1} K. H. Støverud, M. Alnæs, H. P. Langtangen, V. Haughton, and K.-A. Mardal, \emph{Poro-elastic modeling of syringomyelia–a systematic study of the effects of pia mater, central canal, median fissure, white and gray matter on pressure wave propagation and fluid movement within the cervical spinal cord}, Computer methods in biomechanics and biomedical engineering, pp. 1-13, 2015.
+
+\bibitem{stoverud2} K. H. Stoverud, \emph{Relation between the Chiari I malformation and syringomyelia from a mechanical perspective}, 2014.
+
+\bibitem{taylor} C. Taylor and P. Hood, \emph{A numerical solution of the Navier-Stokes equations using the finite element technique}, Computers \& Fluids, vol. 1, no. 1, pp. 73-100, 1973.
+
+\bibitem{thompson} A. Thompson, N. Madan, J. Hesselink, G. Weinstein, A. M. del Rio, and V. Haughton, \emph{The cervical spinal canal tapers differently in patients with Chiari I with and without syringomyelia}, American Journal of Neuroradiology, 2015.
+
+\bibitem{tremblay} D. Tremblay, S. Etienne, D. Pelletier, \emph{Code verification and the method of manifactured solutions for fluid-structure interaction problems}, 36th AIAA Fluid Dynamics Conference and Exhibit, 2006.
+
+\bibitem{vegard} V. Vinje, \emph{Simulating cerebrospinal fluid flow and spinal cord movement associated with syringomyelia}, 2016.
+
+\bibitem{white} F. M. White, \emph{Fluid mechanics}, 7th edition.
+
+
+\end{thebibliography}
 
 \end{document}
