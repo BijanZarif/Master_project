@@ -122,14 +122,14 @@ Last but not least, I thank my family for their constant support, for believing 
 % article martin, kalata, loth,...
 The field of computational fluid dynamics (or CFD) is helping medical doctors unveil mysteries of the human body, providing informations without the use of invasive procedures. For instance, nowadays it is possible to analyze a patients' blood flow in arteries or aneurysms, in order to get important informations on how to predict  aneurysms' rupture, or to study the effects of stenosis in arteries. The following study is an application of CFD to advance our understanding on Chiari I malformation.
 
-The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a clear fluid that in an healthy person, is composed of dilute amounts of proteins and monoamines. It provides nutrients and remove waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur. The CSF moves in a pulsatile way through the subarachnoid space (SAS), a space between the arachnoid mater and the pia mater. The CSF flow is passive and its pulsatile nature has been associated with changes in blood volume within the cranial cavity due to the cardiac cycle [PUT REFERENCE].
+The brain and the spinal cord are surrounded by the cerebrospinal fluid (CSF), a clear fluid that in an healthy person, is composed of dilute amounts of proteins and monoamines. It provides nutrients and remove waste from the brain, and acts as a cushion for the brain, providing damping between the brain and the skull when sudden movements of the cranium occur. The CSF moves in a pulsatile way through the subarachnoid space (SAS), a space between the arachnoid mater and the pia mater. The CSF flow is passive and its pulsatile nature has been associated with changes in blood volume within the cranial cavity due to the cardiac cycle \cite{silverthorn}.
 
 More specifically, this thesis will focus on CSF flow in the domain of Chiari I malformation. Chiari I is a neurological disorder, where the bottom part of the brain, the cerebellum, descends out of the skull and crowds the spinal cord, putting pressure on both the brain and spine and causing many symptoms like severe headaches, balance problems, respiratory problems. Chiari symptoms are often complicated by related conditions like intracranial hypertension, tethered cord, or syringomyelia, a neurological condition where a fluid filled cyst, or syrinx, forms in the spinal cord. These syrinxes expand the spinal cord and stretch the nerve tissue paper thin. This could cause permanent nerve damage and paralysis [\emph{http://conquerchiari.org}].
 
-Since advances in magnetic resonance imaging (MRI), the number of people affected by Chiari I malformation has increased. It is currently estimated that $1$ in $1000$ people have Chiari, which means $300000$ people in the United States alone. If left untreated, the progressing of the symptoms may have a lethal outcome (Stephany et a., 2008). The only treatment which addresses the problem is surgery. Alternatively, some doctors monitor the situation and treat individual symptoms, but since surgery is the primary treatment option, most patients see a neurosurgeon for a better opinion. This surgical procedures is known as \textit{craniovertebral decompression}, which has the goal to create more room around the malformation and restore the flow of spinal fluid. During this procedure, typically a part of the skull is removed (\textit{craniectomy}), or parts of the vertebrae are removed (\textit{laminectomy}). After this first step, a \textit{duraplasty} is carried out, where the \textit{dura mater}, i.e. the covering of the brain, is opened and a patch is sewn in to make it bigger, increasing the movement of the tissue.
+Since advances in magnetic resonance imaging (MRI), the number of people affected by Chiari I malformation has increased. It is currently estimated that $1$ in $1000$ people have Chiari, which means $300000$ people in the United States alone. If left untreated, the progressing of the symptoms may have a lethal outcome [Stephany et al., 2008]. The only treatment which addresses the problem is surgery. Alternatively, some doctors monitor the situation and treat individual symptoms, but since surgery is the primary treatment option, most patients see a neurosurgeon for a better opinion. This surgical procedures is known as \textit{craniovertebral decompression}, which has the goal to create more room around the malformation and restore the flow of spinal fluid. During this procedure, typically a part of the skull is removed (\textit{craniectomy}), or parts of the vertebrae are removed (\textit{laminectomy}). After this first step, a \textit{duraplasty} is carried out, where the \textit{dura mater}, i.e. the covering of the brain, is opened and a patch is sewn in to make it bigger, increasing the movement of the tissue.
 In the $40 \%$ of cases the surgical outcome is good, with no symptoms or limitations. In some other cases (around the $10-20 \%$), the procedure has poor improvements. 
 
-In recent studies [Sivaramakrishnan et al., 2005], medical doctors have studied the effect of compliance in the intracranial compartment, and concluded that an increase in the compliance is the most significant and consistent change measured after decompression surgery. 
+In recent studies like \cite{sivarama}, medical doctors have studied the effect of compliance in the intracranial compartment, and concluded that an increase in the compliance is the most significant and consistent change measured after decompression surgery. 
 
 The purpose of our study is to simulate CSF flow in an idealized geometry of the spinal cord. First, we assume that the walls of the spinal cord are rigid, to mimic the pre-operative case before the decompression surgery.  Afterwards, we introduce a prescribed movement on one of the boundaries, the tissue boundary, which will mimic the post-operative case and the increase in compliance of that portion of the spinal cord. This has been done solving Navier-Stokes equations using the finite element method library FEniCS for the simulations. Our final goal is to compare the different models and movements of the boundary, and study how changes in the fluid velocities, pressure, and stresses are affected by the compliance of the tissue. 
 
@@ -521,7 +521,7 @@ Multiplying the matrices on the right hand side, we obtain the following equatio
 that relates the different velocities. We define the \emph{convective velocity} as
 
 \begin{equation}
-\mathbf{c} := \mathbf{v-w} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{u}}
+\mathbf{c} := \mathbf{u} -\mathbf{w} = \frac{\partial \mathbf{x}}{\partial \chi} \cdot \hat{\mathbf{u}}
 \end{equation}
 
 which is the relative velocity between the material and the mesh.
@@ -642,8 +642,8 @@ The previous equations hold in \emph{any} time-dependent domain which does not n
 
 
 
-The simulations carried out in this thesis imitate the CSF flow through a region $\Omega \subset \mathbb{R}^2$ throughout time $t \in [0, t_{\rm end}]$. Since cerebrospinal fluid consists of $99 \% $ of water \cite{linge1}, it can modeled as water at $37^{\circ} C$ [Hentschel et al., 2010]. The region surrounding the fluid is modelled as impermeable.
-In the first section, we will use Navier-Stokes equation in a fixed domain to simulate the case with no movement of the boundary, while in the second one we will use the ALE formulation of Navier-Stokes equations and allow one of the boundaries to move. The table below describes the units and values used for the different parameters.
+The simulations carried out in this thesis imitate the CSF flow through a region $\Omega \subset \mathbb{R}^2$ throughout time $t \in [0, T]$, where $T=15$ is the final time (and the number of cardiac cycles of our simulations, that we need in order for the flow to fully develop). Since cerebrospinal fluid consists of $99 \% $ of water \cite{linge1}, it can modeled as water at $37^{\circ} C$ [Hentschel et al., 2010]. The region surrounding the fluid is modelled as impermeable.
+In the first section, we will use Navier-Stokes equation in a fixed domain to simulate the case with no movement of the boundary, while in the second one we will use the ALE formulation of Navier-Stokes equations and allow one of the boundaries to move in order to mimic the post-operative case where the tissue is more compliant. The table below describes the units and values used for the different parameters.
 
 \begin{table}[h!]
 \begin{center}
@@ -722,7 +722,7 @@ In order to simulate an oscillatory fluid flow, we set a pressure difference on 
 \sigma \cdot \mathbf{n} &= \mu \frac{\partial \mathbf{u}}{\partial \mathbf{n}} - p \mathbf{n} = \mathbf{0}  && \text { on } \partial \Omega_{\rm bottom}^0.
 \end{align}
 
-where $\bar{p}(t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 9kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
+where $\bar{p}(t) = A \cdot sin(2\pi t)$ is a prescribed pressure, and $A = 4kPa$. We assume a heart rate of $60$ heart-beats per minute, so that the duration of the cardiac cycle is set to $1s$. During \textit{systole}, as blood flows into the brain, CSF flows down the Aqueduct of Sylvius. During \textit{diastole}, the opposite occurs. The sine term is added to reproduce the pulsatile motion of the fluid. 
 
 \begin{figure}[h!]
 \centering
@@ -778,11 +778,11 @@ pressure $p$ such that
   \label{eq:ns:2}
   \nabla \cdot \mathbf{u} &= 0, & \text{in } \Omega^t,
 \end{align}
-for $t \in (0, T]$, where $T=15$ is the final time (and the number of cardiac cycles of our simulations, that we need in order for the flow to fully develop). The quantity $\mathbf{f}$ is a given body force.
+for $t \in (0, T]$. The quantity $\mathbf{f}$ is a given body force.
 We will let the fluid domain boundary follow the changes on the
 fluid-structure interface. Moreover, to move the entire domain, we
 will use a \emph{Laplacian smoothing}
-algorithm~\cite{Winslow1963}. More precisely, our mesh smoothing
+algorithm [Winslow, 1963]. More precisely, our mesh smoothing
 equation reads: given some boundary velocity $\mathbf{w}_0$, find
 $\mathbf{w}$ that satisfies
 \begin{align}
@@ -872,7 +872,7 @@ Then we integrate by parts the integrand with the second-order derivative
 \label{eq:fem:3}
 - \int_\Omega (\Delta \mathbf{u}) \mathbf{v} dx =
 \int_\Omega \nabla \mathbf{u} \cdot \nabla \mathbf{v} dx
-- \int_\partial \Omega \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} ds.
+- \int_{\partial \Omega} \frac{\partial \mathbf{u}}{\partial \mathbf{n}} \mathbf{v} ds.
 \end{equation}
 
 where $\partial \mathbf{u}/\partial \mathbf{n}$ is the derivative of $\mathbf{u}$ in the outward normal direction on the boundary. The test function $\mathbf{v}$ is required to vanish on the parts of the boundary where $\mathbf{u}$ is known, which in the current problem means that $\mathbf{v} = \mathbf{0}$ on the whole boundary $\Omega$. The second term on the right-hand side of (\ref{eq:fem:3}) therefore vanishes. From (\ref{eq:fem:2}) and (\ref{eq:fem:3}) follows that
@@ -1247,9 +1247,8 @@ for all $ \mathbf{z} \in \hat{W}$.
 
 
 
-\section{Numerical scheme}
+\section{Time discretization}
 
-\subsection{Time discretization}
 In the following we present a discretization of the Navier-Stokes equations, that was used in the numerical simulations. Starting from N-S equations in the fixed domain ~\eqref{eq:ns:3}--\eqref{eq:ns:3bis}, we want to use the so called Crank-Nicolson discretization to solve them. Let $[0, T] = \cup^N_{i=0} [t_i, t_{i+1}] $ be a time interval, and $\Delta t = t_{i+1} - t_i$ the time step. We apply a backward Euler discretization to the time derivative $\partial \mathbf{u}/ \partial t$
 
 \begin{equation}
@@ -1719,7 +1718,7 @@ We can see that the flow needs several cycles to fully develop, and that is why 
 
 
 \section{Comparison between fixed and moving meshes}
-We now want to compare different quantities between the fixed and the moving meshes. 
+We now want to compare different quantities between the fixed and the moving meshes.  CITE \cite{elliott}  \cite{hung} \cite{bertram} SOMEWHERE
 
 
 
@@ -1738,6 +1737,8 @@ We now want to compare different quantities between the fixed and the moving mes
 
 \bibitem{bejjani} G. K. Bejjani, \emph{Definition of the adult Chiari malformation: a brief historical overview}, Neurosurg Focus, 2001; 11(1).
 
+\bibitem{bertram} C. Bertram, L. Bilston, and M. Stoodley, \emph{Tensile radial stress in the spinal cord related to arachnoiditis or tethering: a numerical model}, Medical \& Biological engineering \& Computing, vol. 46, no. 7, pp. 701-707, 2008.
+
 \bibitem{brenner} S. Brenner and R. Scott, \emph{The mathematical theory of finite element methods}, vol. 15. Springer Science \& Business Media, 2007.
 
 \bibitem{clarke} E. C. Clarke, D. F. Fletcher, M. A. Stoodley, and L. E. Bilston, \emph{Computational fluid dynamics modelling of cerebrospinal fluid pressure in Chiari malformation and syringomyelia}, Journal of biomechanics, vol. 46, no. 11, pp. 1801–1809,
@@ -1750,6 +1751,9 @@ We now want to compare different quantities between the fixed and the moving mes
 \bibitem{drosdal} I. N. Drosdal, \emph{Porous and viscous modeling of cerebrospinal fluid flow in the spinal canal associated with syringomyelia}, 2011.
 
 \bibitem{duarte} F. Duarte, R. Gormaz, S. Natesan, \emph{Arbitrary Lagrangian-Eulerian method for Navier-Stokes equations with moving boundaries}, Comput. Methods Appl. Mech. Engrg, 193 (2004) 4819-4836.
+
+\bibitem{elliott} N. Elliott, C. Bertram, B. A. Martin, and A. Brodbelt, \emph{Syringomyelia: A review of the biomechanics}, Journal of Fluids and Structures, vol. 40, pp. 1-24, 2013.
+
 
 \bibitem{fletcher} T. M. Fletcher, B. Wirthl, A. G. Kolias, H. Adams, P. J. A. Hutchinson, M. P. F. Sutcliffe, \emph{Modelling of brain deformation after decompressive craniectomy}, Annals of Biomedical Engineering, 2016.
 
@@ -1769,6 +1773,8 @@ We now want to compare different quantities between the fixed and the moving mes
 
 
 \bibitem{hron} J. Hron, S. Turek, \emph{A monolithic FEM/multigrid solver for an ALE formula- tion of fluid-structure interaction with applications in biomechanics}. Springer, 2006.
+
+\bibitem{hung} T. K. Hung, G. L. Chang, H. S. Lin, F. R. Walter, and L. Bunegin, \emph{Stress- strain relationship of the spinal cord of anesthetized cats}, Journal of biomechanics, vol. 14, no. 4, pp. 269-276, 1981
 
 \bibitem{iskandar} B. J. Iskandar, M. Quigley, V. M. Haughton, \emph{Foramen magnum cerebrospinal fluid flow characteristics in children with Chiari I malformation before and after craniovertebral decompression}, J. Neurosurg. (Pediatrics 2) 101: 169-178, 2004.
 
@@ -1792,6 +1798,7 @@ We now want to compare different quantities between the fixed and the moving mes
 \bibitem{martin4} B. A. Martin, R. Labuda, T. J. Royston, J. N. Oshinski, B. Iskandar, and F. Loth, \emph{Pathological biomechanics of cerebrospinal fluid pressure in syringomyelia: Fluid structure interaction of an in vitro coaxial elastic tube system}, pp. 941-942, 2009.
 
 \bibitem{martin5} B. A. Martin, W. Kalata, F. Loth, T. J. Royston, J. N. Oshinski, \emph{Syringomyelia Hydrodynamics: an in vitro study based on in vivo measurements}, Journal of Biomechanical Engineering, vol. 127, December 2005.
+
 
 \bibitem{mortensen} M. Mortensen, K. Valen-Sendstad, \emph{Oasis: a high-level/high performance open source Navier-Stokes solver}, Computer Physics Communications, Vol. 188, pp. 177-188, 2016.
 
