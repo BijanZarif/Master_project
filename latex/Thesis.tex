@@ -99,7 +99,7 @@ I thank Dr. Victor Haughton, for always being so optimistic and for having faith
 
 I would also like to thank Eleonora Piersanti, Vegard Vinje, Magne Nordaas, Øyvind Evju for their important help, and for always having the right answer to my questions. I feel very lucky to have had talented students like you around me, and I have certainly learned a lot thanks to you. \\
 
-My stay in Norway  wouldn't have been the same without the Simula gang. I miss you guys all very much, and you made my six months in Oslo one of the best times of my life. \\
+My stay in Norway  wouldn't have been the same without the Simula gang. I miss you guys very much, and you made my six months in Oslo one of the best times of my life. \\
 I thank all the beautiful people I met in Trento. All of you in different ways turned this city into my home, and I will never forget about it. \\
 Last but not least, I thank my family for their constant support, for believing in me, and for making me the person I am now.
 
@@ -639,6 +639,7 @@ The previous equations hold in \emph{any} time-dependent domain which does not n
 \newpage
 
 \section{Modelling the idealized geometry of the SAS}
+\label{sec:sas}
 
 
 
@@ -1702,25 +1703,212 @@ In this section we add a fixed mesh motion to the test case in section \ref{para
 
 \chapter{SAS simulations}
 
-\section{Mesh refinement on the fixed mesh}
-The first step is to ensure that our solution to the Navier-Stokes equations that we solved numerically is grid independent. To this purpose, we did a mesh refinement test on the rectangular mesh, which consists of $N$ elements on shorter boundaries (top and bottom), and $10 \cdot N$ element on the longer one (cord and tissue). We then plotted the $x$ component of the velocity field $\mathbf{v}$ in the point $(x,y) = (2, 60)$ and compared it for different values of $N$. The time step is $\Delta t = 0.00625$. 
+\section{Mesh refinement}
+The first step is to ensure that our solution to the Navier-Stokes equations that we solved numerically is grid independent. To this purpose, we did a mesh refinement test on the rectangular mesh, which consists of $N$ elements on shorter boundaries (top and bottom), and $10 \cdot N$ element on the longer one (cord and tissue). We then plotted the $x$ component of the velocity field $\mathbf{v}$ in the point $(x,y) = (2, 40)$, i.e. on the top boundary, and compared it for different values of $N$. The time step used is $\Delta t = 0.00625$ in order to decrease the error coming from the time discretization. 
 
 \begin{figure}[h!]
-
 \centering
-\includegraphics[width=\textwidth]{images/mesh_refinement}
-\caption{Plot of the $x$ component of the velocity field in the point $(x,y)=(2,60)$.}
+\includegraphics[width=\textwidth]{images/mesh_refinement.png}
+\caption{Plot of the $x$ component of the velocity field in the point $(x,y)=(2,60)$ (fixed boundary).}
 \label{img:sas:1}
 \end{figure}
 
-From the mesh refinement study we decided to use $N=2^3$ for the further simulations since it is a good compromise between accuracy and computational cost.
-We can see that the flow needs several cycles to fully develop, and that is why in the future simulations we will focus only on the last cycle.
+Using the refined mesh with $N=2^4$ as the reference solution, we have that the error in the Euclidean norm goes from $0.0510$ (for $N=2^2$) to $0.0016$ (for $N=2^3$). Hence, for the following simulations $N=2^3$ was used, since it is a good compromise between accuracy and computational cost.
+We shall also note that the flow takes several cycles to fully develop, and this is the reason why we have a higher velocity in the first five cycles. Starting from the tenth cycle, the flow becomes stable. In the future simulations we will focus only on the last cycle, i.e. for $14 \leq t < 15$. \\
+
+The same was done for the moving mesh case, and the above conclusions hold also in this case.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/mesh_refinement_ampl.png}
+\caption{Plot of the $x$ component of the velocity field in the point $(x,y)=(2,60)$ (movement of the boundary equal to $4 \, mm$).}
+\label{img:sas:2}
+\end{figure}
+
+\section{Simulations of the CSF in the fixed and moving meshes}
+In this section we show the simulations of the pressure and velocity in the idealized geometry of the subarachnoid space that was described in the previous sections. For these simulations $N = 2^3$ and $dt = 0.0125$ were used. Picture \ref{fig1} shows how the fluid flow throughout a cycle of $1 \, s$. At time $t = 0$ the fluid flows up (as the arrows point up) and ideally flowing into the brain, while at time $t = 0.50$ the fluid flows back into the spinal cord (as the arrows point down). With a choice of a pressure difference of $4 \, kPa$, the fluid velocity is of the order of $2.5 \, cm/s$. \\
+
+Picture \ref{fig4} shows the pressure value range. In Section \ref{sec:sas}, we imposed a pressure difference between the top and the bottom wall, which allows the fluid to move. In equations (\ref{eq:bc:6}) we have set $\sigma \cdot \mathbf{n} = -\bar{p}  \mathbf{n}$ with $\bar{p}$ to be a sinusoidal pressure. This means that at time $t=0.25$ the pressure is higher on the top boundary, allowing the fluid to flow upward, while at time $t=0.75$ pressure is higher on the bottom boundary, making the fluid flow in the opposite direction. \\
+
+Pictures \ref{fig2} and \ref{fig3} show the movement of the mesh of, respectively, $4 \, cm$ and $7 \, cm$ in the top right part which corresponds approximately to the C1 vertebra. 
+
+\begin{figure}[h!] 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_fixed_0.png} 
+        \centering
+    \caption{Velocity at time $t = 0$.} 
+    \label{fig1:a} 
+    \vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_fixed_025.png}
+        \centering 
+    \caption{Velocity at time $t = 0.25$.} 
+    \label{fig1:b} 
+    \vspace{4ex}
+  \end{subfigure} 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_fixed_050.png} 
+        \centering
+    \caption{Velocity at time $t = 0.50$.} 
+    \label{fig1:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_fixed_075.png} 
+        \centering
+    \caption{Velocity at time $t = 0.75$.} 
+    \label{fig1:d} 
+  \end{subfigure} 
+  \centering
+  \caption{Velocity plots throughout one cardiac cycle in the case of fixed mesh. The unit used for the velocity is $mm/s$.}
+  \label{fig1} 
+\end{figure}
 
 
-\section{Comparison between fixed and moving meshes}
-We now want to compare different quantities between the fixed and the moving meshes.  CITE \cite{elliott}  \cite{hung} \cite{bertram} SOMEWHERE
+\begin{figure}[h!] 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/pressure_fixed_0.png} 
+        \centering
+    \caption{Pressure at time $t = 0$.} 
+    \label{fig4:a} 
+    \vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/pressure_fixed_025.png}
+        \centering 
+    \caption{Pressure at time $t = 0.25$.} 
+    \label{fig4:b} 
+    \vspace{4ex}
+  \end{subfigure} 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/pressure_fixed_050.png} 
+        \centering
+    \caption{Pressure at time $t = 0.50$.} 
+    \label{fig4:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/pressure_fixed_075.png} 
+        \centering
+    \caption{Pressure at time $t = 0.75$.} 
+    \label{fig4:d} 
+  \end{subfigure} 
+  \centering
+  \caption{Pressure plots throughout one cardiac cycle in the case of fixed mesh. The unit used for the pressure is $kPa$.}
+  \label{fig4} 
+\end{figure}
 
 
+\begin{figure}[h!] 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_30_0.png} 
+        \centering
+    \caption{Velocity at time $t = 0$.} 
+    \label{fig2:a} 
+    \vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_30_025.png}
+        \centering 
+    \caption{Velocity at time $t = 0.25$.} 
+    \label{fig2:b} 
+    \vspace{4ex}
+  \end{subfigure} 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_30_050.png} 
+        \centering
+    \caption{Velocity at time $t = 0.50$.} 
+    \label{fig2:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_30_075.png} 
+        \centering
+    \caption{Velocity at time $t = 0.75$.} 
+    \label{fig2:d} 
+  \end{subfigure} 
+  \centering
+  \caption{Zoom of the velocity throughout one cardiac cycle in the case of $4 \, mm$ movement of the mesh.}
+  \label{fig2} 
+\end{figure}
+
+
+\begin{figure}[h!] 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_50_0.png} 
+        \centering
+    \caption{Velocity at time $t = 0$.} 
+    \label{fig3:a} 
+    \vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_50_025.png}
+        \centering 
+    \caption{Velocity at time $t = 0.25$.} 
+    \label{fig3:b} 
+    \vspace{4ex}
+  \end{subfigure} 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_50_050.png} 
+        \centering
+    \caption{Velocity at time $t = 0.50$.} 
+    \label{fig3:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=1.2\linewidth]{images/velocity_50_075.png} 
+        \centering
+    \caption{Velocity at time $t = 0.75$.} 
+    \label{fig3:d} 
+  \end{subfigure} 
+  \centering
+  \caption{Zoom of the velocity throughout one cardiac cycle in the case of $7 \, mm$ movement of the mesh.}
+  \label{fig3} 
+\end{figure}
+
+\newpage
+
+\section{Comparing stresses in the fixed and moving meshes}
+We now want to compare different quantities between the fixed and the moving meshes.   \cite{elliott}  \cite{hung} \cite{bertram} 
+
+\todo[inline]{comment these plots and write conclusions}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/flux.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/normal_stress.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/tangential_stress.png}
+\caption{}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{images/x_component_ampl.png}
+\caption{}
+\end{figure}
 
 \chapter{Conclusions}
 
