@@ -179,6 +179,8 @@ The \emph{cerebrospinal fluid}, or CSF, is a salty solution that is continuously
 
 
 \section{The Chiari I malformation}
+\label{chiariI}
+
 Chiari I malformation is a neurological disorder where part of the brain, the cerebellum (or more specifically the cerebellar tonsils), descends out of the skull into the spinal area, obstructing the normal flow of the CSF. Chiari patients have a wide range of symptoms: severe headaches, pain in the neck, loos of motor control, respiratory problems, weakness. 
 
 \begin{figure}[h!]
@@ -193,7 +195,7 @@ In some cases, Chiari patients develop a neurological disorder known as \emph{sy
 \begin{figure}[h!]
 \centering
 \includegraphics[width=.6\textwidth]{images/syrinx}
-\caption{How a syrinx appears the spinal cord (\emph{http://www.mayoclinic.org}).}
+\caption{How a syrinx appears in the spinal cord (\emph{http://www.mayoclinic.org}).}
 \label{img:cns:5}
 \end{figure}
 
@@ -1882,36 +1884,52 @@ Pictures \ref{fig2} and \ref{fig3} show the movement of the mesh of, respectivel
 \newpage
 
 \section{Comparing stresses in the fixed and moving meshes}
-We now want to compare different quantities between the fixed and the moving meshes.   \cite{elliott}  \cite{hung} \cite{bertram} 
+As introduced in Section \ref{chiariI}, syringomyelia is a neurological disorder caused by the development of one or more macroscopic fluid-filled cysts in the spinal cord. While the set of causes remains still uncertain, the fluid dynamics seems to play a role \cite{elliott}. What we are interested in our study is to compare different quantities like the fluid flux and stresses on the spinal cord boundary. The stresses on the cord due to the obstruction of the CSF flow and the presence of the cysts are thought to be related with arachnoiditis (i.e. the fibrous scarring of the subarachnoid space), which can cause spinal trauma or inflammation, and it is often related to syringomyelia \cite{bertram}. Moreover, enlarging syrinxes often cause progressive neurological damage, through a combination of direct pressure on neural tissue, and \emph{ischaemia}, i.e. the restriction in blood supply to tissues \cite{elliott}.
 
-\todo[inline]{comment these plots and write conclusions}
+Wall movements of the tissue might change forces acting on the spinal cord. It is important to know which forces act on the spinal cord because these informations might be relevant for the progression and removal of a syrinx. 
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=\textwidth]{images/flux.png}
-\caption{}
-\end{figure}
+\todo[inline]{comment these plots and write conclusions.
+Vegard:
+3) When the wall starts moving, will this movement cause forces on the cord which will make a syrinx grow or decrease?}
+
+Therefore, we plotted the normal stress $(\sigma \cdot \mathbf{n}) \cdot \mathbf{n}$ which acts on the cord boundary $\partial \Omega_{\rm cord}$, and then we compared it for different movements of the mesh (respectively for $0 \, mm, 4 \, mm, 7 \, mm$).
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{images/normal_stress.png}
-\caption{}
+\caption{Normal stress. The movement of the boundary does not influence severely the stresses on the cord wall in both $4 \, mm$ and $7 \, mm$ cases. The unit for stress is Newton per area.}
 \end{figure}
+
+The results show a small change in the stress when the mesh is moving. This suggests that forces on the spinal cord may not change when the wall is allowed to move. Moreover, there are some other factors causing surgery to succeed. In fact, one often has an obstruction at the cerebellum, and the surgery allows for regular flow. It seems not to be the wall movement in itself, but its interplay with the obstruction, that causes change in the forces acting on the spinal cord. In studies like \cite{bilston}, scientists looked for further causes of these forces, and more specifically they investigated whether the relative timing of a spinal artery cardiovascular pulse wave and fluid pressure in the spinal SAS can influence CSF flow. Their results have shown that factors that might alter the fluid flow in the SAS could potentially affect fluid flow into a syrinx.
+
+Moreover, we plotted the tangential stress $(\sigma \cdot \mathbf{n}) \cdot \mathbf{t}$ (where $\mathbf{t}$ is the tangential vector to the cord boundary $\partial \Omega_{\rm cord}$) and compared it for different movements of the mesh (respectively for $0 \, mm, 4 \, mm, 7 \, mm$). Also in this case, the movement of the mesh seems not to play a role in the forces acting on the cord wall.
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{images/tangential_stress.png}
-\caption{}
+\caption{Tangential stress intensity is not influenced by the wall movement.}
 \end{figure}
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=\textwidth]{images/x_component_ampl.png}
-\caption{}
-\end{figure}
+
+
+%\begin{figure}[h!]
+%\centering
+%\includegraphics[width=\textwidth]{images/flux.png}
+%\caption{The CSF flux decreases when }
+%\end{figure}
+
 
 \chapter{Conclusions}
 
+In our study we have developed an idealized model of the subarachnoid space which simulates the post-operative outcome after a decompression surgery. We set a prescribed movement of the boundary corresponding approximately to the C1 vertebra of the spine. We analyzed 3 different cases: the pre-operative case with no movement of the boundary, and two post-operative cases with the two different boundary movements, respectively $4 \, mm$ and $7 \, mm$.
+First we ran test cases on the Navier-Stokes solver, in order to make sure that the solver was well built and quantities converged. \\
+
+After the verification of the solver, we performed the simulations in the SAS, first doing a mesh refinement study, and then comparing quantities between the pre-operative case and the two post-operative cases. We found that the movement of the mesh does not influence normal and tangential stresses on the cord wall. This might suggest that there are other factors which play a role in cerebrospinal fluid dynamics. \\
+
+The limitations of our study are, first of all, the use of 2D meshes. Simulations in 2D channels are not directly comparable to 3D results. Moreover, movement of the mesh in 3D geometries is not straightforward, and might be computationally costly. \\
+We should also note that we used sinusoidal boundary conditions for the pressure to induce an oscillatory movement of the flow. This hypothesis might not be completely correct, but the difficulty in having in-vivo measurements makes life a bit harder to people approaching this field of studying. In fact, many scientists have developed theories attempting to explain the pathogenesis of syringomyelia, including fluid dynamics and biological reasons. However, many studies are not supported by experimental data to prove these theories, and hence there is still a lot to unveil about the mystery of Chiari I malformation. \\
+
+Since measurements are difficult to obtain without invasive procedures, studies involving computational fluid dynamics and, more specifically, the ones applied to patient specific cases, are important to provide medical doctors with insights of this pathology that they could not find themselves. Finally, numerical simulations in the field of CSF and blood dynamics is getting everyday more importance and in the future (if not already in the present) will be a powerful tool to solve medical challenges.
 
 \begin{thebibliography}{100}
 \addcontentsline{toc}{chapter}{Bibliography}
@@ -1926,6 +1944,8 @@ We now want to compare different quantities between the fixed and the moving mes
 \bibitem{bejjani} G. K. Bejjani, \emph{Definition of the adult Chiari malformation: a brief historical overview}, Neurosurg Focus, 2001; 11(1).
 
 \bibitem{bertram} C. Bertram, L. Bilston, and M. Stoodley, \emph{Tensile radial stress in the spinal cord related to arachnoiditis or tethering: a numerical model}, Medical \& Biological engineering \& Computing, vol. 46, no. 7, pp. 701-707, 2008.
+
+\bibitem{bilston} L. E. Bilston, M. A. Stoodley, D. F. Fletcher, \emph{The of the relative timing of arterial and subarachnoid space pulse waves on spinal perivascular cerebrospinal fluid flow as a possible factor in syrinx development}, J. Neurosurg. 112:808-813, 2010.
 
 \bibitem{brenner} S. Brenner and R. Scott, \emph{The mathematical theory of finite element methods}, vol. 15. Springer Science \& Business Media, 2007.
 
